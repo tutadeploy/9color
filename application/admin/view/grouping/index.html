@@ -1,0 +1,118 @@
+{extend name='main'}
+
+{block name="button"}
+
+{if auth("edit_grouping")}
+<button data-modal='{:url("edit_grouping")}' data-title="添加分组" class='layui-btn'>添加分组</button>
+{/if}
+
+{/block}
+
+{block name="content"}
+
+<div class="think-box-shadow">
+    <fieldset>
+    <legend>条件搜索</legend>
+    <form class="layui-form layui-form-pane form-search" action="{:request()->url()}" onsubmit="return false" method="get" autocomplete="off">
+        
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">分类</label>
+            <div class="layui-input-inline">
+                <select name="type" id="selectList">
+                    <option value="" >所有</option>
+                        <option value="1" {if $type==1}selected{/if}>绝对值</option>
+                        <option value="2" {if $type==2}selected{/if}>百分比</option>
+                </select>
+            </div>
+        </div>
+
+
+
+        <div class="layui-form-item layui-inline">
+            <button class="layui-btn layui-btn-primary"><i class="layui-icon">&#xe615;</i> 搜 索</button>
+        </div>
+    </form>
+    <script>
+        var test = "{$Think.get.cid|default='0'}";
+        $("#selectList").find("option[value="+test+"]").prop("selected",true);
+
+        form.render()
+    </script>
+</fieldset>
+    
+    <table class="layui-table margin-top-15" lay-filter="tab" lay-skin="line">
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th lay-data="{field:'id'}" class='text-left nowrap'>ID</th>
+            <th lay-data="{field:'title'}" class='text-left nowrap'>名称</th>
+            <th lay-data="{field:'type'}" class='text-left nowrap'>类型</th>
+            <th lay-data="{field:'add'}" class='text-left nowrap'>分组用户</th>
+            <th lay-data="{field:'content'}" class='text-left nowrap'>配置</th>
+            <th lay-data="{field:'edit',width:130,fixed: 'right'}" class='text-left nowrap'>操作</th>
+        </tr>
+        </thead>
+        {/notempty}
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr>
+
+            <td class='text-left nowrap'>{$vo.id}</td>
+            <td class='text-left nowrap'>{$vo.title}</td>
+            <td class='text-left nowrap'>{if $vo['type']==1}<a class="layui-btn layui-btn-xs">绝对值</a>{else}<a class="layui-btn layui-btn-xs" style="background:red;">百分比</a>{/if}</td>
+            <td class='text-left nowrap'>
+            <a data-dbclick class="layui-btn layui-btn-xs" data-title="【{$vo.title}】 编辑用户" data-modal='{:url("admin/grouping/add_user")}?id={$vo.id}'>编 辑</a>
+            {:model('admin/Users')->get_grouping_user($vo['id']);}
+            </td>
+            <td class='text-left nowrap'>{$vo.content}</td>
+            <td class='text-left nowrap'>
+            {if auth("edit_grouping")}
+                <a data-dbclick class="layui-btn layui-btn-xs" data-title="编辑菜单" data-modal='{:url("admin/grouping/edit_grouping")}?id={$vo.id}'>编 辑</a>
+            {/if}
+            {if ($vo.status == 1) and auth("edit_grouping_status")}
+                <a class="layui-btn layui-btn-xs layui-btn-warm" data-csrf="{:systoken('admin/grouping/edit_grouping_status')}" data-action="{:url('edit_grouping_status',['status'=>2,'id'=>$vo.id])}" data-value="id#{$vo.id};status#2" style='background:red;'>禁用</a>
+            {elseif ($vo.status == 2) and auth("edit_grouping_status") /}
+                <a class="layui-btn layui-btn-xs layui-btn-warm" data-csrf="{:systoken('admin/grouping/edit_grouping_status')}" data-action="{:url('edit_grouping_status',['status'=>1,'id'=>$vo.id])}" data-value="id#{$vo.id};status#1" style='background:green;'>启用</a>
+            {/if}
+            
+            
+            <a class="layui-btn layui-btn-xs layui-btn" onClick="del_group({$vo.id})" style='background:red;'>删 除</a>
+            </td>
+        </tr>
+        {/foreach}
+        </tbody> 
+    </table>
+        <script>
+        function del_group(id){
+            layer.confirm("确认要删除吗，删除后不能恢复",{ title: "删除确认" },function(index){
+                $.ajax({
+                    type: 'POST',
+                    url: "{:url('delete_grouping')}",
+                    data: {
+                        'id': id,
+                        '_csrf_': "{:systoken('admin/grouping/delete_grouping')}"
+                    },
+                    success:function (res) {
+                        layer.msg(res.info,{time:2500});
+                        location.reload();
+                    }
+                });
+            },function(){});
+        }
+    </script>
+    <script>
+        var table = layui.table;
+        //转换静态表格
+        var limit = Number('{$Think.get.limit}');
+        if(limit==0) limit=20;
+        table.init('tab', {
+                cellMinWidth:120,
+                skin: 'line,row',
+                size: 'lg',
+                limit: limit
+            }); 
+    </script>
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+
+</div>
+{/block}

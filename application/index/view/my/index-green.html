@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)http://qiang6-www.baomiche.com/#/My -->
+<html data-dpr="1" style="font-size: 37.5px;">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1">
+    <title>{:lang('我的')}</title>
+    <link href="/static_new6/css/app.green.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static_new/css/public.css">
+
+    <script charset="utf-8" src="/static_new/js/jquery.min.js"></script>
+    <script charset="utf-8" src="/static_new/js/dialog.min.js"></script>
+
+    <script charset="utf-8" src="/static_new/js/common.js"></script>
+    <style type="text/css" title="fading circle style">
+        .circle-color-8 > div::before {
+            background-color: #ccc;
+        }
+        .login_nav li a{
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .login_nav[data-v-d5f15326]{
+            background: none;
+        }
+        body{
+            background:#F7F7F7;
+        }
+        .login_nav li p[data-v-d5f15327] {
+            word-wrap:break-word;
+            word-break:break-all;
+            white-space:normal;
+        }
+    </style>
+</head>
+<body style="font-size: 12px;">
+<div id="app">
+    <div data-v-d5f15326="" class="main">
+		
+		<div class="my-index-header">
+			<div data-v-d5f15326="" class="header">
+                <span data-v-d5f15326="" class="title">{:lang('我的')}</span>
+
+			    <div data-v-d5f15326="" class="img">
+<!--			        <a data-v-d5f15326="" href="" class="">-->
+<!--			            <img data-v-d5f15326=""-->
+<!--			                 src="/web/img/black-msg.png"-->
+<!--                             alt="">-->
+<!--			        </a>-->
+			        <a data-v-d5f15326="" href="javascript:void(0)" onclick="window.location.href=`/index/ctrl/set`" class="">
+			            <img data-v-d5f15326=""
+                             src="/web/img/G-setup.png"
+			                 alt="">
+			        </a>
+			    </div>
+                <div data-v-d5f15326="" class="info">
+                    <img data-v-d5f15326="" src="{$info.headpic}" onerror="this.src='/public/img/G-hear.png'" alt="" class="headerImg">
+                    <div data-v-d5f15326="" class="name">
+                        <strong data-v-d5f15326="">{$info.username}</strong>
+                        <small data-v-d5f15326="">{:lang('邀请码')}:{$info.invite_code}</small>
+                    </div>
+                </div>
+                <div data-v-d5f15326="" class="balance">
+                    <p style="color: #fff;font-size: .4rem;margin-left: .5rem">{:lang('会员等级')}</p>
+                    <div data-v-d5f15327="">
+                        <span>{$level_name}</span>
+                    </div>
+                </div>
+			</div>
+		</div>
+        
+        <ul data-v-d5f15326="" class="login_nav">
+            <li>
+                <h2 style="background: white;padding-left: .8rem;padding-top:.4rem;line-height: .8rem;font-weight: 600">{:lang('我的订单')}</h2>
+            </li>
+            <li data-v-d5f15326="">
+                <a data-v-d5f15326="" href="javascript:void(0)" onclick="window.location.href=`/index/ctrl/recharge_admin`"   class="">
+                    <img data-v-d5f15326=""
+                         src="/web/img/G-cz.png"
+                         alt="">
+                    <p data-v-d5f15326="">{:lang('充值记录')}</p>
+                </a>
+            </li>
+            <li data-v-d5f15326="">
+                <a data-v-d5f15326="" href="javascript:void(0)" onclick="window.location.href=`/index/order/index`" class="">
+                    <img data-v-d5f15326=""
+                         src="/web/img/G-history.png"
+                         alt="">
+                    <p data-v-d5f15326="">{:lang('抢单记录')}</p>
+                </a>
+            </li>
+            <li data-v-d5f15326="">
+                <a data-v-d5f15326="" href="javascript:void(0)" onclick="window.location.href=`/index/ctrl/deposit_admin`"  class="">
+                    <img data-v-d5f15326=""
+                         src="/web/img/G-tx.png"
+                         alt="">
+                    <p data-v-d5f15326="">{:lang('提现记录')}</p>
+                </a>
+            </li>
+
+        </ul>
+        <div data-v-d5f15326="" class="yh">
+            <p data-v-d5f15326=""><span data-v-d5f15326="" style="margin-left: .2rem;font-size: .4rem;font-weight: 800;">{:lang('账户金额')}:</span> <em data-v-d5f15326="">
+                <small data-v-d5f15326="" style="font-size: .4rem;font-weight: 800;">{:lang('￥')}{$info.balance}<span style="font-size: .4rem;font-weight: 800;"></span></small>
+            </em>
+                <button data-v-d5f15326=""  onclick="window.location.href=`/index/ctrl/deposit`"  class="" style="width:max-content;	background: #fff;
+	color: #FFF;
+	float: right;
+	border: 1px solid #27CC74 ;
+	border-radius: 17px;
+	margin-left: .4rem;
+	line-height: 0.6rem;
+	margin-right: .2rem;
+	margin-top: .3rem;
+	background: #27CC74;
+	padding-left: .1rem;
+	padding-right: .1rem;
+">{:lang('提现')}</button>
+                <button data-v-d5f15326="" onclick="window.location.href=`/index/ctrl/recharge`"  class="" style="width:max-content;line-height: 0.6rem;background: #fff;margin-top: .3rem;
+	color: #27CC74;
+	float: right;
+	border: 1px solid #27CC74 ;
+	border-radius: 17px;
+	padding-left: .1rem;
+	padding-right: .1rem;
+
+">{:lang('充值')}</button>
+            </p>
+        </div>
+        <ul data-v-d5f15326="" class="login_nav" style="display: flex;
+    flex-wrap: wrap; clear: both;">
+            <li data-v-d5f15327="">
+                <a data-v-d5f15326="" href="javascript:void(0)" onclick="window.location.href=`/index/ctrl/set`" class="">
+                    <img data-v-d5f15326=""
+                         src="/web/img/G-user.png"
+                         alt="">
+                    <p data-v-d5f15327="">{:lang('个人信息')}</p>
+                </a>
+            </li>
+            <li data-v-d5f15327="">
+                <a data-v-d5f15326="" href="javascript:void(0)" onclick="window.location.href=`/index/my/caiwu`" class="">
+                    <img data-v-d5f15326=""
+                         src="/web/img/G-bla.png"
+                         alt="">
+                    <p data-v-d5f15327="">{:lang('账户明细')}</p>
+                </a>
+            </li>
+            <li data-v-d5f15327="">
+                <a data-v-d5f15326="" href="javascript:void(0)" onclick="window.location.href=`/index/my/invite`" class="">
+                    <img data-v-d5f15326=""
+                         src="/web/img/G-FIEN.png"
+                         alt="">
+                    <p data-v-d5f15327="">{:lang('邀请好友')}</p>
+                </a>
+            </li>
+            <li data-v-d5f15327="">
+                <a data-v-d5f15326="" href="javascript:void(0)" onclick="window.location.href=`/index/my/msg`" class="">
+                    <img data-v-d5f15326=""
+                         src="/web/img/G-announcement.png"
+                         alt="">
+                    <p data-v-d5f15327="">{:lang('信息公告')}</p>
+                </a>
+            </li>
+            <li data-v-d5f15327="">
+                <a data-v-d5f15326="" href="javascript:void(0)" onclick="window.location.href=`/index/ctrl/junior`" class="">
+                    <img data-v-d5f15326=""
+                         src="/web/img/G-frien.png"
+                         alt="">
+                    <p data-v-d5f15327="">{:lang('团队报表')}</p>
+                </a>
+            </li>
+            <li data-v-d5f15327="" >
+                <a data-v-d5f15326="" href="javascript:void(0)" onclick="window.location.href=`{if sysconf('app_url')}{:sysconf('app_url')}{else}/download{/if}`" class="">
+                    <img data-v-d5f15326="" src="/web/img/G-XIAZ.png" alt="">
+                    <p data-v-d5f15327="">{:lang('APP下载')}</p>
+                </a>
+            </li>
+            <li data-v-d5f15327="" style="padding-right: 6.7rem" >
+                <a data-v-d5f15326="" class="">
+                    <img data-v-d5f15326="" src="/web/img/G-out.png" alt="">
+                    <div data-v-d5f15326="" class="LoginOut" style="width: max-content;padding: 0px">
+                        <button data-v-d5f15326="" class="tabs_btn1" style="background:#fff;color: #000;    word-wrap: break-word;
+    word-break: break-all;
+    white-space: normal;border-radius: 10px;line-height: .4rem; width: 1.6rem;">{:lang('退出登陆')}</button>
+                    </div>
+                </a>
+            </li>
+        </ul>
+
+        {include file="public/floor-green" /}
+
+
+    </div>
+</div>
+<script>
+    $(function() {
+        $('.footer li').eq(4).addClass("on");
+
+    })
+
+    $('.tabs_btn1').click(function () {
+        $(document).dialog({
+            type: 'confirm',
+            titleText: "{:lang('确认退出吗')}?",
+            autoClose: 0,
+            onClickConfirmBtn: function () {
+                window.location.href="{:url('user/logout')}";
+            },
+            onClickCancelBtn: function () {
+
+            }
+        });
+    });
+        
+
+</script>
+
+</body>
+</html>

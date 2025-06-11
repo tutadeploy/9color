@@ -1,0 +1,62 @@
+
+<link href="/web/css/cyan.css" rel="stylesheet" />
+<div data-v-59e03106="" data-v-43c1797b="" class="footer" style="color:red">
+    <ul data-v-59e03106="">
+        <li data-v-59e03106="" class="" onclick="window.location.href='{:url(\'index/home\')}'"><img data-v-59e03106="" src="/web/img/shouye_cyan.png" alt="" />
+            <img data-v-59e03106="" src="/web/img/shouye_cyan1.png" alt="" /><p data-v-59e03106="">{:lang('首页')}</p>
+        </li>
+        <li data-v-59e03106="" class="" onclick="window.location.href='{:url(\'order/index\')}'"><img data-v-59e03106="" src="/web/img/jilu_cyan.png" alt="" />
+            <img data-v-59e03106="" src="/web/img/jilu_cyan1.png" alt="" /> <p data-v-59e03106="">{:lang('记录')}</p>
+        </li>
+        <li data-v-59e03106="" class="t" onclick="window.location.href='{:url(\'rot_order/index\')}'"><img data-v-59e03106="" src="{:lang('/web/img/jia_cyan1.png')}" alt="" /> <img data-v-59e03106="" src="{:lang('/web/img/jia_cyan1.png')}" alt="" /></li>
+        <li data-v-59e03106="" class="" onclick="window.location.href='{:url(\'support/index\')}'"><img data-v-59e03106="" src="/web/img/zaixian_cyan.png" alt="" />
+            <img data-v-59e03106="" src="/web/img/zaixian_cyan1.png" alt="" /> <p data-v-59e03106="">{:lang('在线')}</p>
+        </li>
+        <li data-v-59e03106="" class="" onclick="window.location.href='{:url(\'my/index\')}'">
+            <img data-v-59e03106="" src="/web/img/my_cyan.png" alt="" />
+            <img data-v-59e03106="" src="/web/img/my_cyan1.png" alt="" /> <p data-v-59e03106="">{:lang('我的')}</p>
+        </li>
+    </ul>
+</div>
+<script>
+    function updateactivetime(){
+        var url = "{:url('user/updateactivetime')}";
+        var isopenoline = 1;
+        $.ajax({
+            type : "POST",
+            url : url,
+            data: isopenoline,
+            dataType : "json",
+            success : function(result){
+                console.log(result);
+                if(result.code=="0"){
+
+                    alert(result.msg);
+                }
+            },
+            error:function(){
+                //alert();
+            }
+        });
+    }
+    updateactivetime();
+
+    setInterval(updateactivetime,1000*30);
+
+    (function(doc,win){
+        var docEl = doc.documentElement,  //文档根标签
+            resizeEvent =  'orientationchange' in window ? 'orientationchang' :'resize'; //viewport变化事件源
+        var rescale = function(){
+            //重置方法
+            win.clientWidth = docEl.clientWidth;
+            if (!win.clientWidth) return;
+            // 改变DOM根节点fontSize大小的值;
+            // (屏幕宽度/设计图宽度) = 缩放或扩大的比例值;
+            docEl.style.fontSize = 70 * (win.clientWidth / 750) + 'px';
+        }
+        if (!doc.addEventListener) return;
+        win.addEventListener(resizeEvent, rescale, false);
+        doc.addEventListener('DOMContentLoaded', rescale, false);
+    })(document, window);
+</script>
+<style></style>

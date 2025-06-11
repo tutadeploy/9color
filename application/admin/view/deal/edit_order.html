@@ -1,0 +1,87 @@
+<script>
+    function choosegoods(){
+       
+    var index = layer.open({
+                    title: '编辑',
+                    type: 2,
+                    shade: 0.2,
+                    maxmin: true,
+                    shadeClose: true,
+                    area: ['1120px', '600px'],
+                    content: "{:url('deal/edit_order_goods_list')}", //这里是iframe页面的路由
+                    btn: '确定',
+ yes:function(index,layero){
+     console.log(layero);
+ var obj = $(layero).find("iframe")[0].getgoods; //obj可以调用子页面的任何方法
+ console.log(obj);
+ }
+                  
+                }); 
+    }
+    
+</script>
+<form class="layui-form layui-card" action="{:request()->url()}" data-auto="true" method="post" autocomplete="off">
+    <div class="layui-card-body">
+        <div class="layui-form-item">
+            <label class="layui-form-label label-required">商品ID</label>
+            <div class="layui-input-block">
+                <input name="goods_id" type="number" min="0" required placeholder="请输入商品ID{$info.goods_id}" class="layui-input">
+            </div>
+        </div>
+ <div class="layui-form-item layui-row layui-col-space15" >
+            <label class="layui-col-xs9 relative">
+                <span class="color-green" onclick="choosegoods()">选择商品(点击编辑)</span>
+                <p>
+        商品名称: <input id="goodsname" style="width:70%;display: inline-block" class="layui-input" value="{$info.goods_name}" disabled="disabled"></br>
+        商品单价: <input id="goods_price" style="width:70%;display: inline-block"  class="layui-input" value="{$info.goods_price}" disabled="disabled">
+        </p>
+                <input name="goods_id" id="goods_id" type="hidden" value="{$info.goods_id}" >
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label label-required">抢单数量</label>
+            <div class="layui-input-block">
+                <input name="goods_count" type="number" min="0" required placeholder="请输入抢单数量{$info.goods_count}" class="layui-input">
+            </div>
+        </div>
+         <div class="layui-form-item">
+            <label class="layui-form-label label-required">总金额</label>
+            <div class="layui-input-block">
+                <input name="num" type="number" min="0" readonly="" placeholder="抢单总额{$info.num}" class="layui-input">
+            </div>
+        </div>
+          <div class="layui-form-item">
+            <label class="layui-form-label label-required">任务佣金</label>
+            <div class="layui-input-block">
+                <input name="commission" type="number" min="0" required placeholder="请输入任务佣金{$info.commission}" class="layui-input">
+            </div>
+        </div>
+    </div>
+    <input name="id" type="hidden" value="{$info.id}">
+
+    <div class="hr-line-dashed"></div>
+
+    <div class="layui-form-item text-center">
+        <button class="layui-btn" type='submit'>提交</button>
+        <button class="layui-btn layui-btn-danger" type='button' data-close>取消</button>
+    </div>
+
+    <script>
+            var test = "{$info.haspaidan|default='0'}";
+        $("#selectList").find("option[value="+test+"]").prop("selected",true);
+
+    window.form.render();
+    
+    
+    function changegoods_count(){
+      var  num = $('#goods_count').val();
+      var  price = $('#goods_price').val();
+      
+      $('#allprice').val(num*price);
+    }
+    
+
+        window.form.render();
+    </script>
+
+</form>

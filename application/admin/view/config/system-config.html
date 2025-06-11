@@ -1,0 +1,203 @@
+<form onsubmit="return false" data-auto="true" action="{:url()}" method="post" class='layui-form layui-card' autocomplete="off">
+    <div class="layui-card-body padding-left-40">
+        <div class="layui-form-item">
+            <span class="color-green font-w7">管理前端配色 Color</span>
+            <label class="relative block">
+                <select class="layui-select" name="app_color" lay-ignore lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('app_color') eq 'red'"}selected{/if} value="red">红色</option>
+                    <option {if condition="sysconf('app_color') eq 'blue'"}selected{/if} value="blue">蓝色</option>
+                    <option {if condition="sysconf('app_color') eq 'black'"}selected{/if} value="black">黑色</option>
+                    <option {if condition="sysconf('app_color') eq 'yellow'"}selected{/if} value="yellow">黄色</option>
+                    <option {if condition="sysconf('app_color') eq 'green'"}selected{/if} value="green">绿色</option>
+                    <option {if condition="sysconf('app_color') eq 'orange'"}selected{/if} value="orange">橙色</option>
+                    <option {if condition="sysconf('app_color') eq 'purple'"}selected{/if} value="purple">紫色</option>
+                    <option {if condition="sysconf('app_color') eq 'cyan'"}selected{/if} value="cyan">青色</option>
+                    <option {if condition="sysconf('app_color') eq 'pink'"}selected{/if} value="pink">粉色</option>
+                </select>
+            </label>
+            <p class="help-block">管理前端配色，将改变前端样式</p>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">网站名称 Website</span>
+                <input name="site_name" required placeholder="请输入网站名称" value="{:sysconf('site_name')}" class="layui-input">
+            </label>
+            <p class="help-block">网站名称，将在浏览器的标签上显示名称</p>
+        </div>
+          <div class="layui-form-item">
+            <span class="color-green font-w7">网站登录logo</span>
+            <div class="relative block">
+                <img alt="icon" data-tips-image style="height:auto;max-height:42px;min-width:42px" src="{:sysconf('site_logo')}"/>
+                <input type="hidden" name="site_logo" onchange="$(this).prev('img').attr('src', this.value)" value="{:sysconf('site_logo')}" class="layui-input">
+                <a class="margin-left-10" data-file="btn" data-type="ico,png,jpg" data-field="site_logo">上传图片</a>
+            </div>
+        </div>
+         <div class="layui-form-item">
+            <span class="color-green font-w7">网站首页logo</span>
+            <div class="relative block">
+                <img alt="icon" data-tips-image style="height:auto;max-height:42px;min-width:42px" src="{:sysconf('site_index_logo')}"/>
+                <input type="hidden" name="site_index_logo" onchange="$(this).prev('img').attr('src', this.value)" value="{:sysconf('site_index_logo')}" class="layui-input">
+                <a class="margin-left-10" data-file="btn" data-type="ico,png,jpg" data-field="site_index_logo">上传图片</a>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">手机首页公告弹窗</span>
+            </label>
+           <div class="layui-input-block" style="margin-left:0">
+                <select class="layui-select" name="index_notice" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('index_notice') eq 1"}selected{/if} value="1">打开</option>
+                    <option {if condition="sysconf('index_notice') eq 0"}selected{/if} value="0">关闭</option>
+                </select>
+            </div>
+        </div>
+          <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">PC首页开关</span>
+            </label>
+             <div class="layui-input-block" style="margin-left:0">
+                <select class="layui-select" name="isopenpcindex" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('isopenpcindex') eq 1"}selected{/if} value="1">打开</option>
+                    <option {if condition="sysconf('isopenpcindex') eq 0"}selected{/if} value="0">关闭</option>
+                </select>
+            </div>
+            <p class="help-block">打开则pc访问会跳转pc首页</p>
+        </div>
+      <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">邀请码开关</span>
+            </label>
+             <div class="layui-input-block" style="margin-left:0">
+                <select class="layui-select" name="isopeninvitecode" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('isopeninvitecode') eq 1"}selected{/if} value="1">打开</option>
+                    <option {if condition="sysconf('isopeninvitecode') eq 0"}selected{/if} value="0">关闭</option>
+                </select>
+            </div>
+            <p class="help-block">打开则需要邀请码才可以注册</p>
+        </div>
+         <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">语言开关</span>
+            </label>
+             <div class="layui-input-block" style="margin-left:0">
+                 <select class="layui-select" name="jpjp" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('jpjp') eq 1"}selected{/if} value="1">日语打开</option>
+                    <option {if condition="sysconf('jpjp') eq 0"}selected{/if} value="0">日语关闭</option>
+                </select>
+                  <select class="layui-select" name="krkr" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('krkr') eq 1"}selected{/if} value="1">韩语打开</option>
+                    <option {if condition="sysconf('krkr') eq 0"}selected{/if} value="0">韩语关闭</option>
+                </select>
+                <select class="layui-select" name="zhcn" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('zhcn') eq 1"}selected{/if} value="1">中文打开</option>
+                    <option {if condition="sysconf('zhcn') eq 0"}selected{/if} value="0">中文关闭</option>
+                </select>
+                
+                <select class="layui-select" name="enus" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('enus') eq 1"}selected{/if} value="1">英语打开</option>
+                    <option {if condition="sysconf('enus') eq 0"}selected{/if} value="0">英语关闭</option>
+                </select>
+                
+                <select class="layui-select" name="frfr" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('frfr') eq 1"}selected{/if} value="1">法语打开</option>
+                    <option {if condition="sysconf('frfr') eq 0"}selected{/if} value="0">法语关闭</option>
+                </select>
+                
+                <select class="layui-select" name="eses" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('eses') eq 1"}selected{/if} value="1">西班牙语打开</option>
+                    <option {if condition="sysconf('eses') eq 0"}selected{/if} value="0">西班牙语关闭</option>
+                </select>
+                <select class="layui-select" name="thth" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('thth') eq 1"}selected{/if} value="1">泰语打开</option>
+                    <option {if condition="sysconf('thth') eq 0"}selected{/if} value="0">泰语关闭</option>
+                </select>                
+                <select class="layui-select" name="ptpt" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('ptpt') eq 1"}selected{/if} value="1">葡萄牙语打开</option>
+                    <option {if condition="sysconf('ptpt') eq 0"}selected{/if} value="0">葡萄牙语关闭</option>
+                </select>
+                <select class="layui-select" name="indind" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if condition="sysconf('indind') eq 1"}selected{/if} value="1">印度语打开</option>
+                    <option {if condition="sysconf('indind') eq 0"}selected{/if} value="0">印度语关闭</option>
+                </select>
+            </div>
+        </div>
+         <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">签到功能</span>
+                <input name="sigin_status" required placeholder="输入1开启,输入0关闭" value="{:sysconf('sigin_status')}" class="layui-input">
+            </label>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">签到获得现金</span>
+                <input name="sigin_money" required placeholder="输入每日签到获得奖励" value="{:sysconf('sigin_money')}" class="layui-input">
+            </label>
+        </div>
+        
+          <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">每日虚拟成交额</span>
+                <input name="index_money_num" required placeholder="每日虚拟成交额" value="{:sysconf('index_money_num')}" class="layui-input">
+            </label>
+        </div>
+          <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">每日虚拟增加会员</span>
+                <input name="index_member_num" required placeholder="每日虚拟增加会员" value="{:sysconf('index_member_num')}" class="layui-input">
+            </label>
+        </div>
+         <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">app下载</span>
+                <input name="app_url"  placeholder="请输入app下载网址" value="{:sysconf('app_url')}" class="layui-input">
+            </label>
+            <p class="help-block">app下载地址,填写后注册成功会跳转下载地址,登录，注册，个人中心页面都有;留空则为本地下载。</p>
+        </div>
+         
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">管理程序名称 Name</span>
+                <input name="app_name" required placeholder="请输入程序名称" value="{:sysconf('app_name')}" class="layui-input">
+            </label>
+            <p class="help-block">管理程序名称，在后台左上角标题处理显示</p>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">管理程序版本 Version</span>
+                <input name="app_version" placeholder="请输入程序版本" value="{:sysconf('app_version')}" class="layui-input">
+            </label>
+            <p class="help-block">管理程序版本，在后台左上角标题处理显示</p>
+        </div>
+        <div class="layui-form-item">
+            <span class="color-green font-w7">浏览器图标 Browser</span>
+            <div class="relative block">
+                <img alt="icon" data-tips-image style="height:auto;max-height:42px;min-width:42px" src="{:sysconf('site_icon')}"/>
+                <input type="hidden" name="site_icon" onchange="$(this).prev('img').attr('src', this.value)" value="{:sysconf('site_icon')}" class="layui-input">
+                <a class="margin-left-10" data-file="btn" data-type="ico,png" data-field="site_icon">上传图片</a>
+                <p class="help-block">建议上传 ICO 图标的尺寸为 128x128 <a href="http://www.favicon-icon-generator.com" target="_blank">ICON在线制作</a></p>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">网站备案号 Miitbeian</span>
+                <input name="miitbeian" required placeholder="请输入网站备案号" value="{:sysconf('miitbeian')}" class="layui-input">
+            </label>
+            <p class="help-block">网站备案号，可以在<a target="_blank" href="http://beian.miit.gov.cn">备案管理中心</a>查询获取，将在登录页面下面显示</p>
+        </div>
+        <div class="layui-form-item">
+            <label class="relative block">
+                <span class="color-green font-w7">网站版权信息 Copyright</span>
+                <input name="site_copy" required placeholder="请输入版权信息" value="{:sysconf('site_copy')}" class="layui-input">
+            </label>
+            <p class="help-block">网站版权信息，在后台登录页面显示版本信息并链接到备案到信息备案管理系统</p>
+        </div>
+
+        <div class="hr-line-dashed"></div>
+
+        <div class="layui-form-item text-center">
+            <button class="layui-btn" type="submit">保存配置</button>
+            <button class="layui-btn layui-btn-danger" type='button' data-confirm="确定要取消修改吗？" data-close>取消修改</button>
+        </div>
+    </div>
+
+</form>

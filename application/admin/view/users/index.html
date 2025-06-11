@@ -1,0 +1,191 @@
+{extend name='main'}
+
+{block name="button"}
+
+{if auth("add_users")}
+<button data-modal='{:url("add_users")}' data-title="添加会员" class='layui-btn'>添加会员</button>
+{/if}
+
+{/block}
+
+{block name="content"}
+<style>
+.layui-table-cell{
+   display:table-cell;
+   height:auto;
+   overflow:visible;
+}
+table tbody {
+display:block;
+overflow-y:scroll;
+}
+<!--
+table thead, tbody tr {
+display:table;
+width:100%;
+table-layout:fixed;
+}-->
+hr {
+    height: 1px;
+    margin: 1px 0;
+    border: 0;
+    clear: both;
+}
+::-webkit-scrollbar{  height: 8px; } 
+</style>
+<div class="think-box-shadow">
+    {include file='users/index_search'}
+    <?php  $Ip = new \org\Net\IpLocation('UTFWry.dat');
+    
+    ?>
+    <table class="layui-table margin-top-15" >
+        {notempty name='list'}
+        <thead>
+        <tr>
+            <th lay-data="{field:'id',width:15}" class='text-left nowrap' style="width: 15px;">ID</th>
+            <th lay-data="{field:'username'}" class='text-left nowrap' style="width: 65px;">用户名<hr>会员等级</th>
+            <th lay-data="{field:'tel'}" class='text-left nowrap' style="width: 65px;">电话<hr>状态</th>
+            <th lay-data="{field:'balance'}" class='text-left nowrap' style="width: 55px;">账户<hr>利息宝金额</th>
+            <th lay-data="{field:'deal_min_num','deal_max_num'}" class='text-left nowrap' style="width: 90px;">订单控制</th>
+            <th lay-data="{field:'freeze_balance'}" class='text-left nowrap' style="width: 45px;">今日佣金</th>
+            <th lay-data="{field:'invite_code'}" class='text-left nowrap' style="width: 70px;">邀请码<hr>上级用户</th>
+            <th lay-data="{field:'addtime',width:380}" class='text-left nowrap' style="width: 120px;">注册时间</th>
+            <th lay-data="{field:'ip,activetime'}" class='text-left nowrap' style="width: 80px;">最后登录ip</th>
+            <th lay-data="{field:'activetime'}" class='text-left nowrap' style="width: 80px;">最后在线时间</th>
+            <th lay-data="{field:'edit',width:380}" class='text-left nowrap'>操作</th>
+        </tr>
+        </thead>
+        {/notempty}
+        <tbody>
+        {foreach $list as $key=>$vo}
+        <tr>
+
+            <td class='text-left nowrap' style="width: 15px;">{$vo.id}</td>
+            <td class='text-left nowrap' style="width: 65px;">{$vo.username}<hr>{:model('Users')->getLevel($vo.level,'name');}</td>
+            <td class='text-left nowrap' style="width: 65px;">{$vo.tel}<hr>
+             {if $vo.is_jia>0}
+                <a class="layui-btn layui-btn-danger layui-btn-xs" >假人</a>
+                {else}
+                <a class="layui-btn layui-btn-normal layui-btn-xs" >真人</a>
+                {/if}</td>
+            <td class='text-left nowrap' style="width: 55px;">{$vo.balance}<hr>{$vo.lixibao_balance}</td>
+            <td class='text-left nowrap' style="width: 90px;">
+                {if $vo['pipei_type']==2}
+                <a class="layui-btn layui-btn-xs " data-modal="/admin/users/edit_pipei.html?id={$vo.id}">分组模式</a><hr>
+                <a class="layui-btn layui-btn-xs" style="background:red">{:model('Convey')->getGroupingField($vo.pipei_grouping,'title');}</a>
+                {else}
+                <a class="layui-btn layui-btn-normal layui-btn-xs" data-title="正在编辑【{$vo.username}】匹配区间(%)" data-modal="/admin/users/edit_pipei.html?id={$vo.id}">个人配置模式</a><hr>
+            <a data-dbclick="" class="layui-btn layui-btn-xs layui-btn-danger" >{$vo.deal_min_num}% - >{$vo.deal_max_num}%</a>
+            {/if}
+            
+            
+            </td>
+            <td class='text-left nowrap' style="width: 45px;">{:model('Users')->today_commission($vo.id);}</td>
+            <td class='text-left nowrap' style="width: 70px;">{$vo.invite_code}<hr>{$vo.parent_name}</td>
+            <td class='text-left nowrap' style="width: 120px;">{$vo.addtime|format_datetime='Y-m-d H:i:s'}</td>
+            <td class='text-left nowrap' style="width: 80px;overflow:hidden">
+                {$vo.ip}<hr>
+                <?php 
+                if(!empty($vo["ip"])){
+                    $area = $Ip->getlocation($vo["ip"]); echo mb_convert_encoding($area['country'], "UTF-8", "GBK").mb_convert_encoding($area['area'], "UTF-8", "GBK");
+                }
+                ?>
+            </td>
+            <td class='text-left nowrap' style="width: 80px;">
+                {if empty($vo.activetime)}
+                    从未登陆
+                {else}
+                
+                {if $vo.activetime>(time()-5*60)}
+                    <fonr style="color:green">{:date('m-d H:i:s', $vo['activetime']);}</font><hr>
+                <a class="layui-btn layui-btn-xs" style="background:green;">在线</a>
+                {else}
+                    <fonr style="color:red">{:date('m-d H:i:s', $vo['activetime']);}</font><hr>
+                <a class="layui-btn layui-btn-xs" style="background:red;">离线</a>
+                {/if}
+                {/if}
+                </td>
+            
+            <td class='text-left nowrap'>
+                {if auth("edit_users")}
+<a data-dbclick class="layui-btn layui-btn-xs " data-title="加扣款" data-modal='{:url("admin/users/edit_users_balance")}?id={$vo.id}'>加扣款</a>
+
+<a data-dbclick class="layui-btn layui-btn-xs " data-title="赠送彩金" data-modal='{:url("admin/deal/add_user_cj")}?id={$vo.id}'>赠送彩金</a>
+<a data-dbclick class="layui-btn layui-btn-xs" data-title="编辑菜单" data-modal='{:url("admin/users/edit_users")}?id={$vo.id}'>编 辑</a>
+
+                {if ($vo.status == 1) and auth("edit_users_status")}
+<a class="layui-btn layui-btn-xs layui-btn-warm" data-action="{:url('edit_users_status',['status'=>2,'id'=>$vo.id])}" data-value="id#{$vo.id};status#2" style='background:red;'>禁用</a>
+                {elseif ($vo.status == 2) and auth("edit_users_status") /}
+<a class="layui-btn layui-btn-xs layui-btn-warm" data-action="{:url('edit_users_status',['status'=>1,'id'=>$vo.id])}" data-value="id#{$vo.id};status#1" style='background:green;'>启用</a>
+                {/if}
+ <a data-dbclick class="layui-btn layui-btn-xs" data-title="银行卡信息" data-modal='{:url("admin/users/edit_users_bk")}?id={$vo.id}'>银行卡信息</a>
+
+  {if ($vo.is_jia == 1) and auth("edit_users_status")}
+<a class="layui-btn layui-btn-xs layui-btn-warm" data-action="{:url('edit_users_status2',['status'=>-1,'id'=>$vo.id])}" data-value="id#{$vo.id};status#-1" style='background:red;'>设为真人</a>
+                {else/}
+<a class="layui-btn layui-btn-xs layui-btn-warm" data-action="{:url('edit_users_status2',['status'=>1,'id'=>$vo.id])}" data-value="id#{$vo.id};status#1" style='background:green;'>设为假人</a>
+                {/if}
+ </br>
+ 
+<a data-dbclick="" class="layui-btn layui-btn-xs layui-btn-danger" data-title="正在给【{$vo.username}】发送短信" data-modal="/admin/users/add_message.html?id={$vo.id}">发送短信</a>
+<a data-dbclick class="layui-btn layui-btn-xs layui-btn-danger" data-title="收货地址信息" data-modal='{:url("admin/users/edit_users_address")}?id={$vo.id}'>地址信息</a>
+<a class="layui-btn layui-btn-xs layui-btn" onClick="del_user({$vo.id})" style='background:red;'>删 除</a>
+
+                {/if}
+                
+                {if auth("edit_users_ankou")}
+                <a data-dbclick class="layui-btn layui-btn-xs layui-btn-danger" data-title="暗扣设置" data-modal='{:url("admin/users/edit_users_ankou")}?id={$vo.id}'>暗扣设置</a>
+                
+                {/if}
+<a class="layui-btn layui-btn-xs layui-btn" data-action="{:url('edit_users_ewm',['status'=>2,'id'=>$vo.id])}" data-value="id#{$vo.id};status#{$vo.invite_code}" style='background:red;'>刷新二维码</a>
+
+                {if auth("tuandui")}
+<a data-dbclick class="layui-btn layui-btn-xs layui-btn-danger" data-title="查看团队" data-reload="true" data-open='{:url("admin/users/tuandui")}?id={$vo.id}'>查看团队</a>
+<a data-dbclick class="layui-btn layui-btn-xs layui-btn-normal" data-title="查看账变" data-reload="true" data-open='{:url("admin/users/caiwu")}?id={$vo.id}'>账 变</a>
+                {/if}
+
+               
+
+            </td>
+        </tr>
+        {/foreach}
+        </tbody>
+    </table>
+    
+    
+    
+   
+    <script>
+        function del_user(id){
+            layer.confirm("确认要删除吗，删除后不能恢复",{ title: "删除确认" },function(index){
+                $.ajax({
+                    type: 'POST',
+                    url: "{:url('delete_user')}",
+                    data: {
+                        'id': id,
+                        '_csrf_': "{:systoken('admin/users/delete_user')}"
+                    },
+                    success:function (res) {
+                        layer.msg(res.info,{time:2500});
+                        location.reload();
+                    }
+                });
+            },function(){});
+        }
+    </script>
+    <script>
+        var table = layui.table;
+        //转换静态表格
+        var limit = Number('{$Think.get.limit}');
+        if(limit==0) limit=20;
+        table.init('tab', {
+            cellMinWidth:120,
+            skin: 'line,row',
+            size: 'lg',
+            limit: limit
+        });
+    </script>
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+
+</div>
+{/block}

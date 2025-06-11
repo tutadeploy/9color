@@ -1,0 +1,61 @@
+<form class="layui-form layui-card" action="{:request()->url()}" data-auto="true" method="post" autocomplete="off" >
+ 
+   <div class="layui-card-body">
+        <div class="layui-form-item">
+                <label class="layui-form-label label-required">分组名称</label>
+                <div class="layui-input-block">
+                    <input name="title" required placeholder="请输入分组名称" class="layui-input" value="{$info.title}">
+                    <input type="hidden" name="_csrf_" value="{:systoken('admin/Grouping/edit_grouping')}">
+                </div>
+            </div>
+
+  <div class="layui-form-item">
+                <label class="layui-form-label label-required">模式选项</label>
+                <div class="layui-input-block">
+                    
+                <select class="layui-select" name="type" lay-ignore class="opt" lay-filter='test2' lay-verify="required">
+                    <option {if $info['type']==1}selected{/if} value="1">赚</option>
+                    <option {if $info['type']==0}selected{/if} value="0">杀</option>
+                </select>
+                赚:则输入的订单区间为金额 杀:则输入的订单区间为百分比
+                </div>
+            </div>
+
+
+    {notempty name='$pipei_dan'}
+    
+   <input name="id" type="hidden" value="{$info.id}" />
+    {foreach $pipei_dan as $key=>$vo}
+     <div class="layui-form-item">
+     <label class="layui-form-label label-required label-required-next" style="width: 120px;">第【{$vo.pipei_dan_num}】单区间</label>
+     <div class="layui-input-block">
+      <input name="pipei_min[{$key}]" style="width:100px;display: inline-block" required="" placeholder="" value="{$vo.pipei_min}" class="layui-input" onkeyup="this.value=this.value.replace(/\D/g,'')"  onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="5"/> - 
+      <input name="pipei_max[{$key}]" style="width:100px;display: inline-block" required="" placeholder="" value="{$vo.pipei_max}" class="layui-input" onkeyup="this.value=this.value.replace(/\D/g,'')"  onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="5"/>
+       利润:
+      <input name="pipei_dan_run[{$key}]" style="width:100px;display: inline-block" required="" placeholder="" value="{$vo.pipei_dan_run}" class="layui-input" onkeyup="this.value=this.value.replace(/\D/g,'')"  onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="3"/> 
+     </div>
+    </div>
+    {/foreach}
+    {else}
+    <?php  for($x=1; $x<=20; $x++){ ?>
+     <div class="layui-form-item">
+     <label class="layui-form-label label-required label-required-next" style="width: 120px;">第【{$x}】单区间</label>
+     <div class="layui-input-block">
+      <input name="pipei_min[{$x}]" style="width:100px;display: inline-block" required="" placeholder="" value="0" class="layui-input" onkeyup="this.value=this.value.replace(/\D/g,'')"  onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="5"/> - 
+      <input name="pipei_max[{$x}]" style="width:100px;display: inline-block" required="" placeholder="" value="0" class="layui-input" onkeyup="this.value=this.value.replace(/\D/g,'')"  onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="5"/>
+       利润:
+      <input name="pipei_dan_run[{$x}]" style="width:100px;display: inline-block" required="" placeholder="" value="0" class="layui-input" onkeyup="this.value=this.value.replace(/\D/g,'')"  onafterpaste="this.value=this.value.replace(/\D/g,'')" maxlength="3"/>
+     </div>
+    </div>
+    <?php } ?>
+    
+{/notempty}
+    
+   </div>
+   <div class="hr-line-dashed"></div>
+   <div class="layui-form-item text-center">
+    <button class="layui-btn" type="submit">提交</button>
+    <button class="layui-btn layui-btn-danger" type="button" data-close="">取消</button>
+   </div>
+
+  </form>

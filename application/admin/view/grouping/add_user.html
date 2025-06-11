@@ -1,0 +1,86 @@
+{extend name="main"}
+
+{block name="content"}
+
+{if auth('config')}
+<div class="think-box-shadow margin-bottom-15">
+
+    <div class="layui-form layui-card" >
+        <div class="layui-card-body">
+            
+            <label class="layui-form-label">
+            {if $info['type']==1}<a class="layui-btn layui-btn-xs">赚</a>{else}<a class="layui-btn layui-btn-xs" style="background:red;">杀</a>{/if}
+            </label>
+    {foreach $pipei_dan as $key=>$vo}
+             {if $vo['pipei_dan_run']!=0}
+     <div class="layui-form-item">
+     <label class="layui-form-label label-required label-required-next" style="width: 120px;">第【{$vo.pipei_dan_num}】单区间</label>
+     <div class="layui-input-block">
+      <input name="pipei_min[{$key}]" style="width:100px;display: inline-block" required="" placeholder="" value="{$vo.pipei_min}" class="layui-input" readonly=""/> - 
+      <input name="pipei_max[{$key}]" style="width:100px;display: inline-block" required="" placeholder="" value="{$vo.pipei_max}" class="layui-input" readonly=""/>
+       利润:
+      <input name="pipei_dan_run[{$key}]" style="width:100px;display: inline-block" required="" placeholder="" value="{$vo.pipei_dan_run}" class="layui-input" readonly=""/> 
+     </div>
+    </div>
+    {/if}
+    {/foreach}
+            
+            
+        <div class="layui-form-item" pane="">
+            <label class="layui-form-label">选择用户</label>
+            <div class="layui-input-block" id="clear">
+                 {foreach $list as $key=>$vo}
+                <input type="checkbox" name="clear" value="{$vo.id}" lay-skin="primary" title="{$vo.username}" {if $vo['pipei_grouping']==$info['id']}checked=""{/if}>
+                <div class=" layui-form-checkbox layui-form-checked" lay-skin="primary">
+                    <span>{$vo.username}</span><i class="layui-icon layui-icon-ok"></i>
+                </div>
+                
+        {/foreach}
+                
+            </div>
+        </div>
+        
+    {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
+        </div>
+    </div>
+
+    <a class="layui-btn layui-btn-sm" onclick="clearData()" >确定添加</a>
+</div>
+{/if}
+
+{/block}
+{block name='style'}
+
+<script>
+
+    window.form.render();
+</script>
+<script>
+    function clearData(){
+        $.msg.confirm('确定要添加用户到分组吗？', function (index) {
+            //history.back();
+            $.msg.close(index);
+            var chk_value =[];
+            $('input[name="clear"]:checked').each(function(){
+                chk_value.push($(this).val());
+            });
+console.log(chk_value);
+            $.ajax({
+                type: 'POST',
+                url: "{:url('do_add_user')}",
+                data: {
+                    'id': {$info['id']},
+                    'data':JSON.stringify(chk_value),
+                    '_csrf_': "{:systoken('admin/grouping/add_user')}"
+                },
+                success:function (res) {
+                    layer.msg(res.info,{time:2500});
+                    location.reload();
+                }
+            });
+        },function () {
+            return false;
+        });
+    }
+</script>
+{/block}
