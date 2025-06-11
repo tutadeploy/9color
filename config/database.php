@@ -23,17 +23,17 @@ return [
     // 数据库类型
     'type'        => 'mysql',
     // 服务器地址
-    'hostname'    => '192.168.50.45',
+    'hostname'    => '192.168.50.197',
     // 数据库名
-    'database'    => 'www_dkewl_com',
+    'database'    => '6ui',
     // 用户名
-    'username'    => 'www_dkewl_com',
+    'username'    => 'root',
     // 密码
-    'password'    => 'www_dkewl_com',
+    'password'    => 'root123456',
     // 编码
     'charset'     => 'utf8mb4',
     // 端口
-    'hostport'    => '3307',
+    'hostport'    => '3306',
     // 主从
     'deploy'      => 0,
     // 分离
