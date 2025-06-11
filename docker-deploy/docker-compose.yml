@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: 9color_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: 6ui
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: app123456
+      TZ: Asia/Shanghai
+    ports:
+      - "3306:3306"
+    volumes:
+      # 配置文件挂载
+      - ./mysql-config/my.cnf:/etc/mysql/conf.d/custom.cnf:ro
+      # 初始化脚本挂载（按文件名顺序执行）
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+      # 数据持久化
+      - ./mysql-data:/var/lib/mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --sql-mode="ONLY_FULL_GROUP_BY,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION"
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    networks:
+      - 9color_network
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mysqladmin",
+          "ping",
+          "-h",
+          "localhost",
+          "-uroot",
+          "-proot123456",
+        ]
+      timeout: 20s
+      retries: 10
+      interval: 30s
+
+  # ========== 可选服务 (Intel Mac 已注释) ==========
+  # 如需数据库管理界面，取消下面注释
+  # phpmyadmin:
+  #   image: phpmyadmin/phpmyadmin:latest
+  #   container_name: 9color_phpmyadmin
+  #   restart: unless-stopped
+  #   environment:
+  #     PMA_HOST: mysql
+  #     PMA_PORT: 3306
+  #     PMA_USER: root
+  #     PMA_PASSWORD: root123456
+  #     UPLOAD_LIMIT: 100M
+  #   ports:
+  #     - "8080:80"
+  #   depends_on:
+  #     - mysql
+  #   networks:
+  #     - 9color_network
+
+  # ========== Ubuntu 20/22 专用配置 (Intel Mac 已注释) ==========
+  # Ubuntu 环境下可启用以下服务：
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: 9color_nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./nginx/conf.d:/etc/nginx/conf.d:ro
+  #   depends_on:
+  #     - mysql
+  #   networks:
+  #     - 9color_network
+
+networks:
+  9color_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
