@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | ThinkAdmin
 // +----------------------------------------------------------------------
-// | °æÈ¨ËùÓÐ 2014~2019 
+// | ï¿½ï¿½È¨ï¿½ï¿½ï¿½ï¿½ 2014~2019 
 // +----------------------------------------------------------------------
 
 // +----------------------------------------------------------------------
@@ -19,14 +19,14 @@ use library\Controller;
 use think\Db;
 
 /**
- * ÉÌ³Ç
+ * ï¿½Ì³ï¿½
  * Class Index
  * @package app\index\controller
  */
 class Shop extends Base
 {
     /**
-     * Èë¿ÚÌø×ªÁ´½Ó
+     * ï¿½ï¿½ï¿½ï¿½ï¿½×ªï¿½ï¿½ï¿½ï¿½
      */
     public function index2()
     {
@@ -45,7 +45,7 @@ class Shop extends Base
         $this->assign('pic','/upload/qrcode/user/'.(session('user_id')%20).'/'.session('user_id').'-1.png');
         $this->cate = db('xy_shop_goods_cate')->order('id asc')->select();
 
-        //Ò»ÌìµÄ
+        //Ò»ï¿½ï¿½ï¿½
         $this->lixibao = db('xy_lixibao_list')->order('id asc')->find();
 
         return $this->fetch();
@@ -58,7 +58,7 @@ class Shop extends Base
         if(input('cid/d',0))$where[] = ['cid','=',input('cid/d',0)];
         if(input('name/s',''))$where[] = ['goods_name','like','%' . input('name/s','') . '%'];
 
-        //Ò»ÌìµÄ
+        //Ò»ï¿½ï¿½ï¿½
 
         $this->_query('xy_shop_goods_list')->where($where)->page();
         //return $this->fetch();
@@ -72,7 +72,7 @@ class Shop extends Base
         if(input('cid/d',0))$where[] = ['cid','=',input('cid/d',0)];
         if(input('name/s',''))$where[] = ['goods_name','like','%' . input('name/s','') . '%'];
 
-        //Ò»ÌìµÄ
+        //Ò»ï¿½ï¿½ï¿½
         if(request()->isPost()) {
             $uid = session('user_id');
             $page = input('post.page/d',1);
@@ -93,8 +93,8 @@ class Shop extends Base
             }
 
 
-            if(!$data) json(['code'=>1,'info'=>lang('ÔÝÎÞÊý¾Ý')]);
-            return json(['code'=>0,'info'=>lang('ÇëÇó³É¹¦'),'data'=>$data]);
+            if(!$data) json(['code'=>1,'info'=>lang('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½')]);
+            return json(['code'=>0,'info'=>lang('ï¿½ï¿½ï¿½ï¿½É¹ï¿½'),'data'=>$data]);
         }
         return $this->fetch();
     }
@@ -143,13 +143,13 @@ class Shop extends Base
     }
 
 
-    //Éú³É¶©µ¥ºÅ
+    //ï¿½ï¿½ï¿½É¶ï¿½ï¿½ï¿½ï¿½ï¿½
     function getSn($head='')
     {
         @date_default_timezone_set("PRC");
         $order_id_main = date('YmdHis') . mt_rand(1000, 9999);
-        //Î¨Ò»¶©µ¥ºÅÂë£¨YYMMDDHHIISSNNN£©
-        $osn = $head.substr($order_id_main,2); //Éú³É¶©µ¥ºÅ
+        //Î¨Ò»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë£¨YYMMDDHHIISSNNNï¿½ï¿½
+        $osn = $head.substr($order_id_main,2); //ï¿½ï¿½ï¿½É¶ï¿½ï¿½ï¿½ï¿½ï¿½
         return $osn;
     }
 
@@ -161,7 +161,7 @@ class Shop extends Base
         $num = input('post.num',1);
         $goods = db('xy_shop_goods_list')->find($id);
         if (!$goods) {
-            return json(['code'=>1,'info'=>lang('ÉÌÆ·²ÎÊýÒì³£'),'data'=>[]]);
+            return json(['code'=>1,'info'=>lang('ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½ï¿½ì³£'),'data'=>[]]);
         }
 
         if ($num <= 0) {
@@ -171,10 +171,10 @@ class Shop extends Base
 
 
 
-        if (!$num) return json(['code'=>1,'info'=>lang('²ÎÊýÒì³£'),'data'=>[]]);
+        if (!$num) return json(['code'=>1,'info'=>lang('ï¿½ï¿½ï¿½ï¿½ï¿½ì³£'),'data'=>[]]);
         $balance = db('xy_users')->where('id',$uid)->value('balance');
         if ( $balance < ($goods['goods_price']*$num) ) {
-            return json(['code'=>1,'info'=>lang('¿ÉÓÃÓà¶î²»×ã,ÇëÏÈ³äÖµ'),'data'=>[]]);
+            return json(['code'=>1,'info'=>lang('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½î²»ï¿½ï¿½,ï¿½ï¿½ï¿½È³ï¿½Öµ'),'data'=>[]]);
         }
 
         if( $goods['goods_price']*$num < 0 ) {
@@ -196,7 +196,7 @@ class Shop extends Base
 
         //
         $res1 = Db::name('xy_balance_log')->insert([
-            //¼ÇÂ¼·µÓ¶ÐÅÏ¢
+            //ï¿½ï¿½Â¼ï¿½ï¿½Ó¶ï¿½ï¿½Ï¢
             'uid'       => $uid,
             'oid'       => $id1,
             'num'       => $goods['goods_price']*$num,
@@ -206,9 +206,9 @@ class Shop extends Base
 
         $res = db('xy_shop_order')->insert($data);
         if($res)
-            return json(['code'=>0,'info'=>lang('²Ù×÷³É¹¦')]);
+            return json(['code'=>0,'info'=>lang('ï¿½ï¿½ï¿½ï¿½ï¿½É¹ï¿½')]);
         else
-            return json(['code'=>1,'info'=>lang('²Ù×÷Ê§°Ü')]);
+            return json(['code'=>1,'info'=>lang('ï¿½ï¿½ï¿½ï¿½Ê§ï¿½ï¿½')]);
 
     }
 
