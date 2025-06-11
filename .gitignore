@@ -1,0 +1,43 @@
+# PHP 项目通用忽略规则
+/vendor/
+/runtime/
+/thinkphp/
+/php-temp/
+
+# 上传目录
+/upload/
+
+# IDE 和编辑器文件
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+.DS_Store
+
+# 日志文件
+*.log
+logs/
+
+# 缓存文件
+*.cache
+*.tmp
+
+# 环境配置文件
+.env
+.env.*
+!.env.example
+
+# 依赖管理
+composer.lock
+package-lock.json
+yarn.lock
+
+# 其他
+*.bak
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.pkg 
