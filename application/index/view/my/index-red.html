@@ -8,32 +8,33 @@
     <title>{:lang('我的')}</title>
     <link href="/static_new6/css/app.blue.css" rel="stylesheet">
     <link rel="stylesheet" href="/static_new/css/public.css">
+    <link rel="stylesheet" href="/static_sg/my/css/style.css">
 
     <script charset="utf-8" src="/static_new/js/jquery.min.js"></script>
     <script charset="utf-8" src="/static_new/js/dialog.min.js"></script>
 
     <script charset="utf-8" src="/static_new/js/common.js"></script>
     <style type="text/css" title="fading circle style">
-.body-bottom {
-    padding-bottom: 3.2rem;
-}
+        .body-bottom {
+            padding-bottom: 3.2rem;
+        }
 
-body {
-    display: block;
-    color: #000000;
-    background: #F5F9FC;
-    font: 14px / 1.5 "Microsoft Yahei", sans-serif;
-    outline: 0;
-}
+        body {
+            display: block;
+            color: #000000;
+            background: #F5F9FC;
+            font: 14px / 1.5 "Microsoft Yahei", sans-serif;
+            outline: 0;
+        }
     </style>
 </head>
 
-<body class="body-bottom" monica-id="ofpnmcalabcbjgholdjcjblkibolbppb" monica-version="7.9.5">
+<body class="body-bottom">
     <div class="mine-row1">
         <div class="wp">
             <div class="userInfo">
                 <div class="avatar">
-                    <img src="/upload/headimg/39.a901301.png" onerror="this.src='/static/home/images/avatar.png'"
+                    <img src="/upload/headimg/39.a901301.png" onerror="this.src='/static_sg/my/images/avatar.png'"
                         alt="15816393445">
                 </div>
                 <div class="name-code">
@@ -50,7 +51,7 @@ body {
         flex-direction: column;
         align-items: center;
         color: white;" onclick="window.location.href='/my/xyf.html'">
-                    <img src="/static/home/images/xyf.png">
+                    <img src="/static_sg/my/images/xyf.png">
                     <p>悠享手工信用分</p>
                 </div>
             </div>
@@ -66,7 +67,7 @@ body {
                 <li>
                     <a href="/my/invite">
                         <div class="pic">
-                            <img src="/static/home/images/w-icon1.png" alt="">
+                            <img src="/static_sg/my/images/w-icon1.png" alt="">
                         </div>
                         <p>邀请好友</p>
                     </a>
@@ -74,7 +75,7 @@ body {
                 <li>
                     <a href="/ctrl/junior">
                         <div class="pic">
-                            <img src="/static/home/images/w-icon2.png" alt="">
+                            <img src="/static_sg/my/images/w-icon2.png" alt="">
                         </div>
                         <p>团队报表</p>
                     </a>
@@ -82,7 +83,7 @@ body {
                 <li>
                     <a href="/my/caiwu">
                         <div class="pic">
-                            <img src="/static/home/images/w-icon3.png" alt="">
+                            <img src="/static_sg/my/images/w-icon3.png" alt="">
                         </div>
                         <p>账户明细</p>
                     </a>
@@ -90,7 +91,7 @@ body {
                 <li>
                     <a href="/order">
                         <div class="pic">
-                            <img src="/static/home/images/w-icon4.png" alt="">
+                            <img src="/static_sg/my/images/w-icon4.png" alt="">
                         </div>
                         <p>领取记录</p>
                     </a>
@@ -142,6 +143,117 @@ body {
         <!--    <img src="../../home/images/w-p1.jpg" alt="">-->
         <!--</a>-->
     </div>
+
+    <ul class="footer">
+        <li class="active" onclick="window.location.href='/'">
+            <i class="i1"></i>
+            <p>首页</p>
+        </li>
+        <li onclick="window.location.href='/index/order/index.html'">
+            <i class="i2"></i>
+            <p>记录</p>
+        </li>
+        <li onclick="window.location.href='/index/rot_order/index.html'">
+            <i class="i3"></i>
+            <p>领取</p>
+        </li>
+        <li onclick="window.location.href='/index/support/index.html'">
+            <i class="i4"></i>
+            <p>客服</p>
+        </li>
+        <li onclick="window.location.href='/index/my/index.html'">
+            <i class="i5"></i>
+            <p>我的</p>
+        </li>
+    </ul>
+
+
+    <div id="danmu" style="display:none">
+
+        <div class="banner_img" style="width:8rem;height:3.89rem">
+            <img src="/static_sg/my/images/danmu.jpg" width="100%" height="100%">
+        </div>
+
+        <div class="summary-card">
+
+
+            <div class="order-info">
+                <div class="order-text">
+                    <div class="summary-card_h1">消息通知</div>
+                    <p class="summary-card_p" id="content"></p>
+                    <input type="hidden" id="tc_id">
+                </div>
+
+                <div class="order-actions">
+                    <button class="btn btn-primary summary-card_button" onclick="closeDanmu()">我知道了</button>
+                    <!--<button class="btn btn-no-outline">Cancel Order</button>-->
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pop-mask"></div>
+    <script>
+        $('.footer li:eq(4)').addClass('active');
+    </script>
+    <script src="/static/plugs/layui/layui.all.js"></script>
+    <script>
+        get_user_tc();
+
+        setInterval(get_user_tc, 5000);
+        var flag = false;
+
+        function showDanmu(content, id) {
+
+            $("#danmu").show();
+            $(".pop-mask").show();
+            $("#content").html(content);
+            $("#tc_id").val(id);
+        }
+
+        function closeDanmu() {
+            $("#danmu").hide();
+            $(".pop-mask").hide();
+            flag = false;
+            $.ajax({
+                url: "/user-tc/saveOrUpdate",
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    status: 1,
+                    id: $("#tc_id").val()
+                },
+            })
+
+        }
+
+        function get_user_tc() {
+            if (flag) {
+                return false;
+            }
+            $.ajax({
+                url: ("/user-tc/select"),
+                type: "GET",
+                data: {},
+                success: function (res) {
+                    if (res.success) {
+                        flag = true;
+                        var data_tc = res.data;
+                        var html = '';
+                        showDanmu(data_tc.content, data_tc.id)
+
+                    }
+                },
+            })
+
+        }
+
+        function loginOut() {
+            $.ajax({ url: "/doLogout" })
+            window.location.href = '/logout'
+        }
+    </script>
+
 
 </body>
 

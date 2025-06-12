@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html data-dpr="1" style="font-size: 32px;">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta content="telephone=yes" name="format-detection" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+    <meta name="x5-fullscreen" content="true" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+    <title>{:lang('注册')}</title>
+    <link href="/web/css/red.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/static_new/css/public.css">
+    <script charset="utf-8" src="/static_new/js/jquery.min.js"></script>
+    <script charset="utf-8" src="/static_new/js/dialog.min.js"></script>
+    <script charset="utf-8" src="/static_new/js/common.js"></script>
+</head>
+
+<body class="body-login">
+    <div class="header header2">
+        <a href="javascript:void(0)" onclick="history.go(-1);" class="g-return"></a>
+        <h1>注册</h1>
+    </div>
+    <div class="wp">
+        <div class="login-box">
+            <div class="form-login">
+                <form id="registerForm" onsubmit="return false;" novalidate="novalidate">
+                    <div class="inp-box">
+                        <div class="tit tit1">用户名</div>
+                        <input name="userName" class="inp" placeholder="请输入用户名">
+                    </div>
+                    <div class="inp-box">
+                        <div class="tit tit1">手机号</div>
+                        <div class="inp-con">
+                            <input name="tel" class="inp" type="tel" placeholder="请输入11位数字">
+                            <!-- <input id="get-code" class="jg-a1 get-code" type="button" value="发送验证码"> -->
+                        </div>
+                    </div>
+                    <!--    <div class="inp-box">
+                    <div class="tit tit3">验证码</div>
+                    <input name="verify" class="inp" type="text" placeholder="请输入验证码">
+                </div> -->
+                    <div class="inp-box">
+                        <div class="tit tit2">密码</div>
+                        <input name="pwd" class="inp" type="text" placeholder="请输入密码">
+                    </div>
+                    <div class="inp-box">
+                        <div class="tit tit2">交易密码</div>
+                        <input name="depositPwd" class="inp" type="text" placeholder="请输入交易密码">
+                    </div>
+                    <div class="inp-box">
+                        <div class="tit tit4">推荐码</div>
+                        <div class="inp-con">
+                            <input name="inviteCode" class="inp" type="text" value="" placeholder="请输入推荐码">
+                        </div>
+                    </div>
+                    <label class="label-agree">
+                        <input type="checkbox" id="KeepPWD" value="1" name="jizhu" checked="">
+                        <i></i>
+                        登录即代表您已阅读并同意
+                        <a
+                            href="https://dgpd-privacy-policy.b-cdn.net/pdd_privacy_policy/dgpd_privacy_policy.html">《用户隐私政策》</a>
+                    </label>
+                    <input type="button" value="注册" class="btn-submit form-buttom">
+                    <a href="/login" class="g-btn3">已有账号，马上登录</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            var wait = 10;
+            function time(o) {
+                if (wait == 0) {
+                    o.removeAttribute("disabled");
+                    o.value = "免费发送验证码";
+                    wait = 10;
+                } else {
+                    o.setAttribute("disabled", true);
+                    o.value = "重新发送" + wait + "s";
+                    wait--;
+                    setTimeout(function () {
+                        time(o)
+                    },
+                        1000)
+                }
+            }
+            $('#get-code').on('click', function () {
+                time(this);
+                return false;
+            });
+            $("#registerForm").validate({
+                rules: {
+                    user_name: {
+                        required: true,
+                    },
+                    phone_number: {
+                        required: true,
+                        phone_number: true, // 自定义的规则
+                        digits: true, // 整数
+                    },
+
+                    // verification_code: {
+                    //     required: true,
+                    //     verification_code: true, // 自定义的规则
+                    // },
+                    password: {
+                        required: true,
+                        minlength: 6,
+                        maxlength: 10,
+                    },
+                    password2: {
+                        required: true,
+                        minlength: 6,
+                        maxlength: 10,
+                    },
+                },
+                //错误信息提示
+                messages: {
+                    user_name: {
+                        required: "必须填写用户名",
+                        minlength: "用户名至少为6个字符",
+                        maxlength: "用户名至多为10个字符",
+                    },
+                    phone_number: {
+                        required: "必须填写手机号"
+                    },
+                    // verification_code: {
+                    //     required: "必须填写验证码"
+                    // },
+                    password: {
+                        required: "必须填写密码",
+                        minlength: "密码至少为6个字符",
+                        maxlength: "密码至多为10个字符",
+                    },
+                    password2: {
+                        required: "必须填写交易密码",
+                        minlength: "密码至少为6个字符",
+                        maxlength: "密码至多为10个字符",
+                    },
+                },
+            });
+            // 添加自定义验证规则
+            jQuery.validator.addMethod("phone_number", function (value, element) {
+                var phone_length = value.length;
+                var phone_reg = /^(((13[0-9]{1})|(15[0-9]{1}))+\d{8})$/
+                return this.optional(element) || (phone_length == 11 && phone_reg.test(value));
+            }, "手机号码格式错误");
+        })
+    </script>
+
+    <div class="wxtip" id="JweixinTip">
+        <div class="imgs"></div>
+    </div>
+
+
+    <script type="application/javascript">
+        $(function () {
+            var countdown = 60;
+            var flag = true;
+            var loading = null;
+            /*检查表单*/
+            function check() {
+                // if($("input[name=verify]").val()==''){
+                //     $(document).dialog({infoText: '请输入验证码'});
+                //     return false;
+                // }
+                if ($("input[name=pwd]").val() == '') {
+                    $(document).dialog({ infoText: '请输入登录密码' });
+                    return false;
+                }
+                if ($("input[name=deposit_pwd]").val() == '' || $("input[name=deposit_pwd_re]").val() == '') {
+                    $(document).dialog({ infoText: '请输入资金密码' });
+                    return false;
+                }
+                if ($("input[name=deposit_pwd]").val() !== $("input[name=deposit_pwd_re]").val()) {
+                    //$(document).dialog({infoText: '两次输入的资金密码不一致'});
+                    //return false;
+                }
+                if ($("input[name=invite_code]").val() == '') {
+                    $(document).dialog({ infoText: '请输入邀请码' });
+                    return false;
+                }
+                return true;
+            }
+
+            /*手机号码验证*/
+            function check_phone() {
+                if ($("input[name=user_name]").val() == '') {
+                    $(document).dialog({ infoText: '请输入用户名' });
+                    return false;
+                }
+                var myreg = /^([0-9|A-Z|a-z]|[\u4E00-\u9FA5\uF900-\uFA2D]){2,12}$/;
+                if (!myreg.test($("input[name=user_name]").val())) {
+                    $(document).dialog({ infoText: '用户名输入错误,要求2-12位字母或数字' });
+                    return false;
+                }
+                if ($("input[name=tel]").val() == '') {
+                    $(document).dialog({ infoText: '请输入手机号' });
+                    return false;
+                }
+                var myreg = /^[1][3,4,5,6,7,8,9][0-9]{9}$/;
+                if (!myreg.test($("input[name=tel]").val())) {
+                    $(document).dialog({ infoText: '手机号码输入错误' });
+                    return false;
+                }
+                return true;
+            }
+
+            /*验证码倒计时*/
+            function time_down(obj) {
+                if (countdown == 0) {
+                    flag = true;
+                    obj.text("获取验证码");
+                    countdown = 60;
+                    return;
+                } else {
+                    flag = false;
+                    obj.text(countdown + "s");
+                    countdown--;
+                }
+                setTimeout(function () { time_down(obj) }, 1000);
+            }
+
+            /*获取验证码*/
+            $(".get-code").on('click', function () {
+                if (check_phone() && flag) {
+                    $.ajax({
+                        url: '/index/send/sendsms',
+                        data: { 'tel': $("input[name=tel]").val() },
+                        type: 'POST',
+                        success: function (data) {
+                            if (data.code == 0) {
+                                $(document).dialog({ infoText: data.info });
+                                time_down($(".get-code"));
+                            } else {
+                                $(document).dialog({ infoText: data.info });
+                            }
+                        }
+                    });
+                }
+            })
+
+            /*提交*/
+            $(".form-buttom").on('click', function () {
+                if (check_phone() && check()) {
+                    $.ajax({
+                        url: "/doRegister",
+                        data: $("#registerForm").serialize(),
+                        type: 'POST',
+                        beforeSend: function () {
+                            loading = $(document).dialog({
+                                type: 'notice',
+                                infoIcon: '/static/static_new/img/loading.gif',
+                                infoText: '正在加载中',
+                                autoClose: 0
+                            });
+                        },
+                        success: function (data) {
+                            console.log("注册", data)
+                            loading.close();
+                            if (data.success) {
+                                $(document).dialog({ infoText: '注册成功' });
+                                setTimeout(function () {
+                                    location.href = "/login?userName=" + data.data.tel + "&password=" + data.data.pwd
+                                }, 1500);
+                            } else {
+                                $(document).dialog({ infoText: data.msg });
+                            }
+                        }
+                    });
+                }
+                return false;
+            })
+        })
+    </script>
+
+    <script>
+        $(function () {
+            var u = navigator.userAgent, app = navigator.appVersion;
+            var ua = navigator.userAgent.toLowerCase();
+            var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+            var isAndroid = u.indexOf('Android') > -1 || u.indexOf('Adr') > -1; //android终端
+
+            if (ua.match(/MicroMessenger/i) == "micromessenger") {
+                $('#JweixinTip').show();
+                document.getElementById('JweixinTip').style.display = 'block';
+            }
+
+        });
+
+    </script>
+
+
+</body>
+
+</html>
