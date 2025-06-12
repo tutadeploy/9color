@@ -26,6 +26,59 @@
             line-height: 38px;
             /* 行高 */
         }
+
+        .body-bottom {
+            padding-bottom: 3.2rem;
+        }
+
+        .wp {
+            padding: 0 0.5rem;
+        }
+
+        .ind-box1 {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.47rem 0;
+        }
+
+        .ind-box1 .tit {
+            font-weight: bold;
+            font-size: 0.5rem;
+            color: #000000;
+            display: flex;
+            align-items: center;
+        }
+
+        .ind-box1 .tit img {
+            display: block;
+            width: 0.69rem;
+            margin-right: 0.19rem;
+        }
+
+        img {
+            border: 0;
+            max-width: 100%;
+        }
+
+        .ind-box1 .user {
+            font-size: 0.33rem;
+            color: #000000;
+            display: flex;
+            align-items: center;
+        }
+
+        .ind-box1 .user i {
+            width: 0.78rem;
+            height: 0.78rem;
+            display: block;
+            margin-right: 0.19rem;
+            border-radius: 50%;
+            box-shadow: 0px 0.04rem 0.08rem 0.02rem rgba(8, 29, 74, 0.11);
+            background: #ffffff url(../images/public/web/img/icon-user.png) no-repeat center;
+            -webkit-background-size: 0.45rem auto;
+            background-size: 0.45rem auto;
+        }
     </style>
 </head>
 <script charset="utf-8" src="/static_new/js/jquery.min.js"></script>
@@ -33,438 +86,1268 @@
 <link rel="stylesheet" href="__ROOT__/public/js/layer_mobile/need/layer.css">
 <script src="__ROOT__/public/js/layer_mobile/layer.js"></script>
 
-<body style="font-size: 12px;">
-    <!--  <div style="position:absolute;top:0;right:0;z-index: 999999999;">
-      <select id="lang" style="float:right;margin:.3rem;max-width:1.8rem;background: rgba(51,51,51,0);color: #2E2D3C;border: none;" onchange="jump(this)">
-          
-     {if sysconf('jpjp')}<option value="jp" {if condition='$Think.cookie.think_var eq "jp-jp"'}selected{/if}>{:lang('Ljp')}</option>{/if}
-        {if sysconf('thth')}<option value="th" {if condition='$Think.cookie.think_var eq "th-th"'}selected{/if}>{:lang('Lth')}</option>{/if}
-    {if sysconf('krkr')}<option value="kr" {if condition='$Think.cookie.think_var eq "kr-kr"'}selected{/if}>{:lang('Lkr')}</option>{/if}
-          
-    {if sysconf('zhcn')}<option value="zn" {if condition='$Think.cookie.think_var eq "zh-cn"'}selected{/if}>{:lang('Lzh')}</option>{/if}
-    {if sysconf('enus')}<option value="en" {if condition='$Think.cookie.think_var eq "en-us"'}selected{/if}>{:lang('Len')}</option>{/if}
-   {if sysconf('indind')}<option value="indind" {if condition='$Think.cookie.think_var eq "ind-ind"'}selected{/if}>{:lang('Lind')}</option>{/if}
-    {if sysconf('eses')}<option value="es" {if condition='$Think.cookie.think_var eq "es-es"'}selected{/if}>{:lang('Les')}</option>{/if}
-    
-    {if sysconf('frfr')}<option value="fr" {if condition='$Think.cookie.think_var eq "fr-fr"'}selected{/if}>{:lang('Lfr')}</option>{/if}
-    {if sysconf('ptpt')}<option value="pt" {if condition='$Think.cookie.think_var eq "pt-pt"'}selected{/if}>{:lang('Lpt')}</option>{/if}
-     </select>
-</div> -->
-    <script>
-        function jump() {
-            var options = $("#lang option:selected"); //获取选中的项
-            var data = { 'lang': options.val() };
-            console.log(options);
-            $.get("{:url('Index/changelang')}", data, function () { location.reload(); })
-        }
-        function setdefault(lang) {
-            var expires = new Date();
-            expires.setTime(expires.getTime() + 10 * 24 * 60 * 60 * 1000);
-            document.cookie = "think_var=" + escape(lang) + ";expires=" + expires.toGMTString();
-        }
-        //setdefault('en-us');
-    </script>
-    <div id="app">
-        <div data-v-43c1797b="" class="main">
-            <!-- <div data-v-2032808c="" data-v-43c1797b="" class="van-overlay" style="z-index: 999; display: block;"
-                id="tanchuang">
-                <div data-v-2032808c="" class="messaeg_flex">
-                    <div data-v-2032808c="" class="message_wrapper">
-                        <div data-v-2032808c="" class="message_block">
-                            <div data-v-2032808c="" class="message_info">
-                                <img data-v-2032808c=""
-                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAAAdCAMAAADGkCHGAAAA6lBMVEVHcEz/fjCQkK7/djQ0u/8t8/84nf87jf//kC7/aDc1tf//bzL/cjQ1t///ejL/gzH/dzM2vP8x0///gzH/eDIyzv81vv//ii8x0v83ov8v4P//Xjk0v///Xzn/aDb/ZDj/fzI1tf8xz///izAw2///Zjf/azb/gzEv4v//XTn/Yjj/bzX/Zzf/gDL/hzD/cTX/bDb/ji7/fTL/djQzxP80vf8y0P84pP//VDv/ejMv5/8t9P//ajY3qv//WTow3f8u7f86kf//eTMyyv//dDQ1s/85l///ky3/ii8x2P8x1f87if81uP82rv9+MS47AAAAJ3RSTlMAHQVcGCn+JrXBdBM559V59A7bwuVSMaDFuvP09OWMpZzQheiY9+Cn9epSAAABq0lEQVR4Xp3S55LaMBSG4WPZC9hgemeBrbHpvfe2Nbn/24mQPIrRHCWBd/z7mU+S4f8KvbN6vd7Hcyqna3BDIUHQ2m0npZMbDEG0KeE4rbR+tSETrVY/FQavO57xD0Mm+v3ZLB0B3mKx2G7nc7eYt4y/GIJwBLHfxz2EEa672Xx+jZ8SSkNawYjB0UPYCk6MD8msykCJYyfN7sRPHIb3GYWBEdRomMzwE8PRfRY35LsYcKLT1akxd/3E6KedQA3sIJ1Go9H9QQAk4nSyMCOnIpZLHaAoEb9W2BPHlETTBEjKxAQbojNB3AUnumei2dTgRSJWkwJiaI5iBU2HzJkY+ohJAJCi0qMyghn1KpCkt0IQAfRCHPQglKibABlpReAtiB3m4r8QRJ1WBiB5iUANeOAHkVfQSgBg2JfEDjW0uExwoV6rAS1rXxC4ATF8RY0bxHj0E9+4ASH5OrlQWwOLWPYfQmWEozhBDV7CKlBiRwmlAVqU/xf+g6xp4MsI8ggoCpvIivUULiPsU0Yq4kUEQY0ri5jiUb0VU7WhVqqvghDG1YX1ilkueStovwEwXcW+ypHW+QAAAABJRU5ErkJggg=="
-                                    alt="" />
-                                <img data-v-2032808c="" src="{:lang('/public/index.png')}" alt="" />
-                                <img data-v-2032808c=""
-                                    src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAAAdCAMAAADGkCHGAAABHVBMVEVHcExgkuh58tpn59Souv+D+t5mRv+Fff9qT/9a4tF6av92ZP9T2stN1clL08k+y8M6ycKHgv+Vmv+Qj/9t69Ze4M+Eff9M1sxt69WQkP+cpf+TlP9u7NY6ysI/zMQyw74wwb2Adf90Yf90Yf9o59RW3c6bo/928dl079h079gkurhI0sc/zMNF0MVq6dQuwLxt69VL1MiDe/9e4c8zxL+Ul/9b3855af938tlCzsRP1sk7ycKA+Nx79NtxW/+F+98ft7ervf+Ojf+Ynv9x7tdm5tKnt/9/dP+jsP+eqf9R2cptVP84x8CKhv9U2sxj5NF8b/+cpP9Z3c1kRv90Yf+HgP9h49CRkv92ZP+bo/9oTf82xr8pvbpN1clX3M0mJ4ZdAAAAKXRSTlMABbRhKbYqFCMbc/G63DdcwzGGUp7p5RB+4fPF0KWM5fTQuL3FRM726DK2szUAAAGZSURBVHheldAFcuNAEIbRVhSvLDDFFGM4u5LMzExhhsX7HyORxypLk57amv8Ar75ucE0WI+kf31v9fq/XGw6HHuCdIJ4WSqXZTG/ZCLchRufzggvhNWSt+nq3QXQb4TP80UaVINuS/xrSLhkhzm7/PToRXdcthG2AtJdKXlysVovFeEwqOrcEoUo8bKFen05/EmRtyL7OJYrsMIhQYvLmQCxDK//FEYYRvrmZOBEACJgmjjCMUOXFjQAIvrxZxhHUkGIVB/LwiQAE2nkWEkEIQVkuK+4SgGCOiexjGeo9hSRB7uaYiIgYSrNJIecQ6LIRGTFO3mlkDzLXX5EGQdKATH2mkTAEf1+zStB3DAYUkhDgoLZFTBdyh53ivaKRMMBhzUKwcyKAGgS5t5EUABSLNbwkKqPGrytXSUyyDAfS3pRcWogIuOFCYiEL/lPESzTAjScncuSFtYEjvjjL2CKqIhDYIAh1jk8GpkEQ9ViRbNgwkBItDowJ39bzSk7YQJCsAFwbfUGCfuDciEIyROA0bOTwIJgNxIF/H2ny6lvZO+ruAAAAAElFTkSuQmCC"
-                                    alt="" />
-                            </div>
-                            <div data-v-2032808c="" class="message_info_content">
-                                <div data-v-2032808c="" class="message_body">
-                                    <div data-v-2032808c="" class="message_title1"></div>
-                                    <div data-v-2032808c="" class="message_content1">
-                                        <p data-v-2032808c="">
-                                            {if condition='$Think.cookie.think_var eq "zh-cn"'}
-                                            {$tanchunag['content']|raw}
-                                            {elseif condition='$Think.cookie.think_var eq "jp-jp"'}
-                                            {$tanchunag['jp_content']|raw}
-                                            {elseif condition='$Think.cookie.think_var eq "kr-kr"'}
-                                            {$tanchunag['kr_content']|raw}
-                                            {elseif condition='$Think.cookie.think_var eq "fr-fr"'}
-                                            {$tanchunag['fr_content']|raw}
-                                            {elseif condition='$Think.cookie.think_var eq "es-es"'}
-                                            {$tanchunag['es_content']|raw}
-                                            {elseif condition='$Think.cookie.think_var eq "pt-pt"'}
-                                            {$tanchunag['pt_content']|raw}
-                                            {else}
-                                            {$tanchunag['en_content']|raw}
-                                            {/if}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
+<body class="body-bottom" monica-id="ofpnmcalabcbjgholdjcjblkibolbppb" monica-version="7.9.5">
+    <div class="wp">
+        <div class="ind-box1">
+            <div class="tit">
+                <img src="/upload/local/20250531/019e7ac3-8a37-45fd-8e95-a2ec4c7f2cd7.png" alt="">
+                悠享手工
+            </div>
+            <a href="" class="user">
+                <i></i>
+                15816393445
+            </a>
+        </div>
+
+        <!--轮播图-->
+        <div id="root">
+
+            <div class="container">
+                <div style="position: relative; overflow: hidden; border-radius: 5px; height: 150.424px;">
+                    <div style="position: absolute; left: -355px; top: 0px; font-size: 0px; width: 600%; height: 100%;">
+                        <div
+                            style="display: inline-block; height: 100%; position: relative; vertical-align: middle; width: 16.6667%;">
+                            <img src="/static/banner/img/4.jpg" style="width: 100%; height: 100%;">
+                        </div>
+                        <div
+                            style="display: inline-block; height: 100%; position: relative; vertical-align: middle; width: 16.6667%;">
+                            <img src="/static/banner/img/1.jpg" style="width: 100%; height: 100%;">
+                        </div>
+                        <div
+                            style="display: inline-block; height: 100%; position: relative; vertical-align: middle; width: 16.6667%;">
+                            <img src="/static/banner/img/2.jpg" style="width: 100%; height: 100%;">
+                        </div>
+                        <div
+                            style="display: inline-block; height: 100%; position: relative; vertical-align: middle; width: 16.6667%;">
+                            <img src="/static/banner/img/3.jpg" style="width: 100%; height: 100%;">
+                        </div>
+                        <div
+                            style="display: inline-block; height: 100%; position: relative; vertical-align: middle; width: 16.6667%;">
+                            <img src="/static/banner/img/4.jpg" style="width: 100%; height: 100%;">
+                        </div>
+                        <div
+                            style="display: inline-block; height: 100%; position: relative; vertical-align: middle; width: 16.6667%;">
+                            <img src="/static/banner/img/1.jpg" style="width: 100%; height: 100%;">
                         </div>
                     </div>
-                    <div data-v-2032808c="" class="message_wrapper">
-                        <img data-v-2032808c=""
-                            src="data:image/png;base64,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"
-                            alt="" />
+                    <div
+                        style="position: absolute;left: 0;right: 0;bottom: 15px;text-align: center;font-size: 0; z-index: 4;">
+                        <div style="display: inline-block;">
+                            <div
+                                style="display: inline-block;width: 7px;height: 7px;margin: 0 5px;border-radius: 50%;background-color: #fff;opacity: 0.8;">
+                            </div>
+                            <div
+                                style="display: inline-block;width: 7px;height: 7px;margin: 0 5px;border-radius: 50%;background-color: #fff;opacity: 0.3;">
+                            </div>
+                            <div
+                                style="display: inline-block;width: 7px;height: 7px;margin: 0 5px;border-radius: 50%;background-color: #fff;opacity: 0.3;">
+                            </div>
+                            <div
+                                style="display: inline-block;width: 7px;height: 7px;margin: 0 5px;border-radius: 50%;background-color: #fff;opacity: 0.3;">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div data-v-43c1797b="">
-                <div data-v-43c1797b="" class="van-overlay" style="z-index: 3; display: none;">
-                    <div data-v-43c1797b="" class="messaeg_flex">
-                        <div data-v-43c1797b="" class="message_wrapper">
-                            <div data-v-43c1797b="" class="message_block">
-                                <div data-v-43c1797b="" class="message_info">
-                                    <img data-v-43c1797b=""
-                                        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAAAdCAMAAADGkCHGAAAA6lBMVEVHcEz/fjCQkK7/djQ0u/8t8/84nf87jf//kC7/aDc1tf//bzL/cjQ1t///ejL/gzH/dzM2vP8x0///gzH/eDIyzv81vv//ii8x0v83ov8v4P//Xjk0v///Xzn/aDb/ZDj/fzI1tf8xz///izAw2///Zjf/azb/gzEv4v//XTn/Yjj/bzX/Zzf/gDL/hzD/cTX/bDb/ji7/fTL/djQzxP80vf8y0P84pP//VDv/ejMv5/8t9P//ajY3qv//WTow3f8u7f86kf//eTMyyv//dDQ1s/85l///ky3/ii8x2P8x1f87if81uP82rv9+MS47AAAAJ3RSTlMAHQVcGCn+JrXBdBM559V59A7bwuVSMaDFuvP09OWMpZzQheiY9+Cn9epSAAABq0lEQVR4Xp3S55LaMBSG4WPZC9hgemeBrbHpvfe2Nbn/24mQPIrRHCWBd/z7mU+S4f8KvbN6vd7Hcyqna3BDIUHQ2m0npZMbDEG0KeE4rbR+tSETrVY/FQavO57xD0Mm+v3ZLB0B3mKx2G7nc7eYt4y/GIJwBLHfxz2EEa672Xx+jZ8SSkNawYjB0UPYCk6MD8msykCJYyfN7sRPHIb3GYWBEdRomMzwE8PRfRY35LsYcKLT1akxd/3E6KedQA3sIJ1Go9H9QQAk4nSyMCOnIpZLHaAoEb9W2BPHlETTBEjKxAQbojNB3AUnumei2dTgRSJWkwJiaI5iBU2HzJkY+ohJAJCi0qMyghn1KpCkt0IQAfRCHPQglKibABlpReAtiB3m4r8QRJ1WBiB5iUANeOAHkVfQSgBg2JfEDjW0uExwoV6rAS1rXxC4ATF8RY0bxHj0E9+4ASH5OrlQWwOLWPYfQmWEozhBDV7CKlBiRwmlAVqU/xf+g6xp4MsI8ggoCpvIivUULiPsU0Yq4kUEQY0ri5jiUb0VU7WhVqqvghDG1YX1ilkueStovwEwXcW+ypHW+QAAAABJRU5ErkJggg=="
-                                        alt="" />
-                                    <img data-v-43c1797b="" src="{:lang('/public/index.png')}" alt="" />
-                                    <img data-v-43c1797b=""
-                                        src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEMAAAAdCAMAAADGkCHGAAABHVBMVEVHcExgkuh58tpn59Souv+D+t5mRv+Fff9qT/9a4tF6av92ZP9T2stN1clL08k+y8M6ycKHgv+Vmv+Qj/9t69Ze4M+Eff9M1sxt69WQkP+cpf+TlP9u7NY6ysI/zMQyw74wwb2Adf90Yf90Yf9o59RW3c6bo/928dl079h079gkurhI0sc/zMNF0MVq6dQuwLxt69VL1MiDe/9e4c8zxL+Ul/9b3855af938tlCzsRP1sk7ycKA+Nx79NtxW/+F+98ft7ervf+Ojf+Ynv9x7tdm5tKnt/9/dP+jsP+eqf9R2cptVP84x8CKhv9U2sxj5NF8b/+cpP9Z3c1kRv90Yf+HgP9h49CRkv92ZP+bo/9oTf82xr8pvbpN1clX3M0mJ4ZdAAAAKXRSTlMABbRhKbYqFCMbc/G63DdcwzGGUp7p5RB+4fPF0KWM5fTQuL3FRM726DK2szUAAAGZSURBVHheldAFcuNAEIbRVhSvLDDFFGM4u5LMzExhhsX7HyORxypLk57amv8Ar75ucE0WI+kf31v9fq/XGw6HHuCdIJ4WSqXZTG/ZCLchRufzggvhNWSt+nq3QXQb4TP80UaVINuS/xrSLhkhzm7/PToRXdcthG2AtJdKXlysVovFeEwqOrcEoUo8bKFen05/EmRtyL7OJYrsMIhQYvLmQCxDK//FEYYRvrmZOBEACJgmjjCMUOXFjQAIvrxZxhHUkGIVB/LwiQAE2nkWEkEIQVkuK+4SgGCOiexjGeo9hSRB7uaYiIgYSrNJIecQ6LIRGTFO3mlkDzLXX5EGQdKATH2mkTAEf1+zStB3DAYUkhDgoLZFTBdyh53ivaKRMMBhzUKwcyKAGgS5t5EUABSLNbwkKqPGrytXSUyyDAfS3pRcWogIuOFCYiEL/lPESzTAjScncuSFtYEjvjjL2CKqIhDYIAh1jk8GpkEQ9ViRbNgwkBItDowJ39bzSk7YQJCsAFwbfUGCfuDciEIyROA0bOTwIJgNxIF/H2ny6lvZO+ruAAAAAElFTkSuQmCC"
-                                        alt="" />
-                                </div>
-                                <div data-v-43c1797b="" class="message_info_content">
-                                    <div data-v-43c1797b="" class="message_body">
-                                        <div data-v-43c1797b="" class="message_title1">
-                                        </div>
-                                        <div data-v-43c1797b="" class="message_content1">
-                                            <p data-v-43c1797b="">
+        </div>
+        <ul class="ind-row4">
+            <li>
+                <a href="/shop/index2">
+                    <i class="i1"></i>
+                    <p>手工商城</p>
+                </a>
+            </li>
+            <li>
+                <!--自由领取权-->
+                <a href="/index/msg">
+                    <i class="i2_0"></i>
 
-                                                {if condition='$Think.cookie.think_var eq "zh-cn"'}
-                                                {$tanchunag['content']|raw}
-                                                {elseif condition='$Think.cookie.think_var eq "jp-jp"'}
-                                                {$tanchunag['jp_content']|raw}
-                                                {elseif condition='$Think.cookie.think_var eq "kr-kr"'}
-                                                {$tanchunag['kr_content']|raw}
-                                                {elseif condition='$Think.cookie.think_var eq "fr-fr"'}
-                                                {$tanchunag['fr_content']|raw}
-                                                {elseif condition='$Think.cookie.think_var eq "es-es"'}
-                                                {$tanchunag['es_content']|raw}
-                                                {elseif condition='$Think.cookie.think_var eq "pt-pt"'}
-                                                {$tanchunag['pt_content']|raw}
-                                                {else}
-                                                {$tanchunag['en_content']|raw}
-                                                {/if}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div data-v-43c1797b="" class="message_wrapper">
-                            <img data-v-43c1797b=""
-                                src="data:image/png;base64,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"
-                                alt="" />
-                        </div>
-                    </div>
-                </div>
-            </div> -->
-            <div data-v-43c1797b="" class="header home-header-nav">
-                <div data-v-43c1797b="" class="Maintitle">
-                    <div class="tit">
-                        <img data-v-43c1797b=""
-                            src="{if sysconf('site_index_logo')}{:sysconf('site_index_logo')}{else}/public/indexlogo.png{/if}"
-                            alt="" />
-                        悠享手工
-                    </div>
-                    <a href="" class="user">
-                        <i></i>
-                        {$info.username}
+                    <p>待激活权益</p>
+
+                </a>
+            </li>
+            <li>
+                <a href="/ctrl/recharge">
+                    <i class="i3"></i>
+                    <p>马上储入</p>
+                </a>
+            </li>
+            <li>
+                <a href="/ctrl/deposit">
+                    <i class="i4"></i>
+                    <p>快速提现</p>
+                </a>
+            </li>
+            <li>
+                <a href="/my/tc">
+                    <i class="i5"></i>
+                    <p>弹窗记录</p>
+                </a>
+            </li>
+        </ul>
+        <div class="ind-row5">
+            <div class="w-tit1">
+                <div class="tit">任务大厅</div>
+            </div>
+            <ul>
+                <!-- /rotOrder?type=1   /ctrl/vip  -->
+                <li class="li1">
+                    <a href="/rotOrder?type=1">
+                        <div class="pic"><img src="/static/home/images/rw1.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/8f4b6891-692c-4f8e-af71-f307f98e18c0.png"
+                                alt="代还"></div>
+                        <div class="tit">拼多多</div>
+                        <div class="info">普通会员专属通道</div>
+
                     </a>
-                </div>
+                </li>
+                <li class="li2">
+                    <a href="/ctrl/vip">
+                        <div class="pic"><img src="/static/home/images/rw2.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/64505490-03f1-4608-9beb-2e43e34db158.png"
+                                alt="代还"></div>
+                        <div class="tit">淘宝</div>
+                        <div class="info">白银会员专属通道</div>
+                        <div class="status">储入解锁</div>
+                    </a>
+                </li>
+                <li class="li3">
+                    <a href="/ctrl/vip">
+                        <div class="pic"><img src="/static/home/images/rw3.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/03bc00fb-e1d6-4576-b7b5-dd862c9df6a7.png"
+                                alt="代还"></div>
+                        <div class="tit">天猫</div>
+                        <div class="info">黄金会员专属通道</div>
+                        <div class="status">储入解锁</div>
+                    </a>
+                </li>
+                <li class="li4">
+                    <a href="/ctrl/vip">
+                        <div class="pic"><img src="/static/home/images/rw4.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/95c07748-7bc7-46e4-b37a-5acf083953b8.png"
+                                alt="代还"></div>
+                        <div class="tit">京东</div>
+                        <div class="info">铂金会员专属通道</div>
+                        <div class="status">储入解锁</div>
+                    </a>
+                </li>
+                <li class="li5">
+                    <a href="/ctrl/vip">
+                        <div class="pic"><img src="/static/home/images/rw5.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/95c07748-7bc7-46e4-b37a-5acf083953b8.png"
+                                alt="代还"></div>
+                        <div class="tit">京东+淘宝</div>
+                        <div class="info">钻石会员专属通道</div>
+                        <div class="status">储入解锁</div>
+                    </a>
+                </li>
+                <li class="li6">
+                    <a href="/ctrl/vip">
+                        <div class="pic"><img src="/static/home/images/rw6.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/8f4b6891-692c-4f8e-af71-f307f98e18c0.png"
+                                alt="代还"></div>
+                        <div class="tit">天猫+淘宝</div>
+                        <div class="info">至尊会员专属通道</div>
+                        <div class="status">储入解锁</div>
+                    </a>
+                </li>
+                <!-- 					<li class="li1"><a href="/rotOrder?type=2"> -->
+                <!-- 							<div class="pic"><img  th:src="@{/static/home/images/rw2.png}" src="../../home/images/rw2.png" alt="淘宝"></div> -->
+                <!-- 							<div class="icon"><img th:src="@{/static/static_new6/img/vip_2a.be0ead6.png}"  src="/static_new6/img/vip_2a.be0ead6.png" alt="淘宝"></div> -->
+                <!-- 							<div class="tit">淘宝</div> -->
+                <!-- 							<div class="info">黄金会员专属通道</div> -->
+                <!-- 						</a></li> -->
+                <!-- 					<li class="li2"> -->
+                <!-- 						<a href="/ctrl/vip"> -->
+                <!-- 							<div class="pic"><img th:src="@{/static/home/images/rw3.png}" src="../../home/images/rw3.png" alt="天猫"></div> -->
+                <!-- 							<div class="icon"><img th:src="@{/static//static_new6/img/vip_3a.90bd5b6.png}"  src="/static_new6/img/vip_3a.90bd5b6.png" alt="天猫"></div> -->
+                <!-- 							<div class="tit">天猫</div> -->
+                <!-- 							<div class="info">铂金会员专属通道</div> -->
+
+                <!-- 							<div class="status">储入解锁</div> -->
+                <!-- 						</a></li> -->
+                <!-- 					<li class="li3"> -->
+                <!-- 						<a href="/ctrl/vip"> -->
+                <!-- 							<div class="pic"><img th:src="@{/static/home/images/rw4.png}"  src="../../home/images/rw4.png" alt="京东"></div> -->
+                <!-- 							<div class="icon"><img th:src="@{/static/static_new6/img/vip_4a.fe406d7.png}" src="/static_new6/img/vip_4a.fe406d7.png" alt="京东"></div> -->
+                <!-- 							<div class="tit">京东</div> -->
+                <!-- 							<div class="info">钻石会员专属通道</div> -->
+                <!-- 							<div class="status">储入解锁</div> -->
+                <!-- 						</a></li> -->
+            </ul>
+        </div>
+        <div class="ind-row6">
+            <div class="w-tit1">
+                <div class="tit">相关信息</div>
             </div>
-
-            <script src="/web/js/swiper.min.js"></script>
-
-
-            <div data-v-43c1797b="" class=" banner swiper-container">
-                <div class=" swiper-wrapper">
-                    {notempty name='banner'}
-                    {foreach $banner as $key=>$vo}
-                    <div data-v-43c1797b="" class=" is-active  swiper-slide">
-                        <img data-v-43c1797b="" src="{$vo.image}" style="max-width:100%" />
-                    </div>
-
-                    {/foreach}
-                    {else}
-                    <div data-v-43c1797b="" class="mint-swipe-item is-active" style="">
-                        <a data-v-43c1797b=""><img data-v-43c1797b="" src="/public/202109050243260888.png" alt="" /></a>
-                    </div>
-                    {/notempty}
-                </div>
-
-                <script type="text/javascript">
-                    let mySwiper = new Swiper('.swiper-container', {
-                        pagination: '.swiper-pagination',
-                        effect: 'cube',
-                        grabCursor: true,
-                        cube: {
-                            shadow: false,
-                            slideShadows: false,
-                            shadowOffset: 20,
-                            shadowScale: 1
-                        },
-                        loop: true,
-                        autoplay: 2500,
-                        autoplayDisableOnInteraction: false
-                    });  
-                </script>
-            </div>
-            <div data-v-43c1797b="" class="count count-nav">
-                <ul data-v-43c1797b="">
-                    <li data-v-43c1797b="" class="" onclick="window.location.href=`/index/my/signin`"><img
-                            data-v-43c1797b="" src="http://yx.jy7n4x3pgk4-zfk8.shop/static/home/images/1.png" alt="" />
-                        <p data-v-43c1797b="">{:lang('手工商城')}</p>
-                    </li>
-                    <li data-v-43c1797b="" class="" onclick="window.location.href=`/index/my/signin`"><img
-                            data-v-43c1797b="" src="http://yx.jy7n4x3pgk4-zfk8.shop/static/home/images/2_0.png"
-                            alt="" />
-                        <p data-v-43c1797b="">{:lang('待激活权益')}</p>
-                    </li>
-                    <li data-v-43c1797b="" class="" onclick="window.location.href=`/index/ctrl/recharge`"><img
-                            data-v-43c1797b="" src="http://yx.jy7n4x3pgk4-zfk8.shop/static/home/images/3.png" alt="" />
-                        <p data-v-43c1797b="">{:lang('马上储入')}</p>
-                    </li>
-                    <li data-v-43c1797b="" class="" onclick="window.location.href=`/index/ctrl/deposit`"><img
-                            data-v-43c1797b="" src='http://yx.jy7n4x3pgk4-zfk8.shop/static/home/images/4.png' alt="" />
-                        <p data-v-43c1797b="">{:lang('快速提现')}</p>
-                    </li>
-                    <li data-v-43c1797b="" class="" onclick="window.location.href=`/index/my/invite`"><img
-                            data-v-43c1797b="" src='http://yx.jy7n4x3pgk4-zfk8.shop/static/home/images/5.png' alt="" />
-                        <p data-v-43c1797b="">{:lang('弹窗记录')}</p>
-                    </li>
-                </ul>
-            </div>
-
-
-
-
-            <script>
-                function slide(ClassName) {
-                    var ID = setInterval("run('" + ClassName + "')", 3000);
-                    $('.' + ClassName).mouseover(function () {
-                        clearInterval(ID)
-                    }).mouseout(function () {
-                        ID = setInterval("run('" + ClassName + "')", 3000);
-                    });
-
-                }
-                function run(ClassName) {
-                    $('.' + ClassName).find('li').first().clone().appendTo('.' + ClassName);
-                    $('.' + ClassName).find('li').first().slideUp("slow",
-                        function () {
-                            $('.' + ClassName).find('li').first().remove();
-                        }
-                    );
-
-                }
-                $(function () {
-
-                    slide('sItem');
-
-                });
-            </script>
-            <div data-v-43c1797b="" class="announcement">
-                <div data-v-43c1797b="" class="title">
-                    <div data-v-43c1797b="" class="index-title">{:lang('任务大厅')}</div>
-                </div>
-                <!-- 首页 商品列表 -->
-                <div data-v-43c1797b="" class="announcement-task">
-                    <ul data-v-43c1797b="">
-                        {foreach $cate as $key=>$vo}
-                        <li data-v-43c1797b="" class="a-t-items <?php echo $vo['level']<= $info['level'] ? '':'not'; ?>"
-                            data-cid="{$vo.id}">
-                            <div data-v-43c1797b="">
-                                <div data-v-43c1797b="" class="user">
-                                    <div data-v-43c1797b="">
-                                        <!-- <h3 data-v-43c1797b="">{$vo.name}</h3> -->
-                                        <h4 data-v-43c1797b=""><img src="{$vo.pic}" style="width:50%"></h4>
-                                    </div>
-                                    <img data-v-43c1797b="" src="{$vo.cat_ico}" alt="" />
-                                </div>
-                                <div data-v-43c1797b="" class="info">
-
-                                    <div class="info-item">
-                                        <h4 data-v-43c1797b="">{$vo.order_num}&nbsp;{:lang('次')}/
-                                            <?php echo sprintf("%.2f",$vo['bili']*100);?>%
-                                        </h4>
-                                        <h4 data-v-43c1797b="">Require:</h4>
-                                        <h4 data-v-43c1797b="">{$vo.levelname}</h4>
-                                    </div>
-                                    {if condition="$vo['level'] elt $info['level']"}
-                                    <!--  <p data-v-43c1797b="" style="color: red;">Opened</p> -->
-                                    <img data-v-43c1797b="" src="/statics/img/unlock.png" alt="" />
-                                    {else}
-                                    <p data-v-43c1797b="" style="color: red;"
-                                        onclick="showtips({$vo.num},{$vo.auto_vip_xu_num})">Not open</p>
-                                    <img data-v-43c1797b="" src="/statics/img/lock.png" alt="" />
-                                    {/if}
-                                </div>
-                            </div>
-                        </li>
-
-                        {/foreach}
-                    </ul>
-                </div>
-            </div>
-            <div data-v-43c1797b="" class="count count-tool">
-                <div data-v-43c1797b="" class="w-tit1">
-                    <div data-v-43c1797b="" class="tit">{:lang('相关信息')}</div>
-                </div>
-                <ul data-v-43c1797b="">
-                    <li data-v-43c1797b="" class="" onclick="window.location.href=`/index/my/detail.html?id=2`">
+            <ul>
+                <li>
+                    <a href="/my/detail.html?id=2" class="myfancy">
                         <div class="icon">
-                            <img src="http://yx.jy7n4x3pgk4-zfk8.shop/static/home/images/xx1.png" alt="">
+                            <img src="/static/home/images/xx1.png" alt="">
                         </div>
                         <div class="txt">
-                            <div class="cn">{:lang('平台简介')}</div>
+                            <div class="cn">平台简介</div>
                             <div class="en">Platform Introduction</div>
                         </div>
-                    </li>
-                    <li data-v-43c1797b="" class="" onclick="window.location.href=`/index/my/detail.html?id=3`">
+                    </a>
+                </li>
+                <li>
+                    <a href="/my/detail.html?id=3">
                         <div class="icon">
-                            <img src="http://yx.jy7n4x3pgk4-zfk8.shop/static/home/images/xx2.png" alt="">
+                            <img src="/static/home/images/xx2.png" alt="">
                         </div>
                         <div class="txt">
-                            <div class="cn">{:lang('规则说明')}</div>
+                            <div class="cn">规则说明</div>
                             <div class="en">Rule Description</div>
                         </div>
-                    </li>
-                    <li data-v-43c1797b="" class="" onclick="window.location.href=`/index/my/detail.html?id=4`">
+                    </a>
+                </li>
+                <li>
+                    <a href="/my/detail.html?id=4">
                         <div class="icon">
-                            <img src="http://yx.jy7n4x3pgk4-zfk8.shop/static/home/images/xx3.png" alt="">
+                            <img src="/static/home/images/xx3.png" alt="">
                         </div>
                         <div class="txt">
-                            <div class="cn">{:lang('代理合作')}</div>
+                            <div class="cn">代理合作</div>
                             <div class="en">Agency Cooperation</div>
                         </div>
-                    </li>
-                    <li data-v-43c1797b="" class="" onclick="window.location.href=`/index/my/detail.html?id=12`">
+                    </a>
+                </li>
+                <li>
+                    <a href="/my/detail.html?id=12">
                         <div class="icon">
-                            <img src="http://yx.jy7n4x3pgk4-zfk8.shop/static/home/images/xx4.png" alt="">
+                            <img src="/static/home/images/xx4.png" alt="">
                         </div>
                         <div class="txt">
-                            <div class="cn">{:lang('公司资质')}</div>
+                            <div class="cn">公司资质</div>
                             <div class="en">Company Qualifications</div>
                         </div>
-                    </li>
-                </ul>
-                <br data-v-43c1797b="" />
-                <br data-v-43c1797b="" />
-                <br data-v-43c1797b="" />
-            </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
 
-            {include file="public/floor-red" /}
+
+    <ul class="footer">
+        <li class="active" onclick="window.location.href='/'">
+            <i class="i1"></i>
+            <p>首页</p>
+        </li>
+        <li onclick="window.location.href='/order'">
+            <i class="i2"></i>
+            <p>记录</p>
+        </li>
+        <li onclick="window.location.href='/rotOrder'">
+            <i class="i3"></i>
+            <p>领取</p>
+        </li>
+        <li onclick="window.location.href='/support'">
+            <i class="i4"></i>
+            <p>客服</p>
+        </li>
+        <li onclick="window.location.href='/my'">
+            <i class="i5"></i>
+            <p>我的</p>
+        </li>
+    </ul>
+
+
+    <div class="pop-mask" style="display:none"></div>
+    <div class="pop-win1" style="display:none">
+        <div class="bg"></div>
+        <div class="title">特别公告通知</div>
+        <div class="con">
+            <p><span
+                    style="color: rgb(0, 0, 0); font-size: 12px;">最新推出线下购换充值卡福利，线下购买指定充值卡卷到本平台进行兑换的基于充值金额给与一定优惠，卡卷兑换金额达到一万元以上可获得赠送</span><span
+                    style="color: rgb(255, 77, 79); font-size: 12px;">奖励金额188元到1888元不等！<span
+                        style="color: rgb(255, 77, 79); font-size: 14px;">&gt; </span></span></p>
+        </div>
+        <a href="javascript:void(0);" onclick="closeTc()" style="margin-bottom: 0.8rem"
+            class="w-btn js-pop-close">我已阅读</a>
+    </div>
+
+    <div class="pop-win" id="pop1">
+        <div class="bg"></div>
+        <div class="title">
+            <div class="s1">平台简介</div>
+            <div class="s2">Platform Introduction</div>
+        </div>
+        <div class="box">
+            <div class="time">2020年08月27日 19:04:26</div>
+            <div class="con">
+                <p>平台每天都会将需要提高曝光度的商家产品放到
+                    平台上，提供给平台用户进行抢单。为了规避网
+                    购平台的检测，提高订单的真实性，新用户在抢
+                    单前必须先完善个人真实信息，并填写真实的收
+                    货地址。</p>
+                <p>为了有效的帮助商家提升订单成功率， 规避商家
+                    被检查到虚假订单的风险，平台将会根据您当前
+                    的操作IP，设备型号对当天的订单进行优化匹配。
+                    所有订单匹配均需要通过智能云算法实现，
+                    请您耐心等待。</p>
+            </div>
+        </div>
+        <a href="javascript:;" class="w-btn js-pop-close">已了解，返回首页</a>
+    </div>
+
+
+
+    <div id="danmu" style="display:none">
+
+        <div class="banner_img" style="width:8rem;height:3.89rem">
+            <img src="/static/home/images/danmu.jpg" width="100%" height="100%">
+        </div>
+
+        <div class="summary-card">
+
+
+
+            <div class="order-info">
+                <div class="order-text">
+                    <div class="summary-card_h1">消息通知</div>
+                    <p class="summary-card_p" id="content"></p>
+                    <input type="hidden" id="tc_id">
+                </div>
+
+                <div class="order-actions">
+                    <button class="btn btn-primary summary-card_button" onclick="closeDanmu()">我知道了</button>
+                    <!--<button class="btn btn-no-outline">Cancel Order</button>-->
+
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
         $(function () {
-            $('.footer li').eq(0).addClass("on");
-
+            var swiper = new Swiper('.ind-row3 .box', {
+                loop: true,
+                direction: "vertical",
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                }
+            });
+            $('.footer li:eq(0)').addClass('active');
         })
+
+        function closeTc() {
+            $.ajax({
+                url: "/closeTc",
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                }
+            })
+        }
     </script>
-    <script type="text/javascript" src="/static_new6/js/manifest.3ad1d5771e9b13dbdad2.js"></script>
     <script>
+        get_user_tc();
 
-        $(function () {
+        setInterval(get_user_tc, 5000);
+        var flag = false;
 
-            $('.a-t-items').click(function () {
+        function showDanmu(content, id) {
 
+            $("#danmu").show();
+            $(".pop-mask").show();
+            $("#content").html(content);
+            $("#tc_id").val(id);
+        }
 
-                if (!$(this).hasClass('not')) {
-                    cid = $(this).data('cid');
-                    window.location.href = '/index/rot_order/index.html?type=' + cid;
-                }
-            });
+        function closeDanmu() {
+            $("#danmu").hide();
+            $(".pop-mask").hide();
+            flag = false;
+            $.ajax({
+                url: "/user-tc/saveOrUpdate",
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    status: 1,
+                    id: $("#tc_id").val()
+                },
+            })
+        }
 
-            $('.message_wrapper').click(function () {
-                $("#tanchuang").hide()
-
-            });
-
-
-        })
-        function showtips(balance, invite) {
-            if (invite) {
-                var content = "{:lang("需要账户余额大于")}" + balance + "{:lang("邀请")}" + invite + "{:lang("才可以解锁")}"
-            } else {
-                var content = "{:lang("需要账户余额大于")}" + balance + "{:lang("才可以解锁")}"
+        function get_user_tc() {
+            if (flag) {
+                return false;
             }
-            var index = layer.open({
-                type: 0,  //可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
-                title: false,//数组第二项可以写任意css样式；如果你不想显示标题栏，你可以title: false
-                content: content,
-                btn: ['{:lang("前往充值")}', '{:lang("再看看")}'],
-                yes: function (index, layero) {
-                    window.location.href = '/index/ctrl/recharge';
-                    layer.close(index); //如果设定了yes回调，需进行手工关闭
-                },
-                btn2: function (index, layero) {
-
-                    layer.close(index)
-                }
-            });
-
-        }
-        function showmsg() {
             $.ajax({
-                type: 'GET',
-                url: "{:url('get_user_msg')}",
-                data: {
-                    'id': 2
-                },
+                url: ("/user-tc/select"),
+                type: "GET",
+                data: {},
                 success: function (res) {
-                    console.log(res.num);
-                    if (res.num) {
-                        document.getElementById("newmsg").innerHTML = res.num;
-                    }
-                    if (res.info) {
-
-                        var index = layer.open({
-                            type: 0,  //可传入的值有：0（信息框，默认）1（页面层）2（iframe层）3（加载层）4（tips层）
-                            title: false,//数组第二项可以写任意css样式；如果你不想显示标题栏，你可以title: false
-                            content: res.info.content,
-                            btn: ['已读', '返回'],
-                            yes: function (index, layero) {
-                                setmsgred(res.info.id);
-                                layer.close(index); //如果设定了yes回调，需进行手工关闭
-                            },
-                            btn2: function (index, layero) {
-
-                                layer.close(index)
-                            }
-                        });
-
+                    if (res.success) {
+                        flag = true;
+                        var data_tc = res.data;
+                        var html = '';
+                        showDanmu(data_tc.content, data_tc.id)
 
                     }
-
-
-                    console.log(res);
-                }
-            });
-
-
-        }
-        function setmsgred(msgid) {
-            $.ajax({
-                type: 'POST',
-                url: "{:url('set_user_msg')}",
-                data: {
-                    'id': msgid
                 },
-                success: function (res) {
-                    console.log(res);
-                }
-            });
+            })
 
         }
     </script>
 
+
+
+    <div data-v-6cac2965="" id="ng_youtube_summary_text">
+        <div data-v-6cac2965="" id="ng-nc-icon" class="ng-icon" style="top: 100px; display: none;">
+            <div data-v-6cac2965="" class="ng-icon-logo"><svg data-v-6cac2965="" width="28" height="29"
+                    viewBox="0 0 1259 1328" fill="none" xmlns="http://www.w3.org/2000/svg" class="ng-icon-svg">
+                    <path data-v-6cac2965=""
+                        d="M948.355 1130.77C942.145 1137.69 936.193 1144.01 930.608 1149.72C936.641 1143.36 942.556 1137.04 948.355 1130.77C1040.66 1027.91 1189.99 794.063 1040 518C1002.21 451.645 842.197 322.245 679.128 368.304C610.046 374.21 468.82 444.094 456.563 676.383C396.54 569.106 364.511 322.886 638 216C773.968 162.861 1095.68 240.056 1186 469.998C1236.89 599.555 1248.35 806.182 948.355 1130.77Z"
+                        fill="#2E83FB"></path>
+                    <path data-v-6cac2965=""
+                        d="M143.9 1017.84C137.864 1013.71 132.253 1009.69 127.088 1005.84C132.73 1009.91 138.334 1013.91 143.9 1017.84C256.583 1094.97 517.147 1211.93 774 1024C834.713 977.686 935.341 807.691 867.913 652.235C852.833 584.562 764.71 453.936 532.866 472.816C631.164 399.001 870.9 334.372 1013.36 591.132C1084.18 718.783 1050.65 1047.93 834.835 1168.15C712.75 1236.16 508.368 1275.16 143.9 1017.84Z"
+                        fill="#2E83FB"></path>
+                    <path data-v-6cac2965=""
+                        d="M300.056 131.307C310.071 120.08 319.585 110.084 328.201 101.387C318.521 111.471 309.141 121.444 300.056 131.307C206.432 236.268 69.0234 448.956 212 716C249.382 782.586 411.537 929.391 574.885 884.333C644.002 878.85 785.654 809.833 799.335 577.624C858.699 685.267 889.217 931.678 615.078 1036.89C478.788 1089.19 157.551 1010.02 68.6463 779.533C19.1305 651.158 8.59471 447.711 300.056 131.307Z"
+                        fill="#2E83FB"></path>
+                    <path data-v-6cac2965=""
+                        d="M1151.28 304.267C1160.18 313.06 1168.16 321.406 1175.19 329.061C1167.16 320.584 1159.19 312.321 1151.28 304.267C1051.76 205.898 837.877 51.6189 560 184C491.732 218.214 344.191 373.421 381.528 538.706C383.759 608.003 446.048 752.74 677.358 777.31C567.046 831.554 319.473 850.467 227.256 571.69C181.41 433.094 275.574 115.929 509.986 37.9464C641.213 -5.7086 846.35 -6.46511 1151.28 304.267Z"
+                        fill="#2E83FB"></path>
+                </svg></div> <span data-v-6cac2965="" class="ng-close-button"><i data-v-6cac2965=""
+                    class="el-icon-error"></i></span>
+        </div>
+        <div data-v-6cac2965="" id="ng-nc-web-content" class="ng-web-content ng-border-radius" style="display: none;">
+            <div data-v-6cac2965="" class="ng-summary">
+                <div data-v-6cac2965="" class="ng-summary-content-header ng-summary-margin-left-right-width">
+                    <div data-v-6cac2965="" class="ng-left">
+                        <div data-v-6cac2965="" class="ng-flex-center"><svg data-v-6cac2965="" width="29" height="29"
+                                viewBox="0 0 1259 1328" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path data-v-6cac2965=""
+                                    d="M948.355 1130.77C942.145 1137.69 936.193 1144.01 930.608 1149.72C936.641 1143.36 942.556 1137.04 948.355 1130.77C1040.66 1027.91 1189.99 794.063 1040 518C1002.21 451.645 842.197 322.245 679.128 368.304C610.046 374.21 468.82 444.094 456.563 676.383C396.54 569.106 364.511 322.886 638 216C773.968 162.861 1095.68 240.056 1186 469.998C1236.89 599.555 1248.35 806.182 948.355 1130.77Z"
+                                    fill="#2E83FB"></path>
+                                <path data-v-6cac2965=""
+                                    d="M143.9 1017.84C137.864 1013.71 132.253 1009.69 127.088 1005.84C132.73 1009.91 138.334 1013.91 143.9 1017.84C256.583 1094.97 517.147 1211.93 774 1024C834.713 977.686 935.341 807.691 867.913 652.235C852.833 584.562 764.71 453.936 532.866 472.816C631.164 399.001 870.9 334.372 1013.36 591.132C1084.18 718.783 1050.65 1047.93 834.835 1168.15C712.75 1236.16 508.368 1275.16 143.9 1017.84Z"
+                                    fill="#2E83FB"></path>
+                                <path data-v-6cac2965=""
+                                    d="M300.056 131.307C310.071 120.08 319.585 110.084 328.201 101.387C318.521 111.471 309.141 121.444 300.056 131.307C206.432 236.268 69.0234 448.956 212 716C249.382 782.586 411.537 929.391 574.885 884.333C644.002 878.85 785.654 809.833 799.335 577.624C858.699 685.267 889.217 931.678 615.078 1036.89C478.788 1089.19 157.551 1010.02 68.6463 779.533C19.1305 651.158 8.59471 447.711 300.056 131.307Z"
+                                    fill="#2E83FB"></path>
+                                <path data-v-6cac2965=""
+                                    d="M1151.28 304.267C1160.18 313.06 1168.16 321.406 1175.19 329.061C1167.16 320.584 1159.19 312.321 1151.28 304.267C1051.76 205.898 837.877 51.6189 560 184C491.732 218.214 344.191 373.421 381.528 538.706C383.759 608.003 446.048 752.74 677.358 777.31C567.046 831.554 319.473 850.467 227.256 571.69C181.41 433.094 275.574 115.929 509.986 37.9464C641.213 -5.7086 846.35 -6.46511 1151.28 304.267Z"
+                                    fill="#2E83FB"></path>
+                            </svg></div>
+                        <div data-v-6cac2965="" class="ng-brand">NoteGPT</div>
+                    </div>
+                    <div data-v-6cac2965="" class="ng-right"><svg data-v-6cac2965="" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="16" height="16"
+                            viewBox="0 0 16 16" class="ng-close">
+                            <defs data-v-6cac2965="">
+                                <clipPath data-v-6cac2965="" id="master_svg0_38_546">
+                                    <rect data-v-6cac2965="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                </clipPath>
+                            </defs>
+                            <g data-v-6cac2965="" clip-path="url(#master_svg0_38_546)">
+                                <g data-v-6cac2965="">
+                                    <path data-v-6cac2965=""
+                                        d="M8.78570796875,7.9812567236328125L13.39501796875,3.3958397236328124C13.61301796875,3.1789947236328127,13.61411796875,2.8276007236328127,13.39721796875,2.6096367236328124C13.17981796875,2.3911292236328126,12.82901796875,2.3905694236328126,12.61101796875,2.6074147236328127L8.00060796875,7.193396723632812L3.43020596875,2.6090937236328124C3.21391996875,2.3922484236328123,2.86196696875,2.3911292236328126,2.64400296875,2.6079747236328124C2.42659806875,2.8248197236328125,2.42605446875,3.1767727236328125,2.64288396875,3.3947367236328123L7.21219796875,7.977936723632813L2.60508496875,12.560566723632812C2.38712096875,12.777366723632813,2.38601756875,13.128766723632813,2.6028629687500002,13.346766723632813C2.7112849687500002,13.455766723632813,2.85417996875,13.510766723632813,2.99707496875,13.510766723632813C3.13885096875,13.510766723632813,3.28064296875,13.456866723632812,3.3890659687499998,13.348966723632813L7.99728796875,8.765236723632812L12.60941796875,13.391266723632812C12.71781796875,13.500266723632812,12.86011796875,13.554766723632813,13.00301796875,13.554766723632813C13.14541796875,13.554766723632813,13.28721796875,13.500266723632812,13.39561796875,13.392366723632813C13.61301796875,13.175566723632812,13.61351796875,12.824166723632812,13.39671796875,12.606166723632812L8.78570796875,7.9812567236328125Z"
+                                        fill="#212427" fill-opacity="0.501960813999176"></path>
+                                </g>
+                            </g>
+                        </svg></div>
+                </div>
+                <div data-v-6cac2965=""
+                    class="ng-summary-content-body ng-summary-margin-left-right-width ng-border-radius-6">
+                    <div data-v-6cac2965="" class="ng-toolbar">
+                        <div data-v-6cac2965="" class="ng-toolbar-left">
+                            <div data-v-6cac2965="" class="el-select my-language el-select--small"><!---->
+                                <div class="el-input el-input--small el-input--suffix"><!----><input type="text"
+                                        readonly="readonly" autocomplete="off" placeholder="Choose a language"
+                                        class="el-input__inner"><!----><span class="el-input__suffix"><span
+                                            class="el-input__suffix-inner"><i
+                                                class="el-select__caret el-input__icon el-icon-arrow-up"></i><!----><!----><!----><!----><!----></span><!----></span><!----><!---->
+                                </div>
+                                <div class="el-select-dropdown el-popper" style="display: none;">
+                                    <div class="el-scrollbar" style="display: none;">
+                                        <div
+                                            class="el-select-dropdown__wrap el-scrollbar__wrap el-scrollbar__wrap--hidden-default">
+                                            <ul class="el-scrollbar__view el-select-dropdown__list"></ul>
+                                        </div>
+                                        <div class="el-scrollbar__bar is-horizontal">
+                                            <div class="el-scrollbar__thumb" style="transform: translateX(0%);"></div>
+                                        </div>
+                                        <div class="el-scrollbar__bar is-vertical">
+                                            <div class="el-scrollbar__thumb" style="transform: translateY(0%);"></div>
+                                        </div>
+                                    </div>
+                                    <p class="el-select-dropdown__empty">
+                                        No data
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div data-v-6cac2965="" class="ng-toolbar-right"><svg data-v-6cac2965=""
+                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                fill="none" version="1.1" width="16" height="16" viewBox="0 0 16 16"
+                                class="ng-toolbar-refresh">
+                                <defs data-v-6cac2965="">
+                                    <clipPath data-v-6cac2965="" id="master_svg0_38_554">
+                                        <rect data-v-6cac2965="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                    </clipPath>
+                                </defs>
+                                <g data-v-6cac2965="" clip-path="url(#master_svg0_38_554)">
+                                    <g data-v-6cac2965="">
+                                        <g data-v-6cac2965="">
+                                            <path data-v-6cac2965=""
+                                                d="M7.956255,15.659392952823639C6.993755,15.659392952823639,6.060935,15.47029295282364,5.181255,15.09839295282364C4.332815,14.739092952823638,3.570315,14.224992952823639,2.915625,13.570292952823639C2.260935,12.915592952823639,1.746875,12.15309295282364,1.3875,11.30469295282364C1.017188,10.42656295282364,0.828125,9.49219295282364,0.828125,8.529692952823638C0.828125,7.259372952823639,1.167188,6.012502952823639,1.80625,4.923442952823638C2.428125,3.867192952823639,3.315625,2.981252952823639,4.375005,2.365625952823639C4.523435,2.278125952823639,4.715625,2.329687952823639,4.801565,2.478125952823639C4.889065,2.626562952823639,4.837505,2.818752952823639,4.689064999999999,2.904692952823639C2.693755,4.067192952823639,1.453125,6.223442952823639,1.453125,8.529692952823638C1.453125,12.115592952823638,4.370315,15.03279295282364,7.956255,15.03279295282364C11.542225,15.03279295282364,14.459425,12.115592952823638,14.459425,8.529692952823638C14.459425,5.323442952823639,12.167225,2.625002952823639,9.007815,2.110937952823639C8.837505,2.0828129528236388,8.721875,1.923437952823639,8.750005,1.751562952823639C8.778125,1.579688252823639,8.937505,1.465625752823639,9.109375,1.4937507228236389C10.760935,1.7625009528236388,12.273425,2.6125029528236388,13.368725,3.889062952823639C13.910925,4.521872952823639,14.335925,5.235942952823638,14.628125,6.012502952823639C14.931225,6.815622952823639,15.085925,7.662502952823639,15.085925,8.529692952823638C15.085925,9.49219295282364,14.896925,10.42500295282364,14.525025,11.30469295282364C14.165625,12.15309295282364,13.651525,12.915592952823639,12.996825,13.570292952823639C12.342225,14.224992952823639,11.579725,14.739092952823638,10.731245,15.09839295282364C9.853125,15.47029295282364,8.918745,15.659392952823639,7.956255,15.659392952823639Z"
+                                                fill="#212427" fill-opacity="0.6000000238418579"></path>
+                                        </g>
+                                        <g data-v-6cac2965="">
+                                            <path data-v-6cac2965=""
+                                                d="M9.9300578125,0.4640698559095764L7.3081798125,1.1046951159095764C7.1800544725,1.1359451159095764,7.1331795125,1.2953201159095764,7.2238045125,1.3906321159095762L9.1253678125,3.3812601159095763C9.2175578125,3.4781301159095763,9.3800578125,3.4375101159095762,9.4159878125,3.3078201159095766L10.1363078125,0.6765701159095764C10.1706778125,0.5500073159095764,10.0566178125,0.4328198159095764,9.9300578125,0.4640698559095764Z"
+                                                fill="#212427" fill-opacity="0.6000000238418579"></path>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg> <span data-v-6cac2965="">
+                                <div role="tooltip" id="el-popover-695" aria-hidden="true" class="el-popover el-popper"
+                                    tabindex="0" style="display: none;"><!---->
+                                    <div data-v-6cac2965="" class="el-select el-select--small"><!---->
+                                        <div class="el-input el-input--small el-input--suffix"><!----><input type="text"
+                                                readonly="readonly" autocomplete="off" placeholder="Choose a language"
+                                                class="el-input__inner"><!----><span class="el-input__suffix"><span
+                                                    class="el-input__suffix-inner"><i
+                                                        class="el-select__caret el-input__icon el-icon-arrow-up"></i><!----><!----><!----><!----><!----></span><!----></span><!----><!---->
+                                        </div>
+                                        <div class="el-select-dropdown el-popper" style="display: none;">
+                                            <div class="el-scrollbar" style="">
+                                                <div
+                                                    class="el-select-dropdown__wrap el-scrollbar__wrap el-scrollbar__wrap--hidden-default">
+                                                    <ul class="el-scrollbar__view el-select-dropdown__list"><!---->
+                                                        <li data-v-6cac2965=""
+                                                            class="el-select-dropdown__item selected"><span>Auto</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>English</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>中文简体</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>中文繁體</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Español</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Français</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>German</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Italiano</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>日本語</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>한국어</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Português</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Русский</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Türkçe</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>العربية</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>हिन्दी</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Bahasa Indonesia</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>বাংলা</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Tiếng Việt</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Українська</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Čeština</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Norsk</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Ελληνικά</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>עִבְרִית</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Magyar</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Svenska</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Dansk</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Polski</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Suomi</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>हिन्दी</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>ไทย</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Bahasa Indonesia</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Čeština</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Norsk</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Ελληνικά</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>עִבְרִית</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Magyar</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Tiếng Việt</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Slovenčina</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Українська</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Română</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Hrvatski</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Bahasa Melayu</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>বাংলা</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>فارسی</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Српски</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Български</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Eesti</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Lietuvių</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Latviešu</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Slovenščina</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Filipino</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Қазақша</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Azərbaycan</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Oʻzbekcha</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Кыргызча</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>Kiswahili</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>አማርኛ</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>ភាសាខ្មែរ</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>नेपाली</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>සිංහල</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>မြန်မာဘာသာ</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>ਪੰਜਾਬੀ</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>தமிழ்</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>ગુજરાતી</span>
+                                                        </li>
+                                                        <li data-v-6cac2965="" class="el-select-dropdown__item">
+                                                            <span>ಕನ್ನಡ</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="el-scrollbar__bar is-horizontal">
+                                                    <div class="el-scrollbar__thumb" style="transform: translateX(0%);">
+                                                    </div>
+                                                </div>
+                                                <div class="el-scrollbar__bar is-vertical">
+                                                    <div class="el-scrollbar__thumb" style="transform: translateY(0%);">
+                                                    </div>
+                                                </div>
+                                            </div><!---->
+                                        </div>
+                                    </div>
+                                </div><span class="el-popover__reference-wrapper">
+                                    <div data-v-6cac2965="" class="el-popover__reference"
+                                        aria-describedby="el-popover-695" tabindex="0" style="margin-left: 14px;"><svg
+                                            data-v-6cac2965="" xmlns="http://www.w3.org/2000/svg"
+                                            xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1"
+                                            width="20" height="20" viewBox="0 0 20 20" style="vertical-align: middle;">
+                                            <defs data-v-6cac2965="">
+                                                <clipPath data-v-6cac2965="" id="master_svg0_1_1860">
+                                                    <rect data-v-6cac2965="" x="0" y="0" width="20" height="20" rx="0">
+                                                    </rect>
+                                                </clipPath>
+                                            </defs>
+                                            <g data-v-6cac2965="" clip-path="url(#master_svg0_1_1860)">
+                                                <g data-v-6cac2965="">
+                                                    <path data-v-6cac2965=""
+                                                        d="M6.95312,15.2852L2.7460899999999997,15.2852C2.023438,15.2852,1.25,14.8164,1.25,13.498L1.25,3.03711C1.249999850988,1.71875,2.023437,1.25,2.7460899999999997,1.25L16.6738,1.25C17.1289,1.25,17.6172,1.419922,18.0137,1.714844C18.4824,2.0625,18.75,2.5449200000000003,18.75,3.03711L18.75,8.267579999999999L17.5,8.267579999999999L17.5,3.03711C17.5,2.94727,17.4082,2.82227,17.2676,2.7168C17.0898,2.58594,16.8574,2.5,16.675800000000002,2.5L2.7460899999999997,2.5C2.63086,2.5,2.6113299999999997,2.5293,2.59375,2.55664C2.5664100000000003,2.59961,2.5,2.7324200000000003,2.5,3.03711L2.5,13.498C2.5,13.8027,2.56445,13.9355,2.59375,13.9785C2.6113299999999997,14.0059,2.63086,14.0352,2.7460899999999997,14.0352L6.95312,14.0352L6.95312,15.2852Z"
+                                                        fill="#212427" fill-opacity="0.6000000238418579"></path>
+                                                </g>
+                                                <g data-v-6cac2965="">
+                                                    <path data-v-6cac2965=""
+                                                        d="M8.6777375,9.42383375L9.5742175,8.52734375L8.3886675,8.52734375L9.3007775,6.085933750000001C9.4941375,5.56054375,9.6425775,5.03125375,9.7480475,4.49609475C9.8769575,4.94726375,10.072267499999999,5.52148375,10.3378875,6.22070375L11.2050775,8.52539375L10.269527499999999,8.52539375L11.0957075,9.35156375C11.4042975,9.179683749999999,11.7304675,9.044923749999999,12.068357500000001,8.947263750000001L12.068357500000001,7.78515375L10.3671875,3.62109375L9.1835975,3.62109375L5.9921875,11.94140375L7.1601575,11.94140375L8.0722675,9.42187375L8.6777375,9.42187375L8.6777375,9.42383375Z"
+                                                        fill="#212427" fill-opacity="0.6000000238418579"></path>
+                                                </g>
+                                                <g data-v-6cac2965="">
+                                                    <path data-v-6cac2965=""
+                                                        d="M18.750025,13.947267499999999L18.750025,12.6992175L17.214845,12.6992175C17.115235,12.0781275,16.869145,11.5039075,16.515625,11.0136675L17.601565,9.9277375L16.718745,9.0449175L15.632815,10.1308575C15.142575,9.7753875,14.568355,9.5292975,13.947265,9.4316375L13.947265,7.8984375L12.697265,7.8984375L12.697265,9.4316375C12.074214999999999,9.5312475,11.501955,9.7753875,11.011715,10.1308575L9.925785,9.0449175L9.042965,9.9277375L10.128905,11.0136675C9.773435,11.5039075,9.527345,12.0761675,9.427735,12.6992175L7.890625,12.6992175L7.890625,13.947267499999999L9.425785,13.947267499999999C9.525395,14.568357500000001,9.771485,15.1425775,10.125005,15.6328175L9.039065,16.7187475L9.921875,17.6015675L11.007815,16.5156275C11.498045,16.871097499999998,12.072265,17.1171875,12.693355,17.214847499999998L12.693355,18.750037499999998L13.943355,18.750037499999998L13.943355,17.214847499999998C14.566405,17.1152375,15.138675,16.871097499999998,15.628905,16.5156275L16.714845,17.6015675L17.597655,16.7187475L16.511715000000002,15.6328175C16.867185,15.1425775,17.113284999999998,14.5703175,17.212895,13.947267499999999L18.750025,13.947267499999999ZM16.015625,13.3242175C16.015625,14.808597500000001,14.806645,16.0175775,13.320315,16.0175775C11.833985,16.0175775,10.625005,14.808597500000001,10.625005,13.3242175C10.625005,11.8398475,11.833985,10.6308575,13.320315,10.6308575C14.806645,10.6308575,16.015625,11.8378875,16.015625,13.3242175Z"
+                                                        fill="#212427" fill-opacity="0.6000000238418579"></path>
+                                                </g>
+                                            </g>
+                                        </svg></div>
+                                </span>
+                            </span> <svg data-v-6cac2965="" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="16"
+                                height="16" viewBox="0 0 16 15.624000549316406" class="ng-toolbar-copy">
+                                <defs data-v-6cac2965="">
+                                    <clipPath data-v-6cac2965="" id="master_svg0_38_550">
+                                        <rect data-v-6cac2965="" x="0" y="0" width="16" height="15.624000549316406"
+                                            rx="0"></rect>
+                                    </clipPath>
+                                </defs>
+                                <g data-v-6cac2965="" clip-path="url(#master_svg0_38_550)">
+                                    <g data-v-6cac2965="">
+                                        <g data-v-6cac2965="">
+                                            <path data-v-6cac2965=""
+                                                d="M4.2036759201431275,11.615755705070496L2.4063059201431276,11.615755705070496C1.7120749201431273,11.615755705070496,1.1475362062451275,11.051255705070496,1.1475362062451275,10.357005705070495L1.1475362062451275,2.2978257050704958C1.1475362062451275,1.6035947050704955,1.7120749201431273,1.0390557050704956,2.4063059201431276,1.0390557050704956L9.865855920143128,1.0390557050704956C10.560085920143127,1.0390557050704956,11.124615920143128,1.6035947050704955,11.124615920143128,2.2978257050704958L11.124615920143128,3.3673957050704955C11.124615920143128,3.5352357050704954,10.987295920143128,3.672555705070496,10.819465920143127,3.672555705070496C10.651625920143127,3.672555705070496,10.514305920143128,3.5352357050704954,10.514305920143128,3.3673957050704955L10.514305920143128,2.2978257050704958C10.514305920143128,1.9407927050704956,10.224405920143127,1.6493677050704956,9.865855920143128,1.6493677050704956L2.4063059201431276,1.6493677050704956C2.0492729201431272,1.6493677050704956,1.7578489201431275,1.9392667050704957,1.7578489201431275,2.2978257050704958L1.7578489201431275,10.358525705070496C1.7578489201431275,10.715565705070496,2.0477469201431275,11.006985705070496,2.4063059201431276,11.006985705070496L4.2036759201431275,11.006985705070496C4.3715159201431275,11.006985705070496,4.508835920143127,11.144355705070495,4.508835920143127,11.312155705070495C4.508835920143127,11.479955705070495,4.373035920143128,11.615755705070496,4.2036759201431275,11.615755705070496Z"
+                                                fill="#212427" fill-opacity="0.6000000238418579"></path>
+                                        </g>
+                                        <g data-v-6cac2965="">
+                                            <path data-v-6cac2965=""
+                                                d="M13.877388107643128,14.816890031242371L6.304928107643128,14.816890031242371C5.6564741076431275,14.816890031242371,5.127028107643127,14.288930031242371,5.127028107643127,13.63895003124237L5.127028107643127,5.468390031242371C5.127028107643127,4.819936031242371,5.654948107643127,4.290490031242371,6.304928107643128,4.290490031242371L13.878908107643127,4.290490031242371C14.527368107643127,4.290490031242371,15.056818107643128,4.8184100312423706,15.056818107643128,5.468390031242371L15.056818107643128,13.64048003124237C15.055288107643127,14.28894003124237,14.527368107643127,14.816890031242371,13.877388107643128,14.816890031242371ZM6.304928107643128,4.90080303124237C5.992146107643127,4.90080303124237,5.737340107643128,5.15560803124237,5.737340107643128,5.468390031242371L5.737340107643128,13.64048003124237C5.737340107643128,13.95326003124237,5.992146107643127,14.20807003124237,6.304928107643128,14.20807003124237L13.878908107643127,14.20807003124237C14.191698107643127,14.20807003124237,14.446498107643128,13.95326003124237,14.446498107643128,13.64048003124237L14.446498107643128,5.468390031242371C14.446498107643128,5.15560803124237,14.191698107643127,4.900802031242371,13.878908107643127,4.900802031242371L6.304928107643128,4.90080303124237Z"
+                                                fill="#212427" fill-opacity="0.6000000238418579"></path>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg></div>
+                    </div>
+                    <div data-v-6cac2965="" class="separator-panel"></div>
+                    <div data-v-6cac2965="" class="ng-summary-markdown scroll-div">
+                        <div data-v-6cac2965="" id="ng_web_summary_text" class="markdown-body"></div>
+                    </div>
+                </div>
+            </div>
+            <div data-v-6cac2965="" class="ng-explain" style="display: none;">
+                <div data-v-6cac2965="" class="ng-explain-content-header ng-explain-margin-left-right-width">
+                    <div data-v-6cac2965="" class="ng-left">
+                        <div data-v-6cac2965="" class="ng-flex-center"><svg data-v-6cac2965="" width="29" height="29"
+                                viewBox="0 0 1259 1328" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path data-v-6cac2965=""
+                                    d="M948.355 1130.77C942.145 1137.69 936.193 1144.01 930.608 1149.72C936.641 1143.36 942.556 1137.04 948.355 1130.77C1040.66 1027.91 1189.99 794.063 1040 518C1002.21 451.645 842.197 322.245 679.128 368.304C610.046 374.21 468.82 444.094 456.563 676.383C396.54 569.106 364.511 322.886 638 216C773.968 162.861 1095.68 240.056 1186 469.998C1236.89 599.555 1248.35 806.182 948.355 1130.77Z"
+                                    fill="#2E83FB"></path>
+                                <path data-v-6cac2965=""
+                                    d="M143.9 1017.84C137.864 1013.71 132.253 1009.69 127.088 1005.84C132.73 1009.91 138.334 1013.91 143.9 1017.84C256.583 1094.97 517.147 1211.93 774 1024C834.713 977.686 935.341 807.691 867.913 652.235C852.833 584.562 764.71 453.936 532.866 472.816C631.164 399.001 870.9 334.372 1013.36 591.132C1084.18 718.783 1050.65 1047.93 834.835 1168.15C712.75 1236.16 508.368 1275.16 143.9 1017.84Z"
+                                    fill="#2E83FB"></path>
+                                <path data-v-6cac2965=""
+                                    d="M300.056 131.307C310.071 120.08 319.585 110.084 328.201 101.387C318.521 111.471 309.141 121.444 300.056 131.307C206.432 236.268 69.0234 448.956 212 716C249.382 782.586 411.537 929.391 574.885 884.333C644.002 878.85 785.654 809.833 799.335 577.624C858.699 685.267 889.217 931.678 615.078 1036.89C478.788 1089.19 157.551 1010.02 68.6463 779.533C19.1305 651.158 8.59471 447.711 300.056 131.307Z"
+                                    fill="#2E83FB"></path>
+                                <path data-v-6cac2965=""
+                                    d="M1151.28 304.267C1160.18 313.06 1168.16 321.406 1175.19 329.061C1167.16 320.584 1159.19 312.321 1151.28 304.267C1051.76 205.898 837.877 51.6189 560 184C491.732 218.214 344.191 373.421 381.528 538.706C383.759 608.003 446.048 752.74 677.358 777.31C567.046 831.554 319.473 850.467 227.256 571.69C181.41 433.094 275.574 115.929 509.986 37.9464C641.213 -5.7086 846.35 -6.46511 1151.28 304.267Z"
+                                    fill="#2E83FB"></path>
+                            </svg></div>
+                        <div data-v-6cac2965="" class="ng-brand">NoteGPT</div>
+                    </div>
+                    <div data-v-6cac2965="" class="ng-right"><svg data-v-6cac2965="" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="16" height="16"
+                            viewBox="0 0 16 16" class="ng-feedback">
+                            <defs data-v-6cac2965="">
+                                <clipPath data-v-6cac2965="" id="master_svg0_38_548">
+                                    <rect data-v-6cac2965="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                </clipPath>
+                            </defs>
+                            <g data-v-6cac2965="" clip-path="url(#master_svg0_38_548)">
+                                <g data-v-6cac2965="">
+                                    <path data-v-6cac2965=""
+                                        d="M13.8,1.3000030517578125L2.2,1.3000030517578125C1.4,1.3000030517578125,0.75,1.9500030517578124,0.75,2.7000030517578124L0.75,11.800003051757812C0.75,12.550003051757812,1.4,13.200003051757813,2.2,13.200003051757813L6.2,13.200003051757813Q6.3,13.300003051757812,6.45,13.500003051757812C6.5,13.550003051757812,6.55,13.600003051757813,6.6,13.700003051757813Q6.7,13.850003051757813,6.75,13.900003051757812C7.2,14.600003051757813,7.55,14.950003051757813,8.1,14.950003051757813C8.65,14.950003051757813,9.05,14.600003051757813,9.5,13.900003051757812Q9.85,13.350003051757813,9.95,13.200003051757813L13.85,13.200003051757813C14.65,13.200003051757813,15.3,12.550003051757812,15.3,11.800003051757812L15.3,2.7000030517578124C15.25,1.9000030517578126,14.6,1.3000030517578125,13.8,1.3000030517578125ZM14.55,11.800003051757812C14.55,12.200003051757813,14.25,12.500003051757812,13.85,12.500003051757812L9.9,12.500003051757812C9.8,12.500003051757812,9.75,12.500003051757812,9.65,12.550003051757812C9.5,12.650003051757812,9.35,12.750003051757812,9.2,13.000003051757812Q9.15,13.100003051757813,8.85,13.550003051757812C8.55,14.050003051757812,8.3,14.250003051757812,8.1,14.250003051757812C7.9,14.250003051757812,7.7,14.050003051757812,7.35,13.550003051757812C7.3,13.500003051757812,7.25,13.350003051757813,7.2,13.350003051757813C7.15,13.250003051757812,7.1,13.200003051757813,7.05,13.150003051757812C6.75,12.750003051757812,6.55,12.550003051757812,6.2,12.550003051757812L2.2,12.550003051757812C1.8,12.550003051757812,1.5,12.250003051757812,1.5,11.850003051757813L1.5,2.7500030517578127C1.5,2.3500030517578123,1.85,2.0500030517578125,2.25,2.0500030517578125L13.85,2.0500030517578125C14.25,2.0500030517578125,14.6,2.3500030517578123,14.6,2.7500030517578127L14.6,11.800003051757812L14.55,11.800003051757812ZM3.45,7.5500030517578125C3.45,7.991833051757813,3.80817,8.350003051757813,4.25,8.350003051757813C4.6918299999999995,8.350003051757813,5.05,7.991833051757813,5.05,7.5500030517578125C5.05,7.108173051757812,4.6918299999999995,6.750003051757813,4.25,6.750003051757813C3.80817,6.750003051757813,3.45,7.108173051757812,3.45,7.5500030517578125ZM7.2,7.5500030517578125C7.2,7.991833051757813,7.55817,8.350003051757813,8,8.350003051757813C8.44183,8.350003051757813,8.8,7.991833051757813,8.8,7.5500030517578125C8.8,7.108173051757812,8.44183,6.750003051757813,8,6.750003051757813C7.55817,6.750003051757813,7.2,7.108173051757812,7.2,7.5500030517578125ZM10.9,7.5500030517578125C10.9,7.991833051757813,11.2582,8.350003051757813,11.7,8.350003051757813C12.1418,8.350003051757813,12.5,7.991833051757813,12.5,7.5500030517578125C12.5,7.108173051757812,12.1418,6.750003051757813,11.7,6.750003051757813C11.2582,6.750003051757813,10.9,7.108173051757812,10.9,7.5500030517578125Z"
+                                        fill="#212427" fill-opacity="0.5"></path>
+                                </g>
+                            </g>
+                        </svg> <svg data-v-6cac2965="" xmlns="http://www.w3.org/2000/svg"
+                            xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="16" height="16"
+                            viewBox="0 0 16 16" class="ng-close">
+                            <defs data-v-6cac2965="">
+                                <clipPath data-v-6cac2965="" id="master_svg0_38_546">
+                                    <rect data-v-6cac2965="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                </clipPath>
+                            </defs>
+                            <g data-v-6cac2965="" clip-path="url(#master_svg0_38_546)">
+                                <g data-v-6cac2965="">
+                                    <path data-v-6cac2965=""
+                                        d="M8.78570796875,7.9812567236328125L13.39501796875,3.3958397236328124C13.61301796875,3.1789947236328127,13.61411796875,2.8276007236328127,13.39721796875,2.6096367236328124C13.17981796875,2.3911292236328126,12.82901796875,2.3905694236328126,12.61101796875,2.6074147236328127L8.00060796875,7.193396723632812L3.43020596875,2.6090937236328124C3.21391996875,2.3922484236328123,2.86196696875,2.3911292236328126,2.64400296875,2.6079747236328124C2.42659806875,2.8248197236328125,2.42605446875,3.1767727236328125,2.64288396875,3.3947367236328123L7.21219796875,7.977936723632813L2.60508496875,12.560566723632812C2.38712096875,12.777366723632813,2.38601756875,13.128766723632813,2.6028629687500002,13.346766723632813C2.7112849687500002,13.455766723632813,2.85417996875,13.510766723632813,2.99707496875,13.510766723632813C3.13885096875,13.510766723632813,3.28064296875,13.456866723632812,3.3890659687499998,13.348966723632813L7.99728796875,8.765236723632812L12.60941796875,13.391266723632812C12.71781796875,13.500266723632812,12.86011796875,13.554766723632813,13.00301796875,13.554766723632813C13.14541796875,13.554766723632813,13.28721796875,13.500266723632812,13.39561796875,13.392366723632813C13.61301796875,13.175566723632812,13.61351796875,12.824166723632812,13.39671796875,12.606166723632812L8.78570796875,7.9812567236328125Z"
+                                        fill="#212427" fill-opacity="0.501960813999176"></path>
+                                </g>
+                            </g>
+                        </svg></div>
+                </div>
+                <div data-v-6cac2965=""
+                    class="ng-explain-content-body ng-explain-margin-left-right-width ng-border-radius-6">
+                    <div data-v-6cac2965="" class="ng-toolbar">
+                        <div data-v-6cac2965="" class="ng-toolbar-left">
+                            <div data-v-6cac2965="" class="el-select my-language el-select--small"><!---->
+                                <div class="el-input el-input--small el-input--suffix"><!----><input type="text"
+                                        readonly="readonly" autocomplete="off" placeholder="please select"
+                                        class="el-input__inner"><!----><span class="el-input__suffix"><span
+                                            class="el-input__suffix-inner"><i
+                                                class="el-select__caret el-input__icon el-icon-arrow-up"></i><!----><!----><!----><!----><!----></span><!----></span><!----><!---->
+                                </div>
+                                <div class="el-select-dropdown el-popper" style="display: none;">
+                                    <div class="el-scrollbar" style="display: none;">
+                                        <div
+                                            class="el-select-dropdown__wrap el-scrollbar__wrap el-scrollbar__wrap--hidden-default">
+                                            <ul class="el-scrollbar__view el-select-dropdown__list"></ul>
+                                        </div>
+                                        <div class="el-scrollbar__bar is-horizontal">
+                                            <div class="el-scrollbar__thumb" style="transform: translateX(0%);"></div>
+                                        </div>
+                                        <div class="el-scrollbar__bar is-vertical">
+                                            <div class="el-scrollbar__thumb" style="transform: translateY(0%);"></div>
+                                        </div>
+                                    </div>
+                                    <p class="el-select-dropdown__empty">
+                                        No data
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div data-v-6cac2965="" class="ng-toolbar-right"><svg data-v-6cac2965="" slot="reference"
+                                xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                fill="none" version="1.1" width="16" height="16" viewBox="0 0 16 16"
+                                class="ng-toolbar-refresh">
+                                <defs data-v-6cac2965="">
+                                    <clipPath data-v-6cac2965="" id="master_svg0_38_554">
+                                        <rect data-v-6cac2965="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                    </clipPath>
+                                </defs>
+                                <g data-v-6cac2965="" clip-path="url(#master_svg0_38_554)">
+                                    <g data-v-6cac2965="">
+                                        <g data-v-6cac2965="">
+                                            <path data-v-6cac2965=""
+                                                d="M7.956255,15.659392952823639C6.993755,15.659392952823639,6.060935,15.47029295282364,5.181255,15.09839295282364C4.332815,14.739092952823638,3.570315,14.224992952823639,2.915625,13.570292952823639C2.260935,12.915592952823639,1.746875,12.15309295282364,1.3875,11.30469295282364C1.017188,10.42656295282364,0.828125,9.49219295282364,0.828125,8.529692952823638C0.828125,7.259372952823639,1.167188,6.012502952823639,1.80625,4.923442952823638C2.428125,3.867192952823639,3.315625,2.981252952823639,4.375005,2.365625952823639C4.523435,2.278125952823639,4.715625,2.329687952823639,4.801565,2.478125952823639C4.889065,2.626562952823639,4.837505,2.818752952823639,4.689064999999999,2.904692952823639C2.693755,4.067192952823639,1.453125,6.223442952823639,1.453125,8.529692952823638C1.453125,12.115592952823638,4.370315,15.03279295282364,7.956255,15.03279295282364C11.542225,15.03279295282364,14.459425,12.115592952823638,14.459425,8.529692952823638C14.459425,5.323442952823639,12.167225,2.625002952823639,9.007815,2.110937952823639C8.837505,2.0828129528236388,8.721875,1.923437952823639,8.750005,1.751562952823639C8.778125,1.579688252823639,8.937505,1.465625752823639,9.109375,1.4937507228236389C10.760935,1.7625009528236388,12.273425,2.6125029528236388,13.368725,3.889062952823639C13.910925,4.521872952823639,14.335925,5.235942952823638,14.628125,6.012502952823639C14.931225,6.815622952823639,15.085925,7.662502952823639,15.085925,8.529692952823638C15.085925,9.49219295282364,14.896925,10.42500295282364,14.525025,11.30469295282364C14.165625,12.15309295282364,13.651525,12.915592952823639,12.996825,13.570292952823639C12.342225,14.224992952823639,11.579725,14.739092952823638,10.731245,15.09839295282364C9.853125,15.47029295282364,8.918745,15.659392952823639,7.956255,15.659392952823639Z"
+                                                fill="#212427" fill-opacity="0.6000000238418579"></path>
+                                        </g>
+                                        <g data-v-6cac2965="">
+                                            <path data-v-6cac2965=""
+                                                d="M9.9300578125,0.4640698559095764L7.3081798125,1.1046951159095764C7.1800544725,1.1359451159095764,7.1331795125,1.2953201159095764,7.2238045125,1.3906321159095762L9.1253678125,3.3812601159095763C9.2175578125,3.4781301159095763,9.3800578125,3.4375101159095762,9.4159878125,3.3078201159095766L10.1363078125,0.6765701159095764C10.1706778125,0.5500073159095764,10.0566178125,0.4328198159095764,9.9300578125,0.4640698559095764Z"
+                                                fill="#212427" fill-opacity="0.6000000238418579"></path>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg> <svg data-v-6cac2965="" xmlns="http://www.w3.org/2000/svg"
+                                xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="16"
+                                height="16" viewBox="0 0 16 15.624000549316406" class="ng-toolbar-copy">
+                                <defs data-v-6cac2965="">
+                                    <clipPath data-v-6cac2965="" id="master_svg0_38_550">
+                                        <rect data-v-6cac2965="" x="0" y="0" width="16" height="15.624000549316406"
+                                            rx="0"></rect>
+                                    </clipPath>
+                                </defs>
+                                <g data-v-6cac2965="" clip-path="url(#master_svg0_38_550)">
+                                    <g data-v-6cac2965="">
+                                        <g data-v-6cac2965="">
+                                            <path data-v-6cac2965=""
+                                                d="M4.2036759201431275,11.615755705070496L2.4063059201431276,11.615755705070496C1.7120749201431273,11.615755705070496,1.1475362062451275,11.051255705070496,1.1475362062451275,10.357005705070495L1.1475362062451275,2.2978257050704958C1.1475362062451275,1.6035947050704955,1.7120749201431273,1.0390557050704956,2.4063059201431276,1.0390557050704956L9.865855920143128,1.0390557050704956C10.560085920143127,1.0390557050704956,11.124615920143128,1.6035947050704955,11.124615920143128,2.2978257050704958L11.124615920143128,3.3673957050704955C11.124615920143128,3.5352357050704954,10.987295920143128,3.672555705070496,10.819465920143127,3.672555705070496C10.651625920143127,3.672555705070496,10.514305920143128,3.5352357050704954,10.514305920143128,3.3673957050704955L10.514305920143128,2.2978257050704958C10.514305920143128,1.9407927050704956,10.224405920143127,1.6493677050704956,9.865855920143128,1.6493677050704956L2.4063059201431276,1.6493677050704956C2.0492729201431272,1.6493677050704956,1.7578489201431275,1.9392667050704957,1.7578489201431275,2.2978257050704958L1.7578489201431275,10.358525705070496C1.7578489201431275,10.715565705070496,2.0477469201431275,11.006985705070496,2.4063059201431276,11.006985705070496L4.2036759201431275,11.006985705070496C4.3715159201431275,11.006985705070496,4.508835920143127,11.144355705070495,4.508835920143127,11.312155705070495C4.508835920143127,11.479955705070495,4.373035920143128,11.615755705070496,4.2036759201431275,11.615755705070496Z"
+                                                fill="#212427" fill-opacity="0.6000000238418579"></path>
+                                        </g>
+                                        <g data-v-6cac2965="">
+                                            <path data-v-6cac2965=""
+                                                d="M13.877388107643128,14.816890031242371L6.304928107643128,14.816890031242371C5.6564741076431275,14.816890031242371,5.127028107643127,14.288930031242371,5.127028107643127,13.63895003124237L5.127028107643127,5.468390031242371C5.127028107643127,4.819936031242371,5.654948107643127,4.290490031242371,6.304928107643128,4.290490031242371L13.878908107643127,4.290490031242371C14.527368107643127,4.290490031242371,15.056818107643128,4.8184100312423706,15.056818107643128,5.468390031242371L15.056818107643128,13.64048003124237C15.055288107643127,14.28894003124237,14.527368107643127,14.816890031242371,13.877388107643128,14.816890031242371ZM6.304928107643128,4.90080303124237C5.992146107643127,4.90080303124237,5.737340107643128,5.15560803124237,5.737340107643128,5.468390031242371L5.737340107643128,13.64048003124237C5.737340107643128,13.95326003124237,5.992146107643127,14.20807003124237,6.304928107643128,14.20807003124237L13.878908107643127,14.20807003124237C14.191698107643127,14.20807003124237,14.446498107643128,13.95326003124237,14.446498107643128,13.64048003124237L14.446498107643128,5.468390031242371C14.446498107643128,5.15560803124237,14.191698107643127,4.900802031242371,13.878908107643127,4.900802031242371L6.304928107643128,4.90080303124237Z"
+                                                fill="#212427" fill-opacity="0.6000000238418579"></path>
+                                        </g>
+                                    </g>
+                                </g>
+                            </svg></div>
+                    </div>
+                    <div data-v-6cac2965="" class="ng-explain-text">
+                        <div data-v-6cac2965=""
+                            class="ng-explain-margin-left-right-18 ng-border-radius-8 ng-explain-text-box">
+                            <div data-v-6cac2965="" class="ng-explain-line-title">
+                                <div data-v-6cac2965="">Text from your selection</div>
+                                <div data-v-6cac2965="" class="ng-explain-line-title-right"><svg data-v-6cac2965=""
+                                        xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                        fill="none" version="1.1" width="13.879655838012695" height="14"
+                                        viewBox="0 0 13.879655838012695 14">
+                                        <defs data-v-6cac2965="">
+                                            <clipPath data-v-6cac2965="" id="master_svg0_18_3518">
+                                                <rect data-v-6cac2965="" x="0" y="0" width="13.879655838012695"
+                                                    height="14" rx="0"></rect>
+                                            </clipPath>
+                                        </defs>
+                                        <g data-v-6cac2965="" clip-path="url(#master_svg0_18_3518)"
+                                            style="opacity: 0.5;">
+                                            <g data-v-6cac2965="">
+                                                <path data-v-6cac2965=""
+                                                    d="M7.6211575,6.98357740234375L11.6196475,2.97133940234375C11.8087275,2.7815994023437502,11.8096875,2.47413040234375,11.6215775,2.28341140234375C11.4329775,2.09221710234375,11.1286375,2.09172730234375,10.9395575,2.28146640234375L6.9400975,6.29419740234375L2.9753735,2.28293540234375C2.7877505,2.09319640234375,2.4824384999999998,2.09221710234375,2.2933595,2.28195640234375C2.1047653,2.47169640234375,2.1042937,2.77965540234375,2.2923885,2.97037340234375L6.2561775,6.98066740234375L2.2595985,10.99047740234375C2.0705198,11.18021740234375,2.0695626,11.48768740234375,2.2576705,11.67840740234375C2.3517255,11.77376740234375,2.4756835,11.82191740234375,2.5996425,11.82191740234375C2.7226295,11.82191740234375,2.8456305,11.77472740234375,2.9396855,11.68034740234375L6.9372175,7.66956740234375L10.9381175,11.71732740234375C11.0321775,11.81268740234375,11.1556475,11.86036740234375,11.2796075,11.86036740234375C11.4030775,11.86036740234375,11.5260775,11.81268740234375,11.6201375,11.71830740234375C11.8087275,11.52856740234375,11.8092075,11.22109740234375,11.6211075,11.03037740234375L7.6211575,6.98357740234375Z"
+                                                    fill="#212427" fill-opacity="0.501960813999176"></path>
+                                            </g>
+                                        </g>
+                                    </svg></div>
+                            </div>
+                            <div data-v-6cac2965="" class="ng-explain-line-content clamp-text">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div data-v-6cac2965="" class="ng-explain-markdown">
+                        <div data-v-6cac2965="" class="ng-explain-margin-left-right-18">
+                            <div data-v-6cac2965="" id="ng_web_explain_text" class="markdown-body"></div>
+                        </div>
+                    </div>
+                    <div data-v-6cac2965="" class="ng-explain-empty">
+                        <div data-v-6cac2965="" class="ng-explain-empty-box"><svg data-v-6cac2965="" width="117"
+                                height="117" viewBox="0 0 1420 1468" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path data-v-6cac2965=""
+                                    d="M891.5 219C840.3 130.2 797.5 182 782.5 219C732.9 161.4 699.5 226.333 689 266L708.5 1177C918.9 1475.8 1172 1475.5 1298.5 1463.5C1380.5 1448.5 1355 1414.67 1335.5 1383.5C1257.5 1238.83 1098.8 925.3 1088 828.5C1077.2 731.7 1140.5 652.5 1168 616.5C1195.5 580.5 1216.4 511.3 1176 486.5C1135.6 461.7 1086.37 477 1074.5 499.5C1057 532.667 1018.5 597.4 1004.5 591C990.5 584.6 998.667 371.667 1004.5 266C1001.7 178.8 928 198.333 891.5 219Z"
+                                    fill="#C162FB"></path>
+                                <path data-v-6cac2965=""
+                                    d="M357.5 861.499C365.9 940.299 192 1223.33 104 1355C59.9192 1423 97.4999 1434.68 132.5 1443C349.7 1494.6 567.667 1349.16 649.5 1270C702.167 1212.16 813.7 1038.6 838.5 806.998C863.3 575.398 848.834 384.831 838.5 318.498C829.232 258.998 785.667 257.331 758 258.998V222.998C751.6 156.998 671.5 171.5 653 202C599 138 554.667 170.165 541 201.998C458.2 168.798 432.5 215.832 430 243.498C433.334 355.498 438 576.899 430 566.499C422 556.099 407.5 507.498 391 488.999C374 475.998 349.7 468.199 318.5 488.999C287.3 509.799 288.5 549.332 293 566.499C312 601.998 347 762.999 357.5 861.499Z"
+                                    fill="#5199FF"></path>
+                                <path data-v-6cac2965="" d="M238 15.5L291 92.5" stroke="#B63FFF" stroke-width="30"
+                                    stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1219.92 26L1145.41 82.4493" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1219.92 26L1145.41 82.4493" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1219.92 26L1145.41 82.4493" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1339.63 178.233L1251 207.945" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1339.63 178.233L1251 207.945" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1339.63 178.233L1251 207.945" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1404.43 501.611L1311 504.594" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1404.43 501.611L1311 504.594" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1404.43 501.611L1311 504.594" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1347.43 803.571L1264 761.414" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1347.43 803.571L1264 761.414" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1347.43 803.571L1264 761.414" stroke="#2E83FB"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M84 252.761L165.896 297.828" stroke="#B63FFF"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M15.9443 498.037L107.951 514.551" stroke="#B63FFF"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M66 723.992L156.231 699.572" stroke="#B63FFF"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M128.549 865.642L202.911 809" stroke="#B63FFF"
+                                    stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M433.999 577C418 601.5 364.666 827.499 374.999 843.999"
+                                    stroke="#C162FB" stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M539 215C539 230.6 532.333 437.833 529 539.5"
+                                    stroke="#C162FB" stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M646.5 214C630.9 247.6 627 430.333 627 517.5"
+                                    stroke="#C162FB" stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965=""
+                                    d="M812 255.437C800.907 249.07 774.248 240.157 756.36 255.437C738.472 270.717 734 436.179 734 517"
+                                    stroke="#C162FB" stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M793.601 225C784.478 245.162 783.5 230.332 783.5 248"
+                                    stroke="#871BC9" stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M889.289 235C863.289 259.8 866.456 451 871.289 543.5"
+                                    stroke="#871BC9" stroke-width="30" stroke-linecap="round"></path>
+                                <path data-v-6cac2965="" d="M1020.5 594C982.9 631.6 940.167 703.667 923.5 735"
+                                    stroke="#871BC9" stroke-width="30" stroke-linecap="round"></path>
+                            </svg></div>
+                        <div data-v-6cac2965="" class="ng-explain-empty-page-summarize"><button data-v-6cac2965=""
+                                class="ng-explain-empty-btn"><svg data-v-6cac2965="" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="16"
+                                    height="16" viewBox="0 0 16 16">
+                                    <g data-v-6cac2965="">
+                                        <path data-v-6cac2965=""
+                                            d="M2.51386,0L13.4862,0C14.1526,0.000731945,14.7916,0.265819,15.2629,0.737101C15.7342,1.20838,15.9993,1.84737,16,2.51386L16,13.4862C15.9993,14.1526,15.7342,14.7916,15.2629,15.2629C14.7916,15.7342,14.1526,15.9993,13.4862,16L2.51386,16C1.84737,15.9993,1.20838,15.7342,0.737101,15.2629C0.265819,14.7916,0.000731945,14.1526,0,13.4862L0,2.51386C0.000731945,1.84737,0.265819,1.20838,0.737101,0.737101C1.20838,0.265819,1.84737,0.000731945,2.51386,0ZM14.5522,14.5522C14.835,14.2694,14.994,13.886,14.9945,13.4862L14.9945,2.51386C14.994,2.11397,14.8349,1.73059,14.5522,1.44783C14.2694,1.16507,13.886,1.00601,13.4862,1.00554L2.51386,1.00554C2.11397,1.00601,1.73059,1.16507,1.44783,1.44783C1.16507,1.73059,1.00601,2.11397,1.00554,2.51386L1.00554,13.4862C1.00601,13.886,1.16507,14.2694,1.44783,14.5522C1.73059,14.835,2.11397,14.994,2.51386,14.9945L13.4862,14.9945C13.886,14.994,14.2694,14.835,14.5522,14.5522ZM3.7013,4.44952L3.79607,4.44952C3.89607,4.44952,3.99199,4.48925,4.06271,4.55997C4.13342,4.63068,4.17315,4.7266,4.17315,4.8266C4.17315,4.92661,4.13342,5.02252,4.06271,5.09324C3.99199,5.16396,3.89607,5.20368,3.79607,5.20368L3.7013,5.20368C3.60129,5.20368,3.50538,5.16396,3.43466,5.09324C3.36395,5.02252,3.32422,4.92661,3.32422,4.8266C3.32422,4.7266,3.36395,4.63068,3.43466,4.55997C3.50538,4.48925,3.60129,4.44952,3.7013,4.44952ZM6.50149,4.44952L12.1398,4.44952C12.2399,4.44952,12.3357,4.48925,12.4064,4.55997C12.4772,4.63068,12.5169,4.7266,12.5169,4.8266C12.5169,4.92661,12.4772,5.02252,12.4064,5.09324C12.3357,5.16396,12.2399,5.20368,12.1398,5.20368L6.50149,5.20368C6.40148,5.20368,6.30557,5.16396,6.23485,5.09324C6.16414,5.02252,6.12441,4.92661,6.12441,4.8266C6.12441,4.7266,6.16414,4.63068,6.23485,4.55997C6.30557,4.48925,6.40148,4.44952,6.50149,4.44952ZM3.7013,7.56345L3.79607,7.56345C3.89607,7.56345,3.99199,7.60318,4.06271,7.67389C4.13342,7.74461,4.17315,7.84052,4.17315,7.94053C4.17315,8.04056,4.13342,8.13648,4.06271,8.2072C3.99199,8.27792,3.89607,8.3176,3.79607,8.3176L3.7013,8.3176C3.60129,8.3176,3.50538,8.27792,3.43466,8.2072C3.36395,8.13648,3.32422,8.04056,3.32422,7.94053C3.32422,7.84052,3.36395,7.74461,3.43466,7.67389C3.50538,7.60318,3.60129,7.56345,3.7013,7.56345ZM6.50149,7.56345L12.1398,7.56345C12.2399,7.56345,12.3357,7.60318,12.4064,7.67389C12.4772,7.74461,12.5169,7.84052,12.5169,7.94053C12.5169,8.04056,12.4772,8.13648,12.4064,8.2072C12.3357,8.27792,12.2399,8.3176,12.1398,8.3176L6.50149,8.3176C6.40148,8.3176,6.30557,8.27792,6.23485,8.2072C6.16414,8.13648,6.12441,8.04056,6.12441,7.94053C6.12441,7.84052,6.16414,7.74461,6.23485,7.67389C6.30557,7.60318,6.40148,7.56345,6.50149,7.56345ZM3.7013,10.5882L3.79607,10.5882C3.89607,10.5882,3.99199,10.6278,4.06271,10.6986C4.13342,10.7693,4.17315,10.8652,4.17315,10.9652C4.17315,11.0652,4.13342,11.1611,4.06271,11.2318C3.99199,11.3026,3.89607,11.3423,3.79607,11.3423L3.7013,11.3423C3.60129,11.3423,3.50538,11.3026,3.43466,11.2318C3.36395,11.1611,3.32422,11.0652,3.32422,10.9652C3.32422,10.8652,3.36395,10.7693,3.43466,10.6986C3.50538,10.6278,3.60129,10.5882,3.7013,10.5882ZM6.50149,10.5882L12.1398,10.5882C12.2399,10.5882,12.3357,10.6278,12.4064,10.6986C12.4772,10.7693,12.5169,10.8652,12.5169,10.9652C12.5169,11.0652,12.4772,11.1611,12.4064,11.2318C12.3357,11.3026,12.2399,11.3423,12.1398,11.3423L6.50149,11.3423C6.40148,11.3423,6.30557,11.3026,6.23485,11.2318C6.16414,11.1611,6.12441,11.0652,6.12441,10.9652C6.12441,10.8652,6.16414,10.7693,6.23485,10.6986C6.30557,10.6278,6.40148,10.5882,6.50149,10.5882Z"
+                                            fill-rule="evenodd" fill="#FFFFFF" fill-opacity="1"></path>
+                                    </g>
+                                </svg> <span data-v-6cac2965="" class="btn-txt">Summarize this page</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div> <!----> <!---->
+        </div> <!---->
+    </div>
+    <div data-v-8ebec040="">
+        <div data-v-8ebec040="" id="ng-popup">
+            <div data-v-8ebec040="" class="ng-popup-content">
+                <div data-v-8ebec040="" class="close-svg"><svg data-v-8ebec040="" xmlns="http://www.w3.org/2000/svg"
+                        xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="12" height="12"
+                        viewBox="0 0 12 12">
+                        <defs data-v-8ebec040="">
+                            <clipPath data-v-8ebec040="" id="master_svg0_2_3853">
+                                <rect data-v-8ebec040="" x="0" y="0" width="12" height="12" rx="0"></rect>
+                            </clipPath>
+                        </defs>
+                        <g data-v-8ebec040="" clip-path="url(#master_svg0_2_3853)">
+                            <g data-v-8ebec040="">
+                                <ellipse data-v-8ebec040="" cx="6" cy="6" rx="6" ry="6" fill="#FFFFFF" fill-opacity="1">
+                                </ellipse>
+                            </g>
+                            <g data-v-8ebec040="">
+                                <path data-v-8ebec040=""
+                                    d="M6,12C2.6865,12,0,9.3135,0,6C0,2.6865,2.6865,0,6,0C9.3135,0,12,2.6865,12,6C12,9.3135,9.3135,12,6,12ZM6,5.293L3.523,2.815C3.32763,2.621,3.01199,2.62212,2.818,2.8175C2.62179,3.01114,2.62067,3.32748,2.8155,3.5225L5.293,6L2.815,8.477C2.621,8.67237,2.62212,8.98801,2.8175,9.182C3.01114,9.37821,3.32748,9.37933,3.5225,9.1845L6,6.707L8.477,9.1845C8.67237,9.3785,8.98801,9.37738,9.182,9.182C9.37821,8.98836,9.37933,8.67203,9.1845,8.477L6.707,6L9.1845,3.523C9.3785,3.32763,9.37738,3.01199,9.182,2.818C8.98836,2.62179,8.67203,2.62067,8.477,2.8155L6,5.293Z"
+                                    fill="#B3B3B3" fill-opacity="1"></path>
+                            </g>
+                        </g>
+                    </svg></div>
+                <div data-v-8ebec040="" class="ng-box1"><span data-v-8ebec040="">
+                        <div role="tooltip" id="el-popover-150" aria-hidden="true"
+                            class="el-popover el-popper my-el-popover el-popover--plain" tabindex="0"
+                            style="display: none;"><!---->Highlight</div><span class="el-popover__reference-wrapper">
+                            <div data-v-8ebec040="" class="item el-popover__reference" aria-describedby="el-popover-150"
+                                tabindex="0"><svg data-v-8ebec040="" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="16"
+                                    height="16" viewBox="0 0 16 16" class="hover-class">
+                                    <defs data-v-8ebec040="">
+                                        <clipPath data-v-8ebec040="" id="master_svg0_8_176">
+                                            <rect data-v-8ebec040="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                        </clipPath>
+                                    </defs>
+                                    <g data-v-8ebec040="" clip-path="url(#master_svg0_8_176)">
+                                        <g data-v-8ebec040="">
+                                            <path data-v-8ebec040=""
+                                                d="M8.65623529296875,1.912506103515625L5.81717529296875,5.431256103515625L5.42498529296875,5.917196103515625L5.41873529296875,5.925006103515625L4.45154529296875,8.539066103515625L4.84842529296875,8.851566103515625L3.07342529296875,11.212506103515626L6.36717529296875,11.212506103515626L6.88904529296875,10.453126103515626L7.32342529296875,10.793756103515625L9.68904529296875,9.278126103515625L9.695295292968751,9.270316103515626L10.08748529296875,8.784376103515626L12.92654529296875,5.2656261035156255L8.65623529296875,1.912506103515625ZM6.03592529296875,10.565626103515624L4.2702952929687505,10.565626103515624L5.31092529296875,9.221876103515626L6.37342529296875,10.056256103515626L6.03592529296875,10.565626103515624ZM7.34217529296875,9.837506103515626L5.403115292968749,8.314066103515625L6.0702952929687495,6.514066103515625L8.97186529296875,8.793756103515625L7.34217529296875,9.837506103515626ZM9.53748529296875,8.023446103515624L6.69061529296875,5.785946103515625L8.81092529296875,3.157816103515625L11.65779529296875,5.395316103515626L9.53748529296875,8.023446103515624Z"
+                                                fill="#2E83FB" fill-opacity="1"></path>
+                                        </g>
+                                        <g data-v-8ebec040="">
+                                            <path data-v-8ebec040=""
+                                                d="M1.953125,12.837493896484375L14.045325,12.837493896484375L14.045325,14.087493896484375L1.953125,14.087493896484375L1.953125,12.837493896484375Z"
+                                                fill="#C162FB" fill-opacity="1"></path>
+                                        </g>
+                                    </g>
+                                </svg> <svg data-v-8ebec040="" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="16"
+                                    height="16" viewBox="0 0 16 16" class="item-class">
+                                    <defs data-v-8ebec040="">
+                                        <clipPath data-v-8ebec040="" id="master_svg0_8_163">
+                                            <rect data-v-8ebec040="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                        </clipPath>
+                                    </defs>
+                                    <g data-v-8ebec040="" clip-path="url(#master_svg0_8_163)">
+                                        <g data-v-8ebec040="">
+                                            <path data-v-8ebec040=""
+                                                d="M8.65623529296875,1.912506103515625L5.81717529296875,5.431256103515625L5.42498529296875,5.917196103515625L5.41873529296875,5.925006103515625L4.45154529296875,8.539066103515625L4.84842529296875,8.851566103515625L3.07342529296875,11.212506103515626L6.36717529296875,11.212506103515626L6.88904529296875,10.453126103515626L7.32342529296875,10.793756103515625L9.68904529296875,9.278126103515625L9.695295292968751,9.270316103515626L10.08748529296875,8.784376103515626L12.92654529296875,5.2656261035156255L8.65623529296875,1.912506103515625ZM6.03592529296875,10.565626103515624L4.2702952929687505,10.565626103515624L5.31092529296875,9.221876103515626L6.37342529296875,10.056256103515626L6.03592529296875,10.565626103515624ZM7.34217529296875,9.837506103515626L5.403115292968749,8.314066103515625L6.0702952929687495,6.514066103515625L8.97186529296875,8.793756103515625L7.34217529296875,9.837506103515626ZM9.53748529296875,8.023446103515624L6.69061529296875,5.785946103515625L8.81092529296875,3.157816103515625L11.65779529296875,5.395316103515626L9.53748529296875,8.023446103515624Z"
+                                                fill="#3D3D3D" fill-opacity="1"></path>
+                                        </g>
+                                        <g data-v-8ebec040="">
+                                            <path data-v-8ebec040=""
+                                                d="M1.953125,12.837493896484375L14.045325,12.837493896484375L14.045325,14.087493896484375L1.953125,14.087493896484375L1.953125,12.837493896484375Z"
+                                                fill="#C162FB" fill-opacity="1"></path>
+                                        </g>
+                                    </g>
+                                </svg></div>
+                        </span>
+                    </span> <!----> <!----> <span data-v-8ebec040="">
+                        <div role="tooltip" id="el-popover-9751" aria-hidden="true"
+                            class="el-popover el-popper my-el-popover el-popover--plain" tabindex="0"
+                            style="display: none;"><!---->Translate</div><span class="el-popover__reference-wrapper">
+                            <div data-v-8ebec040="" class="item mrigin-left-8 el-popover__reference"
+                                aria-describedby="el-popover-9751" tabindex="0"><svg data-v-8ebec040=""
+                                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    fill="none" version="1.1" width="16" height="16" viewBox="0 0 16 16"
+                                    class="hover-class">
+                                    <defs data-v-8ebec040="">
+                                        <clipPath data-v-8ebec040="" id="master_svg0_2_2040">
+                                            <rect data-v-8ebec040="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                        </clipPath>
+                                    </defs>
+                                    <g data-v-8ebec040="" clip-path="url(#master_svg0_2_2040)">
+                                        <g data-v-8ebec040="">
+                                            <path data-v-8ebec040=""
+                                                d="M3.33331298828125,10.666673505859375L3.33331298828125,11.333343505859375C3.33309298828125,12.031143505859376,3.87086298828125,12.611043505859374,4.5666429882812505,12.663343505859375L4.66664298828125,12.666643505859374L5.99998298828125,12.666643505859374C6.36817298828125,12.666643505859374,6.66664298828125,12.965143505859375,6.66664298828125,13.333343505859375C6.66664298828125,13.701543505859375,6.36817298828125,14.000043505859376,5.99998298828125,14.000043505859376L4.66664298828125,14.000043505859376C3.19388298828125,14.000043505859376,1.99997998828125,12.806143505859374,1.99997998828125,11.333343505859375L1.99997998828125,10.666673505859375C1.99997998828125,10.298483505859375,2.29845598828125,10.000013505859375,2.66664298828125,10.000013505859375C3.03483298828125,10.000013505859375,3.33331298828125,10.298483505859375,3.33331298828125,10.666673505859375ZM12.08401298828125,6.876013505859375L14.75061298828125,13.542643505859376C14.83851298828125,13.761943505859374,14.67681298828125,14.000443505859375,14.44061298828125,14.000043505859376L13.72201298828125,14.000043505859376C13.58581298828125,13.999943505859376,13.46331298828125,13.917143505859375,13.41261298828125,13.790643505859375L12.69601298828125,12.000043505859376L9.96931298828125,12.000043505859376L9.253982988281251,13.790643505859375C9.20322298828125,13.917343505859375,9.08041298828125,14.000243505859375,8.943982988281249,14.000043505859376L8.226642988281249,14.000043505859376C7.99076298828125,13.999943505859376,7.82956298828125,13.761643505859375,7.91731298828125,13.542643505859376L10.58398298828125,6.876013505859375C10.63469298828125,6.749563505859375,10.75716298828125,6.666673505859375,10.89331298828125,6.666673505859375L11.77461298828125,6.666673505859375C11.91111298828125,6.666433505859375,12.03391298828125,6.749363505859375,12.08461298828125,6.876013505859375L12.08401298828125,6.876013505859375ZM11.33331298828125,8.590013505859375L10.50198298828125,10.666673505859375L12.16331298828125,10.666673505859375L11.33331298828125,8.590013505859375ZM5.33331298828125,1.666676505859375L5.33331298828125,2.666673505859375L7.66664298828125,2.666673505859375C7.85074298828125,2.666673505859375,7.99998298828125,2.815913505859375,7.99998298828125,3.000013505859375L7.99998298828125,7.000013505859375C7.99998298828125,7.184103505859375,7.85074298828125,7.333343505859375,7.66664298828125,7.333343505859375L5.33331298828125,7.333343505859375L5.33331298828125,9.000013505859375C5.33331298828125,9.184103505859376,5.18407298828125,9.333343505859375,4.99998298828125,9.333343505859375L4.33331298828125,9.333343505859375C4.149222988281251,9.333343505859375,3.99998298828125,9.184103505859376,3.99998298828125,9.000013505859375L3.99998298828125,7.333343505859375L1.66664598828125,7.333343505859375C1.48255098828125,7.333343505859375,1.33331298828125,7.184103505859375,1.33331298828125,7.000013505859375L1.33331298828125,3.000013505859375C1.33331286907225,2.815913505859375,1.48255098828125,2.666673505859375,1.66664598828125,2.666673505859375L3.99998298828125,2.666673505859375L3.99998298828125,1.666676505859375C3.99998298828125,1.482581505859375,4.149222988281251,1.333343505859375,4.33331298828125,1.333343505859375L4.99998298828125,1.333343505859375C5.18407298828125,1.333343267440375,5.33331298828125,1.482581505859375,5.33331298828125,1.666676505859375ZM11.33331298828125,2.000010505859375C12.80611298828125,2.000010505859375,14.00001298828125,3.193913505859375,14.00001298828125,4.666673505859375L14.00001298828125,5.333343505859375C14.00001298828125,5.701533505859375,13.70151298828125,6.000013505859375,13.33331298828125,6.000013505859375C12.96511298828125,6.000013505859375,12.66661298828125,5.701533505859375,12.66661298828125,5.333343505859375L12.66661298828125,4.666673505859375C12.66661298828125,3.930293505859375,12.06971298828125,3.333343505859375,11.33331298828125,3.333343505859375L9.99998298828125,3.333343505859375C9.63179298828125,3.333343505859375,9.33331298828125,3.034863505859375,9.33331298828125,2.666673505859375C9.33331298828125,2.298486505859375,9.63179298828125,2.000010505859375,9.99998298828125,2.000009505859375L11.33331298828125,2.000010505859375ZM3.99998298828125,4.000013505859375L2.66664298828125,4.000013505859375L2.66664298828125,6.000013505859375L3.99998298828125,6.000013505859375L3.99998298828125,4.000013505859375ZM6.66664298828125,4.000013505859375L5.33331298828125,4.000013505859375L5.33331298828125,6.000013505859375L6.66664298828125,6.000013505859375L6.66664298828125,4.000013505859375Z"
+                                                fill="#2E83FB" fill-opacity="1"></path>
+                                        </g>
+                                    </g>
+                                </svg> <svg data-v-8ebec040="" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="16"
+                                    height="16" viewBox="0 0 16 16" class="item-class">
+                                    <defs data-v-8ebec040="">
+                                        <clipPath data-v-8ebec040="" id="master_svg0_2_2099">
+                                            <rect data-v-8ebec040="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                        </clipPath>
+                                    </defs>
+                                    <g data-v-8ebec040="" clip-path="url(#master_svg0_2_2099)">
+                                        <g data-v-8ebec040="">
+                                            <path data-v-8ebec040=""
+                                                d="M3.33331298828125,10.666673505859375L3.33331298828125,11.333343505859375C3.33309298828125,12.031143505859376,3.87086298828125,12.611043505859374,4.5666429882812505,12.663343505859375L4.66664298828125,12.666643505859374L5.99998298828125,12.666643505859374C6.36817298828125,12.666643505859374,6.66664298828125,12.965143505859375,6.66664298828125,13.333343505859375C6.66664298828125,13.701543505859375,6.36817298828125,14.000043505859376,5.99998298828125,14.000043505859376L4.66664298828125,14.000043505859376C3.19388298828125,14.000043505859376,1.99997998828125,12.806143505859374,1.99997998828125,11.333343505859375L1.99997998828125,10.666673505859375C1.99997998828125,10.298483505859375,2.29845598828125,10.000013505859375,2.66664298828125,10.000013505859375C3.03483298828125,10.000013505859375,3.33331298828125,10.298483505859375,3.33331298828125,10.666673505859375ZM12.08401298828125,6.876013505859375L14.75061298828125,13.542643505859376C14.83851298828125,13.761943505859374,14.67681298828125,14.000443505859375,14.44061298828125,14.000043505859376L13.72201298828125,14.000043505859376C13.58581298828125,13.999943505859376,13.46331298828125,13.917143505859375,13.41261298828125,13.790643505859375L12.69601298828125,12.000043505859376L9.96931298828125,12.000043505859376L9.253982988281251,13.790643505859375C9.20322298828125,13.917343505859375,9.08041298828125,14.000243505859375,8.943982988281249,14.000043505859376L8.226642988281249,14.000043505859376C7.99076298828125,13.999943505859376,7.82956298828125,13.761643505859375,7.91731298828125,13.542643505859376L10.58398298828125,6.876013505859375C10.63469298828125,6.749563505859375,10.75716298828125,6.666673505859375,10.89331298828125,6.666673505859375L11.77461298828125,6.666673505859375C11.91111298828125,6.666433505859375,12.03391298828125,6.749363505859375,12.08461298828125,6.876013505859375L12.08401298828125,6.876013505859375ZM11.33331298828125,8.590013505859375L10.50198298828125,10.666673505859375L12.16331298828125,10.666673505859375L11.33331298828125,8.590013505859375ZM5.33331298828125,1.666676505859375L5.33331298828125,2.666673505859375L7.66664298828125,2.666673505859375C7.85074298828125,2.666673505859375,7.99998298828125,2.815913505859375,7.99998298828125,3.000013505859375L7.99998298828125,7.000013505859375C7.99998298828125,7.184103505859375,7.85074298828125,7.333343505859375,7.66664298828125,7.333343505859375L5.33331298828125,7.333343505859375L5.33331298828125,9.000013505859375C5.33331298828125,9.184103505859376,5.18407298828125,9.333343505859375,4.99998298828125,9.333343505859375L4.33331298828125,9.333343505859375C4.149222988281251,9.333343505859375,3.99998298828125,9.184103505859376,3.99998298828125,9.000013505859375L3.99998298828125,7.333343505859375L1.66664598828125,7.333343505859375C1.48255098828125,7.333343505859375,1.33331298828125,7.184103505859375,1.33331298828125,7.000013505859375L1.33331298828125,3.000013505859375C1.33331286907225,2.815913505859375,1.48255098828125,2.666673505859375,1.66664598828125,2.666673505859375L3.99998298828125,2.666673505859375L3.99998298828125,1.666676505859375C3.99998298828125,1.482581505859375,4.149222988281251,1.333343505859375,4.33331298828125,1.333343505859375L4.99998298828125,1.333343505859375C5.18407298828125,1.333343267440375,5.33331298828125,1.482581505859375,5.33331298828125,1.666676505859375ZM11.33331298828125,2.000010505859375C12.80611298828125,2.000010505859375,14.00001298828125,3.193913505859375,14.00001298828125,4.666673505859375L14.00001298828125,5.333343505859375C14.00001298828125,5.701533505859375,13.70151298828125,6.000013505859375,13.33331298828125,6.000013505859375C12.96511298828125,6.000013505859375,12.66661298828125,5.701533505859375,12.66661298828125,5.333343505859375L12.66661298828125,4.666673505859375C12.66661298828125,3.930293505859375,12.06971298828125,3.333343505859375,11.33331298828125,3.333343505859375L9.99998298828125,3.333343505859375C9.63179298828125,3.333343505859375,9.33331298828125,3.034863505859375,9.33331298828125,2.666673505859375C9.33331298828125,2.298486505859375,9.63179298828125,2.000010505859375,9.99998298828125,2.000009505859375L11.33331298828125,2.000010505859375ZM3.99998298828125,4.000013505859375L2.66664298828125,4.000013505859375L2.66664298828125,6.000013505859375L3.99998298828125,6.000013505859375L3.99998298828125,4.000013505859375ZM6.66664298828125,4.000013505859375L5.33331298828125,4.000013505859375L5.33331298828125,6.000013505859375L6.66664298828125,6.000013505859375L6.66664298828125,4.000013505859375Z"
+                                                fill="#3D3D3D" fill-opacity="1"></path>
+                                        </g>
+                                    </g>
+                                </svg></div>
+                        </span>
+                    </span> <span data-v-8ebec040="">
+                        <div role="tooltip" id="el-popover-7943" aria-hidden="true"
+                            class="el-popover el-popper my-el-popover el-popover--plain" tabindex="0"
+                            style="display: none;"><!---->Explain</div><span class="el-popover__reference-wrapper">
+                            <div data-v-8ebec040="" class="item mrigin-left-8 el-popover__reference"
+                                aria-describedby="el-popover-7943" tabindex="0"><svg data-v-8ebec040=""
+                                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    fill="none" version="1.1" width="16" height="16" viewBox="0 0 16 16"
+                                    class="hover-class">
+                                    <defs data-v-8ebec040="">
+                                        <clipPath data-v-8ebec040="" id="master_svg0_2_2089">
+                                            <rect data-v-8ebec040="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                        </clipPath>
+                                    </defs>
+                                    <g data-v-8ebec040="" clip-path="url(#master_svg0_2_2089)">
+                                        <g data-v-8ebec040="">
+                                            <path data-v-8ebec040=""
+                                                d="M3.49219,1.515625C2.393687,1.515625,1.5,2.411078,1.5,3.5117149999999997L1.5,12.375025L1.50453126,12.375025C1.50162506,12.418925,1.5,12.463225,1.5,12.507825C1.5,13.606325,2.393687,14.500025,3.49219,14.500025L14.4844,14.500025L14.4844,1.515625L3.49219,1.515625ZM5.48438,2.5L7.5,2.5L7.5,7.315175L6.84894,6.660685C6.75687,6.568145,6.63182,6.515965,6.50128,6.515625L6.5,6.515625C6.36991,6.515625,6.24511,6.567125,6.15287,6.658875L5.48438,7.323905L5.48438,2.5ZM13.5,13.515625L3.49219,13.515625C2.93648,13.515625,2.484375,13.063525,2.484375,12.507825C2.484375,11.952125,2.93648,11.500005,3.49219,11.500005L13.5,11.500005L13.5,13.515625ZM3.49219,10.515625C3.1247,10.515625,2.78023,10.615755,2.484375,10.789995L2.484375,3.5117149999999997C2.484375,2.953855,2.93648,2.5,3.49219,2.5L4.5,2.5L4.5,8.507815C4.5,8.706655,4.61964,8.885964999999999,4.803240000000001,8.962295000000001C4.9868500000000004,9.038625,5.19835,8.996984999999999,5.339309999999999,8.856755L6.49819,7.703875L7.64325,8.854935000000001C7.7838,8.996265000000001,7.99572,9.038855,8.17995,8.962785C8.364180000000001,8.886755,8.48438,8.707115,8.48438,8.507815L8.48438,2.5L13.5,2.5L13.5,10.515625L3.49219,10.515625Z"
+                                                fill="#2E83FB" fill-opacity="1"></path>
+                                        </g>
+                                    </g>
+                                </svg> <svg data-v-8ebec040="" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="16"
+                                    height="16" viewBox="0 0 16 16" class="item-class">
+                                    <defs data-v-8ebec040="">
+                                        <clipPath data-v-8ebec040="" id="master_svg0_2_2113">
+                                            <rect data-v-8ebec040="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                        </clipPath>
+                                    </defs>
+                                    <g data-v-8ebec040="" clip-path="url(#master_svg0_2_2113)">
+                                        <g data-v-8ebec040="">
+                                            <path data-v-8ebec040=""
+                                                d="M3.49219,1.515625C2.393687,1.515625,1.5,2.411078,1.5,3.5117149999999997L1.5,12.375025L1.50453126,12.375025C1.50162506,12.418925,1.5,12.463225,1.5,12.507825C1.5,13.606325,2.393687,14.500025,3.49219,14.500025L14.4844,14.500025L14.4844,1.515625L3.49219,1.515625ZM5.48438,2.5L7.5,2.5L7.5,7.315175L6.84894,6.660685C6.75687,6.568145,6.63182,6.515965,6.50128,6.515625L6.5,6.515625C6.36991,6.515625,6.24511,6.567125,6.15287,6.658875L5.48438,7.323905L5.48438,2.5ZM13.5,13.515625L3.49219,13.515625C2.93648,13.515625,2.484375,13.063525,2.484375,12.507825C2.484375,11.952125,2.93648,11.500005,3.49219,11.500005L13.5,11.500005L13.5,13.515625ZM3.49219,10.515625C3.1247,10.515625,2.78023,10.615755,2.484375,10.789995L2.484375,3.5117149999999997C2.484375,2.953855,2.93648,2.5,3.49219,2.5L4.5,2.5L4.5,8.507815C4.5,8.706655,4.61964,8.885964999999999,4.803240000000001,8.962295000000001C4.9868500000000004,9.038625,5.19835,8.996984999999999,5.339309999999999,8.856755L6.49819,7.703875L7.64325,8.854935000000001C7.7838,8.996265000000001,7.99572,9.038855,8.17995,8.962785C8.364180000000001,8.886755,8.48438,8.707115,8.48438,8.507815L8.48438,2.5L13.5,2.5L13.5,10.515625L3.49219,10.515625Z"
+                                                fill="#3D3D3D" fill-opacity="1"></path>
+                                        </g>
+                                    </g>
+                                </svg></div>
+                        </span>
+                    </span>
+                    <div data-v-8ebec040="" class="el-divider el-divider--vertical"><!----></div> <span
+                        data-v-8ebec040="">
+                        <div role="tooltip" id="el-popover-7610" aria-hidden="true"
+                            class="el-popover el-popper my-el-popover el-popover--plain" tabindex="0"
+                            style="display: none;"><!---->Share on X</div><span class="el-popover__reference-wrapper">
+                            <div data-v-8ebec040="" class="item el-popover__reference"
+                                aria-describedby="el-popover-7610" tabindex="0"><svg data-v-8ebec040=""
+                                    xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                                    fill="none" version="1.1" width="16" height="16" viewBox="0 0 16 16"
+                                    class="hover-class">
+                                    <defs data-v-8ebec040="">
+                                        <clipPath data-v-8ebec040="" id="master_svg0_2_2115">
+                                            <rect data-v-8ebec040="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                        </clipPath>
+                                    </defs>
+                                    <g data-v-8ebec040="" clip-path="url(#master_svg0_2_2115)">
+                                        <g data-v-8ebec040="">
+                                            <g data-v-8ebec040="">
+                                                <path data-v-8ebec040=""
+                                                    d="M14.224218603515626,2.008730858564377L11.283188603515624,2.008730858564377L1.795318603515625,15.000030858564378L4.600348603515625,15.000030858564378L14.224218603515626,2.008730858564377Z"
+                                                    fill="#2E83FB" fill-opacity="1"></path>
+                                            </g>
+                                            <g data-v-8ebec040="">
+                                                <path data-v-8ebec040=""
+                                                    d="M5.46941,2L1,2L10.68082,14.9998L15,14.9998L5.46941,2ZM4.86346,3.2424299999999997L12.5724,13.7574L11.281,13.7574L3.45054,3.24224L4.86346,3.24224L4.86346,3.2424299999999997Z"
+                                                    fill="#2E83FB" fill-opacity="1"></path>
+                                            </g>
+                                            <g data-v-8ebec040="">
+                                                <path data-v-8ebec040=""
+                                                    d="M4.863496782226562,3.242453245526184L12.572476782226563,13.757368681526184L11.281066782226564,13.757368681526184L3.4505767822265625,3.242268681526184L4.863496782226562,3.242453245526184Z"
+                                                    fill="#FFFFFF" fill-opacity="1"></path>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </svg> <svg data-v-8ebec040="" xmlns="http://www.w3.org/2000/svg"
+                                    xmlns:xlink="http://www.w3.org/1999/xlink" fill="none" version="1.1" width="16"
+                                    height="16" viewBox="0 0 16 16" class="item-class">
+                                    <defs data-v-8ebec040="">
+                                        <clipPath data-v-8ebec040="" id="master_svg0_2_2091">
+                                            <rect data-v-8ebec040="" x="0" y="0" width="16" height="16" rx="0"></rect>
+                                        </clipPath>
+                                    </defs>
+                                    <g data-v-8ebec040="" clip-path="url(#master_svg0_2_2091)">
+                                        <g data-v-8ebec040="">
+                                            <g data-v-8ebec040="">
+                                                <path data-v-8ebec040=""
+                                                    d="M14.224218603515626,2.008730858564377L11.283188603515624,2.008730858564377L1.795318603515625,15.000030858564378L4.600348603515625,15.000030858564378L14.224218603515626,2.008730858564377Z"
+                                                    fill="#3D3D3D" fill-opacity="1"></path>
+                                            </g>
+                                            <g data-v-8ebec040="">
+                                                <path data-v-8ebec040=""
+                                                    d="M5.46941,2L1,2L10.68082,14.9998L15,14.9998L5.46941,2ZM4.86346,3.2424299999999997L12.5724,13.7574L11.281,13.7574L3.45054,3.24224L4.86346,3.24224L4.86346,3.2424299999999997Z"
+                                                    fill="#3D3D3D" fill-opacity="1"></path>
+                                            </g>
+                                            <g data-v-8ebec040="">
+                                                <path data-v-8ebec040=""
+                                                    d="M4.863496782226562,3.242453245526184L12.572476782226563,13.757368681526184L11.281066782226564,13.757368681526184L3.4505767822265625,3.242268681526184L4.863496782226562,3.242453245526184Z"
+                                                    fill="#FFFFFF" fill-opacity="1"></path>
+                                            </g>
+                                        </g>
+                                    </g>
+                                </svg></div>
+                        </span>
+                    </span>
+                    <div data-v-8ebec040="" class="ng-line3"></div>
+                </div>
+            </div>
+        </div> <!---->
+    </div>
+    <div id="monica-content-root" class="monica-widget" style="pointer-events: auto;"></div>
 </body>
 
 </html>
