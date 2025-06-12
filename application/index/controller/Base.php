@@ -19,7 +19,7 @@ class Base extends Controller
         
            if(!cookie('think_var')){
              $url=$this->getUrl();
-             cookie('think_var', 'jp-jp', time()+3600*24);
+             cookie('think_var', 'zh-cn', time()+3600*24);
              $this->redirect($url);
              
         } 
