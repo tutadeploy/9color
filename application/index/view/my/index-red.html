@@ -34,15 +34,15 @@
         <div class="wp">
             <div class="userInfo">
                 <div class="avatar">
-                    <img src="/upload/headimg/39.a901301.png" onerror="this.src='/static_sg/my/images/avatar.png'"
-                        alt="15816393445">
+                    <img src="{$info.headpic}" onerror="this.src='/static_sg/my/images/avatar.png'"
+                        alt="">
                 </div>
                 <div class="name-code">
                     <div class="name-vip">
-                        <div class="name">15816393445</div>
-                        <div class="vip">LV1</div>
+                        <div class="name">{$info.username}</div>
+                        <div class="vip">{$level_name}</div>
                     </div>
-                    <div class="code">邀请码:658595</div>
+                    <div class="code">{:lang('邀请码')}:{$info.invite_code}</div>
                 </div>
 
 
@@ -50,7 +50,7 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        color: white;" onclick="window.location.href='/my/xyf.html'">
+        color: white;" >
                     <img src="/static_sg/my/images/xyf.png">
                     <p>悠享手工信用分</p>
                 </div>
@@ -60,12 +60,12 @@
                     <div class="s1">账户金额</div>
                     <div class="s2">￥0.00</div>
                 </div>
-                <a href="/ctrl/recharge" class="a1">立即储入</a>
-                <a href="/ctrl/deposit" class="a2">立即提现</a>
+                <a  onclick="window.location.href=`/index/ctrl/recharge`" class="a1">立即储入</a>
+                <a onclick="window.location.href=`/index/ctrl/deposit`" class="a2">立即提现</a>
             </div>
             <ul class="w-list1">
                 <li>
-                    <a href="/my/invite">
+                    <a onclick="window.location.href=`/index/my/invite`">
                         <div class="pic">
                             <img src="/static_sg/my/images/w-icon1.png" alt="">
                         </div>
@@ -73,7 +73,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/ctrl/junior">
+                    <a onclick="window.location.href=`/index/ctrl/junior`">
                         <div class="pic">
                             <img src="/static_sg/my/images/w-icon2.png" alt="">
                         </div>
@@ -81,7 +81,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/my/caiwu">
+                    <a onclick="window.location.href=`/index/my/caiwu`">
                         <div class="pic">
                             <img src="/static_sg/my/images/w-icon3.png" alt="">
                         </div>
@@ -89,7 +89,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/order">
+                    <a onclick="window.location.href=`/index/order/index`">
                         <div class="pic">
                             <img src="/static_sg/my/images/w-icon4.png" alt="">
                         </div>
@@ -106,22 +106,22 @@
             </div>
             <ul class="w-list3">
                 <li>
-                    <a href="/ctrl/set">
+                    <a onclick="window.location.href=`/index/ctrl/set`">
                         <span class="s1">个人信息</span>
                     </a>
                 </li>
                 <li>
-                    <a href="/ctrl/recharge_admin">
+                    <a onclick="window.location.href=`/index/ctrl/recharge_admin`">
                         <span class="s2">储入记录</span>
                     </a>
                 </li>
                 <li>
-                    <a href="/ctrl/deposit_admin">
+                    <a onclick="window.location.href=`/index/ctrl/deposit_admin`">
                         <span class="s3">提现记录</span>
                     </a>
                 </li>
                 <li>
-                    <a href="/my/msg">
+                    <a onclick="window.location.href=`/index/my/msg`">
                         <span class="s4">系统公告</span>
                     </a>
                 </li>
@@ -249,8 +249,7 @@
         }
 
         function loginOut() {
-            $.ajax({ url: "/doLogout" })
-            window.location.href = '/logout'
+            window.location.href="{:url('user/logout')}";
         }
     </script>
 
