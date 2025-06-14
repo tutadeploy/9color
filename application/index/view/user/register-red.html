@@ -1,22 +1,23 @@
 <!DOCTYPE html>
-<html data-dpr="1" style="font-size: 32px;">
+<html lang="zh-CN">
 
 <head>
+    <meta charset="UTF-8">
+    <title>注册</title>
     <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+    <meta name="renderer" content="webkit" />
     <meta name="viewport"
-        content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta content="telephone=yes" name="format-detection" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="white" />
-    <meta name="x5-fullscreen" content="true" />
-    <meta name="apple-touch-fullscreen" content="yes" />
-    <title>{:lang('注册')}</title>
-    <link href="/web/css/red.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/static_new/css/public.css">
-    <link rel="stylesheet" href="/static_sg/register/css/style.css">
-    <script charset="utf-8" src="/static_new/js/jquery.min.js"></script>
-    <script charset="utf-8" src="/static_new/js/dialog.min.js"></script>
-    <script charset="utf-8" src="/static_new/js/common.js"></script>
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="stylesheet" href="/static/home/css/style.css" />
+    <link rel="stylesheet" href="/static/static_new/css/public.css">
+
+    <script src="/static/home/js/jquery.js"></script>
+    <script src="/static/home/js/lib.js"></script>
+    <script charset="utf-8" src="/static/static_new/js/dialog.min.js"></script>
+    <script src="/static/home/js/jquery.validate.min.js"></script>
+
 </head>
 
 <body class="body-login">
@@ -27,7 +28,7 @@
     <div class="wp">
         <div class="login-box">
             <div class="form-login">
-                <form id="registerForm" onsubmit="return false;" novalidate="novalidate">
+                <form id="registerForm" onsubmit="return false;">
                     <div class="inp-box">
                         <div class="tit tit1">用户名</div>
                         <input name="userName" class="inp" placeholder="请输入用户名">
@@ -40,9 +41,9 @@
                         </div>
                     </div>
                     <!--    <div class="inp-box">
-                        <div class="tit tit3">验证码</div>
-                        <input name="verify" class="inp" type="text" placeholder="请输入验证码">
-                    </div> -->
+                    <div class="tit tit3">验证码</div>
+                    <input name="verify" class="inp" type="text" placeholder="请输入验证码">
+                </div> -->
                     <div class="inp-box">
                         <div class="tit tit2">密码</div>
                         <input name="pwd" class="inp" type="text" placeholder="请输入密码">
@@ -58,7 +59,7 @@
                         </div>
                     </div>
                     <label class="label-agree">
-                        <input type="checkbox" id="KeepPWD" value="1" name="jizhu" checked="">
+                        <input type="checkbox" id="KeepPWD" value="1" name="jizhu" checked>
                         <i></i>
                         登录即代表您已阅读并同意
                         <a
@@ -294,8 +295,6 @@
         });
 
     </script>
-
-
 </body>
 
 </html>

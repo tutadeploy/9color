@@ -44,3 +44,4 @@ dev-docker/
 *.rar
 *.7z
 *.pkg 
+.DS_Store

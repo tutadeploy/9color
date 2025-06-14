@@ -3,7 +3,7 @@
 // +----------------------------------------------------------------------
 // | ThinkAdmin
 // +----------------------------------------------------------------------
-// | ��Ȩ���� 2014~2019 
+// | Ȩ 2014~2019 
 // +----------------------------------------------------------------------
 
 // +----------------------------------------------------------------------
@@ -19,18 +19,20 @@ use library\Controller;
 use think\Db;
 
 /**
- * �̳�
+ * ̳
  * Class Index
  * @package app\index\controller
  */
 class Shop extends Base
 {
     /**
-     * �����ת����
+     * 新版商城页面
      */
     public function index2()
     {
-        $this->redirect('home');
+        // 直接返回静态HTML文件内容
+        $content = file_get_contents(APP_PATH . '../shop/shop/index2.html');
+        return $content;
     }
 
     public function index()
@@ -212,7 +214,14 @@ class Shop extends Base
 
     }
 
-
-
+    /**
+     * 新版商城页面
+     */
+    public function static()
+    {
+        // 直接返回静态HTML文件内容
+        $content = file_get_contents(APP_PATH . '../shop/shop/index2.html');
+        return $content;
+    }
 
 }

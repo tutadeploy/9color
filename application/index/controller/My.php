@@ -745,4 +745,22 @@ class My extends Base
             return $this->fetch('signin-blue');
         }
     }
+
+    /**
+     * 弹窗记录页面
+     */
+    public function tc_red()
+    {
+        // 渲染tc-red.html模板，指定完整路径
+        return $this->fetch('index@tc-red');
+    }
+
+    /**
+     * 弹窗记录页面 - 简化访问路径
+     */
+    public function tc()
+    {
+        // 渲染tc-red.html模板，指定完整路径
+        return $this->fetch('index@tc-red');
+    }
 }

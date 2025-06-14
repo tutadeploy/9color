@@ -1,98 +1,33 @@
 <!DOCTYPE html>
-<html data-dpr="1" style="font-size: 37.5px;">
+<html lang="en">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta name="viewport" content="width=device-width,user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1">
-    <title>{:lang('抢单记录')}</title>
-    <link href="/static_new6/css/app.red.css" rel="stylesheet">
-    <link rel="stylesheet" href="/static_new/css/public.css">
+    <meta charset="UTF-8">
+    <title>抢单记录</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+    <meta name="renderer" content="webkit" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="stylesheet" href="/static/home/css/style.css" />
+    <link rel="stylesheet" href="/static/home/css/danmu.css" />
+    <link href="/static/static_new6/css/app.7b22fa66c2af28f12bf32977d4b82694.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/static_new/css/public.css">
+    <link rel="stylesheet" href="/static/public/js/layer_mobile/need/layer.css">
 
-    <script charset="utf-8" src="/static_new/js/jquery.min.js"></script>
-    <script charset="utf-8" src="/static_new/js/dialog.min.js"></script>
-    <script charset="utf-8" src="/static_new/js/common.js"></script>
+    <script src="/static/home/js/jquery.js"></script>
+    <script src="/static/home/js/lib.js"></script>
+    <script charset="utf-8" src="/static/static_new/js/dialog.min.js"></script>
+    <script src="/static/public/js/layer_mobile/layer.js"></script>
 
-    <link rel="stylesheet" href="__ROOT__/public/js/layer_mobile/need/layer.css">
-    <link rel="stylesheet" href="/static_sg/record/css/style.css">
-    <script src="__ROOT__/public/js/layer_mobile/layer.js"></script>
-    <style type="text/css" title="fading circle style">
-        .circle-color-9>div::before {
-            background-color: #ccc;
+    <style>
+        body {
+            padding-top: 0 !important;
         }
 
-        /* 通用分页 */
-        .pagination-container {
-            line-height: 40px;
-            text-align: right;
-        }
-
-        .pagination-container>span {
-            color: #666;
-            font-size: 9pt;
-        }
-
-        .pagination-container>ul {
-            float: right;
-            display: inline-block;
-            margin: 0;
-            padding: 0;
-        }
-
-        .pagination-container>ul>li {
-            z-index: 1;
-            display: inline-block;
-        }
-
-        .pagination-container>ul>li>a,
-        .pagination-container>ul>li>span {
-            color: #333;
-            width: 33px;
-            height: 30px;
-            border: 1px solid #dcdcdc;
-            display: inline-block;
-            margin-left: -1px;
-            text-align: center;
-            line-height: 28px;
-        }
-
-        .pagination-container>ul>li>span {
-            background: #dcdcdc;
-            cursor: default;
-        }
-
-        .van-tab--active {
-            border-bottom: 2px solid #f12020;
-        }
-
-        .van-tab--active span {
-            color: #f12020
-                /*主题修改*/
-            ;
-        }
-
-        .circle-color-23>div::before {
-            background-color: #ccc;
-        }
-
-        .dialog {
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 10001;
-            width: 100%;
-            height: 100%;
-        }
-
-        .mint-loadmore[data-v-35ad745e] {
-            background: none;
-        }
-
-        .circle {
-            font-size: .5rem width: .4em;
-            height: .4em;
-            border-radius: 4em;
-            background: #E83338;
-            color: #fff;
+        .hide {
+            display: none;
         }
     </style>
 </head>
@@ -133,27 +68,26 @@
 
 
     <ul class="footer">
-        <li class="active" onclick="window.location.href='/'">
+        <li class="" onclick="window.location.href='/'">
             <i class="i1"></i>
             <p>首页</p>
         </li>
-        <li onclick="window.location.href='/index/order/index.html'">
+        <li onclick="window.location.href='/order'">
             <i class="i2"></i>
             <p>记录</p>
         </li>
-        <li onclick="window.location.href='/index/rot_order/index.html'">
+        <li onclick="window.location.href='/rotOrder'">
             <i class="i3"></i>
             <p>领取</p>
         </li>
-        <li onclick="window.location.href='/index/support/index.html'">
+        <li onclick="window.location.href='/support'">
             <i class="i4"></i>
             <p>客服</p>
         </li>
-        <li onclick="window.location.href='/index/my/index.html'">
+        <li onclick="window.location.href='/my'">
             <i class="i5"></i>
             <p>我的</p>
         </li>
-    </ul>
     </ul>
 
     <div data-v-4c2dcb20="" class="" style="" id="orderDetail">
@@ -214,7 +148,7 @@
 
     <div id="danmu" style="display:none">
 
-        <div class="banner_img" style="width:8rem;height:3.89rem">
+        <div class='banner_img' style="width:8rem;height:3.89rem">
             <img src="/static/home/images/danmu.jpg" width="100%" height="100%">
         </div>
 
@@ -560,8 +494,6 @@
 
         }
     </script>
-
-
 </body>
 
 </html>
