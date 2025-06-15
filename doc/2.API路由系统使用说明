@@ -1,0 +1,312 @@
+# API路由系统使用说明
+
+## 概述
+
+API路由系统是为了解决Nginx代理环境下前端接口路由问题而开发的JavaScript解决方案。该系统能够自动将相对路径的接口调用转换为正确的ThinkPHP路径格式。
+
+## 系统组成
+
+### 1. 核心文件
+- `public/static/js/url-mapping.js` - URL映射配置文件
+- `public/static/js/api-url-resolver.js` - URL转换核心库
+- `public/static/js/api-integration.js` - jQuery Ajax拦截器
+
+### 2. 文档文件
+- `doc/1.Nginx代理环境下的前端接口改造方案` - 改造方案文档
+- `doc/2.API路由系统使用说明` - 本文档
+
+## 集成步骤
+
+### 1. 在页面中引入文件
+
+在需要使用API路由系统的页面的`<head>`标签中，按以下顺序引入文件：
+
+```html
+<!-- 确保jQuery已加载 -->
+<script src="/static/home/js/jquery.js"></script>
+
+<!-- API路由系统文件 -->
+<script src="/static/js/url-mapping.js"></script>
+<script src="/static/js/api-url-resolver.js"></script>
+<script src="/static/js/api-integration.js"></script>
+```
+
+### 2. 验证系统是否正常工作
+
+在浏览器控制台中，应该能看到以下信息：
+```
+✓ ApiUrlResolver v1.0.0 已加载
+✓ ApiIntegration 已启用
+✓ API路由系统初始化成功 ✓
+```
+
+## 使用方法
+
+### 1. 无需修改现有代码
+
+API路由系统会自动拦截所有的jQuery Ajax请求，无需修改现有的业务代码：
+
+```javascript
+// 原有代码保持不变
+$.ajax({
+    url: "doLogin",  // 会自动转换为 /index/user/do_login
+    data: { tel: tel, pwd: pwd },
+    type: 'POST',
+    success: function(data) { ... }
+});
+```
+
+### 2. 支持的调用方式
+
+系统支持以下所有调用方式：
+
+```javascript
+// 1. 相对路径（会自动转换）
+$.ajax({ url: "doLogin", ... });
+
+// 2. ThinkPHP语法（服务器端处理）
+$.ajax({ url: "{:url('do_login')}", ... });
+
+// 3. 绝对路径（直接使用）
+$.ajax({ url: "/index/user/do_login", ... });
+
+// 4. 完整URL（直接使用）
+$.ajax({ url: "https://api.example.com/login", ... });
+
+// 5. 快捷方法
+$.get("doLogin", data, callback);
+$.post("doLogin", data, callback);
+```
+
+### 3. 使用统一的API请求方法（可选）
+
+系统还提供了一个统一的API请求方法：
+
+```javascript
+// 使用统一方法
+apiRequest("doLogin", { tel: tel, pwd: pwd }, {
+    success: function(data) { ... },
+    error: function(xhr, status, error) { ... }
+});
+```
+
+## 调试功能
+
+### 1. 开启调试模式
+
+在`url-mapping.js`中设置：
+```javascript
+debug: true  // 开发环境
+debug: false // 生产环境
+```
+
+### 2. 调试方法
+
+调试模式下，系统提供以下调试方法：
+
+```javascript
+// 测试URL转换
+debugApi.test("doLogin");
+// 输出: 输入: doLogin, 输出: /index/user/do_login
+
+// 查看统计信息
+debugApi.stats();
+// 输出: { totalRequests: 10, transformedRequests: 5, errors: 0, ... }
+
+// 重置统计信息
+debugApi.reset();
+
+// 手动解析URL
+debugApi.resolve("submitOrder");
+// 返回: "/index/rot_order/submit_order"
+```
+
+### 3. 日志查看
+
+开启调试模式后，控制台会显示详细的URL转换日志：
+```
+[ApiUrlMapping] [Resolver] 找到映射: doLogin -> /index/user/do_login
+[ApiUrlMapping] [Integration] Ajax URL转换: doLogin -> /index/user/do_login
+```
+
+## 配置管理
+
+### 1. 添加新的URL映射
+
+在`url-mapping.js`的`mappings`对象中添加：
+
+```javascript
+mappings: {
+    // 现有映射...
+    
+    // 新增映射
+    'newApi': '/index/controller/new_api',
+    'anotherApi': '/index/other/another_api'
+}
+```
+
+### 2. 添加控制器推断规则
+
+在`controllerRules`对象中添加：
+
+```javascript
+controllerRules: {
+    // 现有规则...
+    
+    // 新增规则
+    '/newmodule': 'newmodule',
+    '/special/': 'special'
+}
+```
+
+### 3. 修改默认控制器
+
+```javascript
+defaultController: 'index'  // 默认控制器
+```
+
+## 性能优化
+
+### 1. URL缓存
+
+系统自动缓存URL转换结果，提高性能：
+- 首次转换：解析映射表或智能推断
+- 后续请求：直接使用缓存结果
+
+### 2. 缓存管理
+
+```javascript
+// 查看缓存统计
+window.getApiStats().cacheStats;
+
+// 清除缓存
+window.ApiUrlResolver.clearCache();
+```
+
+## 错误处理
+
+### 1. 自动降级
+
+当URL转换出现错误时，系统会自动使用原始URL，确保请求不会失败。
+
+### 2. 错误日志
+
+所有错误都会记录在控制台中：
+```
+[ApiUrlMapping] [Resolver] URL解析出错: Invalid URL format
+[ApiUrlMapping] [Integration] 请求失败: /api/test - 404: Not Found
+```
+
+### 3. 错误统计
+
+可通过统计信息查看错误次数：
+```javascript
+window.getApiStats().errors; // 错误次数
+```
+
+## 部署注意事项
+
+### 1. 生产环境配置
+
+部署到生产环境前，记得关闭调试模式：
+```javascript
+debug: false
+```
+
+### 2. 文件压缩
+
+建议将三个JS文件合并压缩为一个文件，减少HTTP请求。
+
+### 3. 缓存策略
+
+由于JS文件包含路由映射配置，更新后需要清除浏览器缓存。
+
+## 常见问题
+
+### Q: 为什么我的接口还是请求失败？
+A: 检查以下几点：
+1. 确保按正确顺序引入了所有JS文件
+2. 检查控制台是否有错误信息
+3. 验证映射表中是否包含该接口
+4. 确认nginx路由配置是否正确
+
+### Q: 如何添加新的接口映射？
+A: 在`url-mapping.js`的`mappings`对象中添加映射关系即可。
+
+### Q: 系统会影响现有代码的性能吗？
+A: 影响极小，系统使用了缓存机制，只有第一次转换时会有少量计算开销。
+
+### Q: 如何在不同环境中使用不同配置？
+A: 可以根据域名或其他环境变量动态设置`debug`和其他配置项。
+
+## 响应数据转换功能
+
+### 1. 自动格式转换
+
+系统会自动将ThinkPHP格式的响应转换为前端期望的格式：
+
+**ThinkPHP响应格式**：
+```json
+{"code": 0, "info": "登录成功"}
+```
+
+**自动转换为前端格式**：
+```json
+{
+  "success": true,
+  "msg": "登录成功", 
+  "data": {...},
+  "originalData": {"code": 0, "info": "登录成功"},
+  "redirectUrl": "/index/home"
+}
+```
+
+### 2. 配置响应转换规则
+
+在`url-mapping.js`中可以为不同接口配置转换规则：
+
+```javascript
+responseTransforms: {
+  'doLogin': {
+    successField: 'code',      // 成功判断字段
+    successValue: 0,           // 成功值 (0表示成功)
+    messageField: 'info',      // 消息字段
+    redirectUrl: '/index/home', // 跳转URL
+    enabled: true              // 启用转换
+  }
+}
+```
+
+### 3. 调试响应转换
+
+```javascript
+// 测试响应转换
+debugApi.testResponse('doLogin', {code: 0, info: '登录成功'});
+
+// 测试URL跳转转换  
+debugApi.transformUrl('/');  // 返回: '/index/home'
+```
+
+## 更新日志
+
+### v1.1.0 (2024-06-14)
+- 🔥 新增响应数据转换系统
+- 支持ThinkPHP格式到前端格式的自动转换
+- 新增配置化的响应转换规则
+- 添加URL跳转地址映射功能
+- 扩展调试工具支持响应转换测试
+
+### v1.0.0 (2024-06-14)
+- 初始版本发布
+- 支持基本的URL映射和智能推断
+- 提供完整的调试功能
+- 实现jQuery Ajax拦截器
+
+---
+
+## 技术支持
+
+如有问题，请查看：
+1. 浏览器控制台的错误信息
+2. `doc/1.Nginx代理环境下的前端接口改造方案`文档
+3. 使用调试方法进行问题排查 

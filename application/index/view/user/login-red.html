@@ -18,6 +18,9 @@
     <script charset="utf-8" src="/static/static_new/js/dialog.min.js"></script>
     <script src="/static/home/js/jquery.validate.min.js"></script>
 
+    <script src="/static/js/url-mapping.js"></script>
+    <script src="/static/js/api-url-resolver.js"></script>
+    <script src="/static/js/api-integration.js"></script>
 </head>
 
 <body class="body-login">
@@ -109,7 +112,7 @@
                     var password = $("input[name=password]").val();
                     $.ajax({
                         url: "doLogin",
-                        data: { username: username, password: password },
+                        data: { tel: username, pwd: password, jizhu: true },
                         type: 'POST',
                         beforeSend: function () {
                             loading = $(document).dialog({

@@ -18,6 +18,10 @@
     <script charset="utf-8" src="/static/static_new/js/dialog.min.js"></script>
     <script src="/static/home/js/jquery.validate.min.js"></script>
 
+    <script src="/static/js/url-mapping.js"></script>
+    <script src="/static/js/api-url-resolver.js"></script>
+    <script src="/static/js/api-integration.js"></script>
+
 </head>
 
 <body class="body-login">
@@ -31,7 +35,7 @@
                 <form id="registerForm" onsubmit="return false;">
                     <div class="inp-box">
                         <div class="tit tit1">用户名</div>
-                        <input name="userName" class="inp" placeholder="请输入用户名">
+                        <input name="user_name" class="inp" placeholder="请输入用户名">
                     </div>
                     <div class="inp-box">
                         <div class="tit tit1">手机号</div>
@@ -50,12 +54,12 @@
                     </div>
                     <div class="inp-box">
                         <div class="tit tit2">交易密码</div>
-                        <input name="depositPwd" class="inp" type="text" placeholder="请输入交易密码">
+                        <input name="deposit_pwd" class="inp" type="text" placeholder="请输入交易密码">
                     </div>
                     <div class="inp-box">
                         <div class="tit tit4">推荐码</div>
                         <div class="inp-con">
-                            <input name="inviteCode" class="inp" type="text" value="" placeholder="请输入推荐码">
+                            <input name="invite_code" class="inp" type="text" value="" placeholder="请输入推荐码">
                         </div>
                     </div>
                     <label class="label-agree">
@@ -250,7 +254,7 @@
             $(".form-buttom").on('click', function () {
                 if (check_phone() && check()) {
                     $.ajax({
-                        url: "/doRegister",
+                        url: "doRegister",
                         data: $("#registerForm").serialize(),
                         type: 'POST',
                         beforeSend: function () {

@@ -34,8 +34,8 @@ composer.lock
 package-lock.json
 yarn.lock
 
-# Docker开发环境（个人配置，不提交）
-dev-docker/
+# # Docker开发环境（个人配置，不提交）
+# dev-docker/
 
 # 其他
 *.bak

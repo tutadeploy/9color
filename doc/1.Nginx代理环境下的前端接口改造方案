@@ -1,0 +1,132 @@
+# Nginx代理环境下的前端接口改造方案
+
+## 改造背景
+
+项目原本在Apache环境下运行，现需要迁移到Nginx代理环境。在迁移过程中发现前端页面中存在两种不同的接口调用方式：
+
+1. **相对路径方式**（如 `login-red.html`）：`url: "doLogin"`
+2. **ThinkPHP模板语法方式**：`url: "{:url('do_login')}"`
+
+在Nginx代理环境下，相对路径方式会导致路由错误，因为nginx的路由规则与Apache的.htaccess重写规则不同。
+
+## 问题分析
+
+### 路由差异
+- **Apache + .htaccess**：`RewriteCond %{REQUEST_FILENAME} !-f` 提供文件存在性检查保护
+- **Nginx代理**：直接按路由规则转发，没有文件存在性检查
+
+### 具体问题
+- `url: "doLogin"` 在 `/login` 页面会请求 `/doLogin`
+- nginx中没有配置 `/doLogin` 路由，导致请求失败
+- 实际需要的是 `/index/user/do_login` 路径
+
+## 改造方案：前端JavaScript统一处理
+
+### 设计原则
+1. **不伤害源码**：不修改现有业务代码文件
+2. **向后兼容**：支持现有的所有调用方式
+3. **可维护性**：集中管理URL映射关系
+4. **可扩展性**：便于后续添加新的接口映射
+
+### 技术实现
+
+#### 1. 创建URL映射配置文件
+文件位置：`public/static/js/url-mapping.js`
+包含所有接口的路径映射关系。
+
+#### 2. 创建URL转换核心库
+文件位置：`public/static/js/api-url-resolver.js`
+实现智能URL转换逻辑。
+
+#### 3. 集成到现有页面
+通过在页面头部引入JS文件的方式，实现无侵入式集成。
+
+## 实施计划
+
+### 第一阶段：核心功能开发 ✅
+- [x] 创建URL映射配置文件
+- [x] 开发URL转换核心库
+- [x] 实现jQuery Ajax拦截器
+
+### 第二阶段：测试验证
+- [ ] 测试登录功能
+- [ ] 测试注册功能
+- [ ] 测试其他主要接口
+
+### 第三阶段：完善和优化 ✅
+- [x] 完善错误处理机制
+- [x] 添加调试模式
+- [x] 优化性能
+
+## 文件结构
+
+```
+public/static/js/
+├── url-mapping.js          # URL映射配置
+├── api-url-resolver.js     # URL转换核心库
+└── api-integration.js      # 页面集成脚本
+```
+
+## 改造日志
+
+### 2024-06-14
+- 创建改造方案文档
+- 分析问题根因
+- 确定技术方案
+- ✅ 完成核心文件开发：
+  - `public/static/js/url-mapping.js` - URL映射配置文件
+  - `public/static/js/api-url-resolver.js` - URL转换核心库
+  - `public/static/js/api-integration.js` - jQuery Ajax拦截器
+- ✅ 创建使用说明文档：`doc/2.API路由系统使用说明`
+- ✅ 实现完整的调试功能和错误处理机制
+- ✅ 修复PHP兼容性问题：
+  - 修复 `application/index/controller/User.php` 第102行
+  - 将已废弃的 `eregi()` 函数替换为 `preg_match()`
+  - 解决PHP 7.3环境下的致命错误问题
+- ✅ 实现响应数据转换系统（方案A）：
+  - 扩展 `public/static/js/url-mapping.js` 添加响应格式转换配置
+  - 扩展 `public/static/js/api-integration.js` 添加智能响应转换器
+  - 实现ThinkPHP响应格式到前端期望格式的自动转换
+  - 支持配置化的接口响应格式转换规则
+  - 添加URL跳转地址转换功能
+
+---
+
+## 技术细节记录
+
+### URL映射规则
+基于ThinkPHP的路由规则：`/模块/控制器/方法`
+
+### 支持的调用方式
+1. 相对路径：`"doLogin"`
+2. ThinkPHP语法：`"{:url('do_login')}"`
+3. 绝对路径：`"/index/user/do_login"`
+4. 完整URL：`"https://domain.com/api"`
+
+### 错误处理策略
+1. 映射表未找到：根据当前页面智能推断
+2. 推断失败：使用默认控制器路径
+3. 请求失败：提供友好的错误提示
+
+### 性能优化
+1. 缓存URL转换结果
+2. 减少字符串操作
+3. 延迟加载映射表
+
+---
+
+## 注意事项
+
+1. **页面引入顺序**：确保在jQuery之后、业务代码之前引入
+2. **缓存处理**：更新JS文件后需要清除浏览器缓存
+3. **调试模式**：开发环境可开启URL转换日志
+4. **向后兼容**：保持对现有代码的完全兼容
+
+## 回滚方案
+
+如果改造出现问题，可以通过以下方式快速回滚：
+1. 移除JS文件引入
+2. 恢复nginx配置（如有修改）
+3. 清除浏览器缓存
+
+改造方案完全基于新增文件，不修改现有代码，因此回滚风险极低。 

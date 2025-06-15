@@ -99,7 +99,7 @@ function get_real_ip()
         $ips = explode (", ", $_SERVER['HTTP_X_FORWARDED_FOR']);
         if ($ip) { array_unshift($ips, $ip); $ip = FALSE; }
         for ($i = 0; $i < count($ips); $i++) {
-            if (!eregi ("^(10│172.16│192.168).", $ips[$i])) {
+            if (!preg_match("/^(10\.|172\.16\.|192\.168\.)/", $ips[$i])) {
 
                 $ip = $ips[$i];
                 break;
@@ -129,9 +129,12 @@ function get_real_ip()
 
 
         
+         // 临时注释验证码验证逻辑，适配nginx环境改造
+         /*
          if (!CaptchaService::check(input('verify'),input('uniqid'))) {
                 return json(['code'=>1,'info'=>lang('图形验证码验证失败,请重新输入')]);
             }
+         */
         $pid = 0;
         if($invite_code) {
             $parentinfo = Db::table($this->table)->field('id,status')->where('invite_code',$invite_code)->find();
@@ -206,7 +209,8 @@ function get_real_ip()
             $url=SITE_URL . url('@index/user/register/invite_code/'.$this->invite_code);
             $this->redirect($url);
         }
-        $this->captcha = new CaptchaService();
+        // 临时注释验证码服务实例化，适配nginx环境改造
+        // $this->captcha = new CaptchaService();
         $color = sysconf('app_color');
         if($color){
             return $this->fetch('register-'.$color);

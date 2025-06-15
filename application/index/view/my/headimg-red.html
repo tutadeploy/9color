@@ -18,6 +18,11 @@
     <script charset="utf-8" src="/static/static_new/js/dialog.min.js"></script>
     <link rel="stylesheet" href="/static/static_new/css/public.css">
 
+    <!-- API路由系统文件 -->
+    <script src="/static/js/url-mapping.js"></script>
+    <script src="/static/js/api-url-resolver.js"></script>
+    <script src="/static/js/api-integration.js"></script>
+
     <style type="text/css">
         .avatar {
             position: relative;
@@ -50,8 +55,8 @@
                 <input class="file-upload" id="file" type="file" accept="image/*" name="file" />
                 <div class="avatar" id="btn">
 
-                    <img class="js-avatar" src="/upload/headimg/39.a901301.png"
-                        onerror="this.src='/static/home/images/avatar.png'" alt="15816393445">
+                    <img class="js-avatar" src="{$info.headpic}" onerror="this.src='/static/home/images/avatar.png'"
+                        alt="15816393445">
                 </div>
                 <div class="name-vip">
                     <div class="name">15816393445</div>
@@ -613,7 +618,7 @@
                 if (1) {
                     var loading = null;
                     $.ajax({
-                        url: "/users/editHeadImg",
+                        url: "editHeadImg",  // 改为相对路径
                         data: { pic: pic },
                         type: 'POST',
                         beforeSend: function () {
@@ -625,7 +630,6 @@
                             });
                         },
                         success: function (data) {
-
                             if (data.success) {
                                 $(document).dialog({ infoText: '保存成功' });
                                 setTimeout(function () {
