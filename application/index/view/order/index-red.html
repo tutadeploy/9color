@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>抢单记录</title>
+    <title>{:lang('抢单记录')}</title>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
     <meta name="renderer" content="webkit" />
@@ -21,6 +21,8 @@
     <script charset="utf-8" src="/static/static_new/js/dialog.min.js"></script>
     <script src="/static/public/js/layer_mobile/layer.js"></script>
 
+    <link rel="stylesheet" href="/static/theme/css/console.css">
+
     <style>
         body {
             padding-top: 0 !important;
@@ -29,64 +31,235 @@
         .hide {
             display: none;
         }
+
+
+        .records_tabs[data-v-35ad745e] {
+            margin: .266667rem
+        }
+
+        .records_tabs .records_tabs_box[data-v-35ad745e] {
+            background-image: url(data:image/png;base64,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);
+            background-size: 100% 100%;
+            padding-top: .4rem;
+            padding-bottom: .4rem;
+            position: relative
+        }
+
+        .records_tabs .records_tabs_box .records_tabs_box_top[data-v-35ad745e] {
+            font-size: .32rem;
+            color: #9e9e9e;
+            font-weight: 400;
+            text-align: left;
+            font-family: PingFangSC-Regular, PingFang SC
+        }
+
+        .records_tabs .records_tabs_box .records_tabs_box_img[data-v-35ad745e] {
+            width: 1.733333rem;
+            height: auto;
+            position: absolute;
+            top: .266667rem;
+            right: .133333rem
+        }
+
+        .records_tabs .records_tabs_box .records_tabs_box_des[data-v-35ad745e] {
+            background: #f2f2f2;
+            border-radius: .133333rem;
+            margin: .266667rem 0;
+            display: -ms-flexbox;
+            display: flex;
+            overflow: hidden
+        }
+
+        .records_tabs .records_tabs_box .records_tabs_box_des .tabs_box_des_img[data-v-35ad745e] {
+            width: 2.4rem;
+            height: 2.4rem
+        }
+
+        .records_tabs .records_tabs_box .records_tabs_box_des .tabs_box_des_img>img[data-v-35ad745e] {
+            width: 2.4rem;
+            height: 2.4rem;
+            -o-object-fit: cover;
+            object-fit: cover
+        }
+
+        .records_tabs .records_tabs_box .records_tabs_box_des .tabs_box_des_r[data-v-35ad745e] {
+            text-align: left;
+            padding: .266667rem;
+            font-size: .266667rem
+        }
+
+        .records_tabs .records_tabs_box .records_tabs_box_des .tabs_box_des_r .tabs_box_des_r_tit[data-v-35ad745e] {
+            overflow: hidden;
+            font-size: .373333rem;
+            color: #424242;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            font-family: PingFangSC-Regular, PingFang SC
+        }
+
+        .records_tabs .records_tabs_box .tabs_box_des_r_pic[data-v-35ad745e] {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-pack: justify;
+            justify-content: space-between;
+            margin-top: .4rem;
+            font-size: .373333rem;
+            color: #424242
+        }
+
+        .records_tabs .records_tabs_box .txt1[data-v-35ad745e] {
+            color: #ff9a2c;
+            font-size: .64rem !important
+        }
+
+        .records .van-sticky--fixed[data-v-35ad745e] {
+            background: #fff;
+            box-shadow: 0 .013333rem .013333rem #ddd
+        }
+
+        .van-sticky--fixed[data-v-35ad745e] {
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: 0;
+            z-index: 99
+        }
+
+        .records_tabs .tabs_btn[data-v-35ad745e] {
+            display: -ms-flexbox;
+            display: flex;
+            -ms-flex-pack: end;
+            justify-content: flex-end
+        }
+
+        .records_tabs .tabs_btn .tabs_btn1[data-v-35ad745e],
+        .records_tabs .tabs_btn .tabs_btn2[data-v-35ad745e] {
+            margin: .266667rem;
+            width: 3.2rem;
+            height: 1.093333rem;
+            font-size: .48rem;
+            text-align: center;
+            line-height: 1.066667rem;
+            border: .026667rem solid #969ba3
+        }
+
+        .records_tabs .tabs_btn .tabs_btn2[data-v-35ad745e] {
+            border: none;
+            background: #2f3848;
+            color: #f2d8be
+        }
     </style>
 </head>
 
 <body class="body-bottom">
-    <!--<div class="header header3">-->
-    <!--    <a href="" class="g-return"></a>-->
-    <!--    <h1>我要充值</h1>-->
-    <!--</div>-->
     <div class="lc-box1 cz-box1 mb">
-        <div class="title0">抢单记录</div>
-        <div class="title">剩余可用资产（元）</div>
+        <div class="title0">{:lang('抢单记录')}</div>
+        <div class="title">{:lang('剩余可用资产')}（{:lang('美元')}）</div>
         <div class="price">
-            ¥<strong class="js-price">0.00</strong>
+            {:lang('￥')}<strong class="js-price">{$balance}</strong>
         </div>
     </div>
     <div class="cz-box4">
-        <div class="left">本数据由悠享手工官方提供</div>
+        <div class="left">{:lang('本数据由')}{:sysconf('app_name')}{:lang('官方提供')}</div>
     </div>
     <div class="wp">
         <div class="ind-row7">
             <ul class="z-tab z-tab2 TAB_CLICK">
-                <li class="on"><a href="/order">全部</a></li>
-                <li><a href="/order?status=0">待处理</a></li>
-                <li><a href="/order?status=1">已完成</a></li>
-                <li><a href="/order?status=5">冻结中</a></li>
-                <li><a href="/order?status=6">派单中</a></li>
+                <li class="<?php echo !$status ? 'on' : ''?>"><a href="/order">{:lang('全部')}</a></li>
+                <li class="<?php echo $status == -1 ? 'on' : ''?>"><a href="/order?status=-1">{:lang('待处理')}</a></li>
+                <li class="<?php echo $status == 1 ? 'on' : ''?>"><a href="/order?status=1">{:lang('已完成')}</a></li>
+                <li class="<?php echo $status == 5 ? 'on' : ''?>"><a href="/order?status=5">{:lang('冻结中')}</a></li>
             </ul>
             <ul class="qd-list" id="newsList">
-
+                {if $list}
+                {volist name='list' id='v'}
+                <?php
+                $img = '/static_new6/img/succ.png';
+                if(isset($v['status'])) {
+                    if($v['status']==0) $img= '/static_new6/img/en_dai.png';
+                    if($v['status']==1) $img= '/static_new6/img/en_succ.png';
+                    if($v['status']==4) $img= '/static_new6/img/en_dongjie.png';
+                    if($v['status']==5) $img= '/static_new6/img/en_dongjie.png';
+                }
+                ?>
+                <li>
+                    <div data-v-35ad745e="">
+                        <div data-v-35ad745e="" class="records_tabs">
+                            <div data-v-35ad745e="" class="records_tabs_box">
+                                <div data-v-35ad745e="" class="records_tabs_box_top">
+                                    {if $v['order_num']!=0}<span class="circle">{$v.order_num}</span>{/if}
+                                    {:lang('抢单时间')}：{$v.addtime|format_datetime='Y-m-d H:i:s'}
+                                    {:lang('抢单编号')}：{$v.id}
+                                </div>
+                                <img data-v-35ad745e="" src="{$img}" class="records_tabs_box_img">
+                                <div data-v-35ad745e="" class="records_tabs_box_des">
+                                    <div data-v-35ad745e="" class="tabs_box_des_img">
+                                        <img data-v-35ad745e="" src="{$v.goods_pic}">
+                                    </div>
+                                    <div data-v-35ad745e="" class="tabs_box_des_r">
+                                        <p data-v-35ad745e="" class="tabs_box_des_r_tit">{$v.goods_name}</p>
+                                        <div data-v-35ad745e="" class="tabs_box_des_r_pic">
+                                            <p data-v-35ad745e="">{:lang('￥')} {$v.goods_price}</p>
+                                            <p data-v-35ad745e="">x {$v.goods_count}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div data-v-35ad745e="" class="tabs_box_des_r_pic">
+                                    <p data-v-35ad745e="" class="gray">{:lang('订单总额')}</p>
+                                    <p data-v-35ad745e="">{:lang('￥')} {$v.num}</p>
+                                </div>
+                                <div data-v-35ad745e="" class="tabs_box_des_r_pic">
+                                    <p data-v-35ad745e="" class="gray">{:lang('佣金')}</p>
+                                    <p data-v-35ad745e="">{:lang('￥')}{$v.commission}</p>
+                                </div>
+                                <div data-v-35ad745e="" class="tabs_box_des_r_pic">
+                                    <p data-v-35ad745e="" class="txt">{:lang('预计返还')}</p>
+                                    <p data-v-35ad745e="" class="txt1"> {if
+                                        $v['status']==4||$v['status']==5}0{else}{:lang('￥')}{$v.commission+$v.num}{/if}
+                                    </p>
+                                </div>
+                                <div data-v-35ad745e="" class="tabs_box_des_r_pic">
+                                    <button data-v-35ad745e="" onclick="tijiao('{$v.id}')" class="redb"
+                                        style="display: <?php echo $v['status']==0 ? 'block':'none'; ?>;padding: 3px 10px;border-radius: 5px;width: 40%;float:left;">{:lang('提交订单')}</button>
+                                    {if $balance<$v.num} <p data-v-35ad745e="" class="txt"
+                                        style="display: <?php echo $v['status']==0 ? 'block':'none'; ?>;width:50%;float:right;color:red"
+                                        onclick="jump('{$v.num-$balance}')">{:lang('账户可用余额不足')}</p>{/if}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+                {/volist}
+                {/if}
             </ul>
-
-
         </div>
-
     </div>
-    <div class="loadmore" style="display: none;margin-top: 30px" id="moreNews" onclick="moreNews()">查看更多</div>
+    {empty name='list'}<span class="notdata">{:lang('没有记录')}</span>{else}{$pagehtml|raw|default=''}{/empty}
 
+    <div class="loadmore" style="display: none;margin-top: 30px" id="moreNews" onclick="moreNews()">{:lang('查看更多')}
+    </div>
 
     <ul class="footer">
         <li class="" onclick="window.location.href='/'">
             <i class="i1"></i>
-            <p>首页</p>
+            <p>{:lang('首页')}</p>
         </li>
         <li onclick="window.location.href='/order'">
             <i class="i2"></i>
-            <p>记录</p>
+            <p>{:lang('记录')}</p>
         </li>
         <li onclick="window.location.href='/rotOrder'">
             <i class="i3"></i>
-            <p>领取</p>
+            <p>{:lang('领取')}</p>
         </li>
         <li onclick="window.location.href='/support'">
             <i class="i4"></i>
-            <p>客服</p>
+            <p>{:lang('客服')}</p>
         </li>
         <li onclick="window.location.href='/my'">
             <i class="i5"></i>
-            <p>我的</p>
+            <p>{:lang('我的')}</p>
         </li>
     </ul>
 
@@ -94,78 +267,72 @@
         <div data-v-4c2dcb20="" class="van-overlay" style="z-index: 1000;padding: 0 10px;display:none ;">
             <div data-v-4c2dcb20="" class="grabSuccess" style="width: 100%;;">
                 <div data-v-4c2dcb20="" class="title" style="height: 1.586667rem;">
-                    <img data-v-4c2dcb20=""
-                        src="data:image/png;base64,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"
-                        alt="">
+                    {if condition='$Think.cookie.think_var eq "zh-cn"'}
+                    <img data-v-4c2dcb20="" src="/static_new6/img/ordersucesstitle.png">
+                    {else}
+                    <img data-v-4c2dcb20="" src="/static_new6/img/en_ordersucesstitle.png">
+                    {/if}
                 </div>
                 <div data-v-4c2dcb20="" class="records_tabs_box">
-                    <div data-v-4c2dcb20="" class="records_tabs_box_top">抢单时间：<span
-                            id="otime">2020-03-17T17:11:41</span>
-                        抢单编号：<span id="oid">202003171711414080</span>
+                    <div data-v-4c2dcb20="" class="records_tabs_box_top">{:lang('抢单时间')}：<span id="otime">0</span>
+                        {:lang('抢单编号')}：<span id="oid">0</span>
                     </div>
-                    <img data-v-4c2dcb20=""
-                        src="data:image/png;base64,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"
-                        class="records_tabs_box_img">
+                    <?php
+                    $img = '/static_new6/img/succ.png';
+                    if(isset($v['status'])) {
+                        if($v['status']==0) $img= '/static_new6/img/en_dai.png';
+                        if($v['status']==1) $img= '/static_new6/img/en_succ.png';
+                        if($v['status']==4) $img= '/static_new6/img/en_dongjie.png';
+                        if($v['status']==5) $img= '/static_new6/img/en_dongjie.png';
+                    }
+                    ?>
+                    <img data-v-4c2dcb20="" src="{$img}" class="records_tabs_box_img">
                     <div data-v-4c2dcb20="" class="records_tabs_box_des">
                         <div data-v-4c2dcb20="" class="tabs_box_des_img">
                             <img data-v-4c2dcb20="" alt="" id="oimg" src="../../static_new6/img/wenhao.png">
                         </div>
                         <div data-v-4c2dcb20="" class="tabs_box_des_r">
-                            <p data-v-4c2dcb20="" class="tabs_box_des_r_tit" id="otitle">
-                                出口法国实木家具橱柜北欧乡村风大理石台面实木可拆分家具整体
-                            </p>
+                            <p data-v-4c2dcb20="" class="tabs_box_des_r_tit" id="otitle"></p>
                             <div data-v-4c2dcb20="" class="tabs_box_des_r_pic">
-                                <p data-v-4c2dcb20="" id="oprice">¥ 1090</p>
-                                <p data-v-4c2dcb20="" id="onum">x 1</p>
+                                <p data-v-4c2dcb20="" id="oprice"></p>
+                                <p data-v-4c2dcb20="" id="onum"></p>
                             </div>
                         </div>
                     </div>
                     <div data-v-4c2dcb20="" class="tabs_box_des_r_pic">
-                        <p data-v-4c2dcb20="" class="gray">订单总额</p>
-                        <p data-v-4c2dcb20="" id="ototal">¥ 1090</p>
+                        <p data-v-4c2dcb20="" class="gray">{:lang('订单总额')}</p>
+                        <p data-v-4c2dcb20="" id="ototal"></p>
                     </div>
                     <div data-v-4c2dcb20="" class="tabs_box_des_r_pic">
-                        <p data-v-4c2dcb20="" class="gray">佣金</p>
-                        <p data-v-4c2dcb20="">¥ <span id="yongjin">3.27</span></p>
+                        <p data-v-4c2dcb20="" class="gray">{:lang('佣金')}</p>
+                        <p data-v-4c2dcb20="">{:lang('￥')} <span id="yongjin"></span></p>
                     </div>
                     <div data-v-4c2dcb20="" class="tabs_box_des_r_pic">
-                        <p data-v-4c2dcb20="" class="txt">预计返还</p>
-                        <p data-v-4c2dcb20="" class="txt1">¥ <span id="yuji">1093.27</span></p>
+                        <p data-v-4c2dcb20="" class="txt">{:lang('预计返还')}</p>
+                        <p data-v-4c2dcb20="" class="txt1">{:lang('￥')} <span id="yuji"></span></p>
                     </div>
                 </div>
                 <div data-v-4c2dcb20="" class="tabs_btn">
-                    <div data-v-4c2dcb20="" class="tabs_btn1">暂不提交</div>
-                    <div data-v-4c2dcb20="" class="tabs_btn2">立即提交</div>
+                    <div data-v-4c2dcb20="" class="tabs_btn1">{:lang('暂不提交')}</div>
+                    <div data-v-4c2dcb20="" class="tabs_btn2">{:lang('立即提交')}</div>
                 </div>
             </div>
-            <img data-v-4c2dcb20=""
-                src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAP1BMVEVHcEz///////////////////////////////////////////////////////////////////////////////9KjZoYAAAAFXRSTlMAEFN/o8rX6/sxkf9z88Q9XSlotgUhojDzAAABp0lEQVR4AaSSVwKzIBgEkfYBS1vN/a/690oitnlK1Bmq2mPRxjovIYh31uhFXSImjwGf4ll7yR5AqSnr1mJsTedUCwCflzO6EUBsj/yP2K0AYg4TXQC38iOrA6RPdVbAde7SHVC57+sCyZySBUXv+QnYIg+IG5A+6i+LYHgCE2BfH/wNpfMUvWB7L1iI5km0wL6vv2ieRpdxHzRC5wV6gP7XZ4HhJQwK/wlUbLzIhqr+0CGRF4mCP7d6EWReJkMW9RMDxxs4mD8T6LxB/z2FDMdbOGT1HY91vCfOrxxYvdPjI/jvfoS8pxHysGUB7xMVxB+X2HLA43th9OE5YJF+rKBzYA0/CoMfVg7072tYUP5cokHI49+RWLAojUpOChOfrNDKIHFSmPpMMMoic1qY+DSwykFzVpj51HDKo3FWmPls8ErQOCvMfDaICoicFiY+I8LjwOMlPN7EZ8fY4Z5dpAz7/Cp/Lb0OBAAAABiE+VsPYhB/tWPqOe+h9KX1qe6tN1gebQ/Xx/sLxivOS9Zr3ovmq+7L9uv+B8cnz0fXZ9+HZ6ZvxHfkP9pUwubvmZnSAAAAAElFTkSuQmCC"
-                alt="" class="close">
         </div>
-
-
     </div>
 
     <div id="danmu" style="display:none">
-
         <div class='banner_img' style="width:8rem;height:3.89rem">
             <img src="/static/home/images/danmu.jpg" width="100%" height="100%">
         </div>
-
         <div class="summary-card">
-
-
             <div class="order-info">
                 <div class="order-text">
-                    <div class="summary-card_h1">消息通知</div>
+                    <div class="summary-card_h1">{:lang('消息通知')}</div>
                     <p class="summary-card_p" id="content"></p>
                     <input type="hidden" id="tc_id">
                 </div>
-
                 <div class="order-actions">
-                    <button class="btn btn-primary summary-card_button" onclick="closeDanmu()">我知道了</button>
-                    <!--<button class="btn btn-no-outline">Cancel Order</button>-->
-
+                    <button class="btn btn-primary summary-card_button" onclick="closeDanmu()">{:lang('我知道了')}</button>
                 </div>
             </div>
         </div>
@@ -197,7 +364,6 @@
         }
 
         function ajaxHonor(page, limit) {
-            //提交 Ajax 成功后，静态更新表格中的数据
             $.ajax({
                 url: '/convey/page',
                 method: 'get',
@@ -217,7 +383,7 @@
         }
 
         function timestampToTime(timestamp) {
-            var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+            var date = new Date(timestamp);
             var Y = date.getFullYear() + '年';
             var M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '月';
             var D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '日 ';
@@ -237,261 +403,63 @@
 
             for (var i = 0; i < newsList.length; i++) {
                 var obj = newsList[i];
-
                 var statusHtml = '';
-
                 switch (obj.status) {
                     case 1:
-                        statusHtml = '<span class="status status1">待审核</span>';
+                        statusHtml = '<span class="status status1">{:lang("待审核")}</span>';
                         break;
                     case 2:
-                        statusHtml = '<span class="status status2">审核通过</span>';
+                        statusHtml = '<span class="status status2">{:lang("审核通过")}</span>';
                         break;
                     case 3:
-                        statusHtml = '<span class="status status1">审核失败</span>';
+                        statusHtml = '<span class="status status3">{:lang("审核拒绝")}</span>';
+                        break;
+                    case 4:
+                        statusHtml = '<span class="status status4">{:lang("冻结中")}</span>';
+                        break;
+                    case 5:
+                        statusHtml = '<span class="status status5">{:lang("派单中")}</span>';
                         break;
                 }
-                var status = "3";
-                if (obj.status == 0) {
-                    status = "1";
-                }
-                if (obj.status == 1 || obj.status == 3 || obj.status == 7) {
-                    status = "2";
-                }
-                var statusHtml = "";
-                switch (obj.status) {
-                    case 0:
-                        statusHtml = '待处理';
-                        break;
-                    case 1:
-                    case 3:
-                    case 7:
-                        statusHtml = '已完成';
-                        break;
-                    case 6:
-                        statusHtml = '派单中';
-                        break;
-                }
-                if (obj.freezeStatus == 1) {
-                    statusHtml = '冻结中';
-                }
-
-                var img = '<img src="' + obj.goodsPic + '">';
-                if (obj.status == 6 || obj.goodsPic == null) {
-                    img = '<img src="/static/home/images/paidanzhong.png">';
-                }
-
-                var finish = '';
-                if (obj.status == 0) {
-                    finish = '<a href="###" onclick="tijiao(\'' + obj.id + '\',\'' + timestampToTime(obj.createTime) + '\',\'' + obj.orderNo + '\',\'' + obj.goodsName + '\',\'' + obj.goodsPic + '\',\'' + obj.goodsPrice + '\',\'' + obj.goodsCount + '\',\'' + obj.num + '\',\'' + obj.commission + '\')" class="btn">去完成</a>';
-                }
-
                 html += '<li>' +
-                    '<div class="s1">' +
-                    '<div class="time "><span>' + timestampToTime(obj.createTime) + '</span></div>' +
-                    '<div class="status status' + status + '">' +
-                    statusHtml +
+                    '<div class="records_tabs_box">' +
+                    '<div class="records_tabs_box_top">' +
+                    (obj.order_num != 0 ? '<span class="circle">' + obj.order_num + '</span>' : '') +
+                    '{:lang("抢单时间")}：' + timestampToTime(obj.addtime) + ' {:lang("抢单编号")}：' + obj.id +
+                    '</div>' +
+                    '<img src="' + obj.img + '" class="records_tabs_box_img">' +
+                    '<div class="records_tabs_box_des">' +
+                    '<div class="tabs_box_des_img">' +
+                    '<img src="' + obj.goods_pic + '">' +
+                    '</div>' +
+                    '<div class="tabs_box_des_r">' +
+                    '<p class="tabs_box_des_r_tit">' + obj.goods_name + '</p>' +
+                    '<div class="tabs_box_des_r_pic">' +
+                    '<p>{:lang("￥")} ' + obj.goods_price + '</p>' +
+                    '<p>x ' + obj.goods_count + '</p>' +
                     '</div>' +
                     '</div>' +
-                    '<div class="s2">' +
-                    '<a href="/convey/detail?orderId=' + obj.id + '" class="pic">' +
-                    img +
-                    '</a>' +
-                    '<div class="txt">' +
-                    '<a href="/convey/detail?orderId=' + obj.id + '" class="title">' + (obj.goodsName == null ? '' : obj.goodsName) + '</a>' +
-                    '<div class="price-btn">' +
-                    '<div class="price" style="color:black">信用卡价格：¥' + (parseFloat(obj.goodsPrice).toFixed(2) == 'NaN' ? 0.00 : parseFloat(obj.goodsPrice).toFixed(2)) + '</div>' +
-
                     '</div>' +
-                    '<div class="price-btn">' +
-                    '<div class="price">佣　　金：¥' + (parseFloat(obj.commission).toFixed(2) == 'NaN' ? 0.00 : parseFloat(obj.commission).toFixed(2)) + '</div>' +
-                    finish +
+                    '<div class="tabs_box_des_r_pic">' +
+                    '<p class="gray">{:lang("订单总额")}</p>' +
+                    '<p>{:lang("￥")} ' + obj.num + '</p>' +
                     '</div>' +
-                    ' </div>' +
+                    '<div class="tabs_box_des_r_pic">' +
+                    '<p class="gray">{:lang("佣金")}</p>' +
+                    '<p>{:lang("￥")}' + obj.commission + '</p>' +
+                    '</div>' +
+                    '<div class="tabs_box_des_r_pic">' +
+                    '<p class="txt">{:lang("预计返还")}</p>' +
+                    '<p class="txt1">' + (obj.status == 4 || obj.status == 5 ? '0' : '{:lang("￥")}' + (parseFloat(obj.commission) + parseFloat(obj.num))) + '</p>' +
+                    '</div>' +
+                    '<div class="tabs_box_des_r_pic">' +
+                    (obj.status == 0 ? '<button onclick="tijiao(\'' + obj.id + '\')" class="redb" style="padding: 3px 10px;border-radius: 5px;width: 40%;float:left;">{:lang("提交订单")}</button>' : '') +
+                    (obj.status == 0 && parseFloat(obj.num) > parseFloat({ $balance }) ? '<p class="txt" style="width:50%;float:right;color:red" onclick="jump(\'' + (parseFloat(obj.num) - parseFloat({ $balance })) + '\')">{:lang("账户可用余额不足")}</p>' : '') +
+                    '</div>' +
                     '</div>' +
                     '</li>';
-
             }
-
             $("#newsList").append(html);
-        }
-
-
-    </script>
-
-    <script type="text/javascript" src="/static/static_new6/js/manifest.3ad1d5771e9b13dbdad2.js"></script>
-    <script>
-        var oid, add_id = '';
-        $(function () {
-            $('#load').hide();
-        });
-        $('.pagination li').click(function () {
-            var class2 = $(this).attr('class');
-            if (class2 == 'active' || class2 == 'disabled') {
-
-            } else {
-                var url = $(this).find('a').attr('href');
-                window.location.href = url;
-            }
-        });
-        $(function () {
-            $('.pagination-container select').attr('disabled', 'disabled');
-        })
-
-        $('.tabs_btn1').click(function () {
-            $('#orderDetail .van-overlay').hide();
-        });
-        $('.close').click(function () {
-            $('#orderDetail .van-overlay').hide();
-        });
-
-        function tijiao(id, createTime, orderNo, goodsName, goodsPic, goodsPrice, goodsCount, num, commission) {
-            oid = id;
-            $('#orderDetail .van-overlay').show();
-
-            $('#otime').html(createTime)
-            $('#oid').html(orderNo)
-            $('#otitle').html(goodsName)
-            $('#oimg').attr('src', goodsPic)
-            $('#oprice').html(goodsPrice)
-            $('#onum').html(goodsCount)
-            $('#ototal').html('¥ ' + num)
-            $('#yongjin').html('' + commission)
-
-            yuji = (parseFloat(num) + parseFloat(commission)).toFixed(2);
-            $('#yuji').html(yuji)
-        }
-
-        // TODO 提交时间
-        var zhujiTime = 1;
-        var shopTime = 1;
-
-        zhujiTime = zhujiTime * 1000;
-        shopTime = shopTime * 1000;
-
-        //提交
-        $('.tabs_btn2').click(function () {
-            //--------------------------------
-            var i = 0;
-            layer.open({
-                type: 2
-                , content: '订单提交中',
-                time: zhujiTime,
-                shadeClose: false,
-            });
-
-            //--------------------------------
-            var i = 0;
-            layer.open({
-                type: 2
-                , content: '订单提交中',
-                time: zhujiTime,
-                shadeClose: false,
-            });
-            var timer = setInterval(function () {
-                i++;
-                if (i == 1) {
-                    layer.open({
-                        type: 2
-                        , content: '远程主机正在分配',
-                        time: zhujiTime,
-                        shadeClose: false,
-                    })
-                } else if (i == 2) {
-                    layer.open({
-                        type: 2
-                        , content: '等待商家系统响应',
-                        time: shopTime,
-                        shadeClose: false,
-                    })
-                    var ajaxT = setTimeout(function () {
-                        $.ajax({
-                            url: "/convey/fukuan",
-                            type: "POST",
-                            dataType: "JSON",
-                            data: { id: oid },
-                            success: function (res) {
-                                layer.closeAll();
-                                if (res.success) {
-                                    $(document).dialog({
-                                        infoText: "订单提交成功!",
-                                        autoClose: 2000
-                                    });
-                                    clearInterval(timer);
-                                    var linkTime = setTimeout(function () {
-                                        location.reload()
-                                    }, 1800);
-                                } else {
-                                    $(document).dialog({
-                                        infoText: res.msg,
-                                        autoClose: 2000
-                                    });
-                                }
-                                sumbit = true;
-                            },
-                            error: function (err) {
-                                layer.closeAll();
-                                console.log(err);
-                                sumbit = true;
-                            }
-                        })
-                    }, shopTime)
-                }
-            }, zhujiTime)
-
-
-        });
-    </script>
-
-    <script>
-        get_user_tc();
-
-        setInterval(get_user_tc, 5000);
-        var flag = false;
-
-        function showDanmu(content, id) {
-
-            $("#danmu").show();
-            $(".pop-mask").show();
-            $("#content").html(content);
-            $("#tc_id").val(id);
-        }
-
-        function closeDanmu() {
-            $("#danmu").hide();
-            $(".pop-mask").hide();
-            flag = false;
-            $.ajax({
-                url: "/user-tc/saveOrUpdate",
-                type: "POST",
-                dataType: "JSON",
-                data: {
-                    status: 1,
-                    id: $("#tc_id").val()
-                },
-            })
-
-        }
-
-        function get_user_tc() {
-            if (flag) {
-                return false;
-            }
-            $.ajax({
-                url: ("/user-tc/select"),
-                type: "GET",
-                data: {},
-                success: function (res) {
-                    if (res.success) {
-                        flag = true;
-                        var data_tc = res.data;
-                        var html = '';
-                        showDanmu(data_tc.content, data_tc.id)
-
-                    }
-                },
-            })
-
         }
     </script>
 </body>
