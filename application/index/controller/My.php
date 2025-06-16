@@ -539,6 +539,12 @@ class My extends Base
         }
         $this->assign('url',$url);
         $this->assign('invite_code',$user['invite_code']);
+        
+        // 获取用户等级名称
+        $level = $user['level'];
+        !$level ? $level = 0 : '';
+        $this->level_name = db('xy_level')->where('level',$level)->value('name');
+        $this->info = db('xy_users')->field('username,tel,level,id,headpic,balance,freeze_balance,lixibao_balance,invite_code,show_td')->find($uid);
         $color = sysconf('app_color');
         if($color){
             return $this->fetch('invite-'.$color);

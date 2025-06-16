@@ -12,8 +12,10 @@
     <meta name="format-detection" content="telephone=no" />
     <link rel="stylesheet" href="/static/home/css/style.css?ver=1.1" />
 
-    <script href="/static/home/js/jquery.js" src="../../home/js/jquery.js"></script>
-    <script href="/static/home/js/lib.js" src="../../home/js/lib.js"></script>
+    <script charset="utf-8" src="/static_new/js/jquery.min.js"></script>
+    <script charset="utf-8" src="/static_new/js/dialog.min.js"></script>
+    <script charset="utf-8" src="/static_new/js/common.js"></script>
+    <script type="text/javascript" src="/statics/js/jquery.qrcode.min.js"></script>
 </head>
 
 <body class="body-invite" id="imgDiv">
@@ -24,14 +26,26 @@
         <div class="avatar">
             <img onerror="this.src='/static/home/images/avatar.png'" src="/upload/headimg/39.a901301.png" alt="">
         </div>
-        <div class="vip">LV1</div>
-        <div class="name">15816393445</div>
-        <div class="code">邀请码：<span id="c">658595</span> <i class="btn-copy"></i></div>
-        <div class="qr">
-            <img src="/createQrCode?url=http://8.217.81.93:91:93/register/658595.html">
-        </div>
+        <div class="vip">{$level_name}</div>
+        <div class="name">{$info.username}</div>
+        <div class="code">邀请码：<span id="c">{$info.invite_code}</span> <i class="btn-copy"></i></div>
+ 	 <div class="promote-wrpa">
+	 	
+     <div data-v-268420fc="" class="user" style="display: block;text-align: center;">
+      <div id="qrcode" class="ewm qr" ></div>
+                          
+
+<script>
+jQuery('#qrcode').qrcode({
+    render: "canvas", //也可以替换为table
+    width: 100,
+    height: 100,
+    text: "{$url}"
+});
+</script>
         <a href="javascript:;" class="btn-share js-share">立即分享</a>
     </div>
+   
     <script src="/static/home/js/clipboard.min.js"></script>
     <script>
         var c = document.getElementById("c");

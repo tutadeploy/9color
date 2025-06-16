@@ -25,10 +25,10 @@
                 </div>
                 <div class="name-code">
                     <div class="name-vip">
-                        <div class="name">15816393445</div>
-                        <div class="vip">LV1</div>
+                        <div class="name">{$info.username}</div>
+                        <div class="vip">{$level_name}</div>
                     </div>
-                    <div class="code">邀请码:658595</div>
+                    <div class="code">邀请码:{$info.invite_code}</div>
                 </div>
 
 
@@ -44,7 +44,7 @@
             <div class="zh-info">
                 <div class="txt">
                     <div class="s1">账户金额</div>
-                    <div class="s2">￥0.00</div>
+                    <div class="s2">￥{$info.balance}</div>
                 </div>
                 <a href="/ctrl/recharge" class="a1">立即储入</a>
                 <a href="/ctrl/deposit" class="a2">立即提现</a>
