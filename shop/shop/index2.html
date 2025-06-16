@@ -57,6 +57,39 @@
             display: inline-block
         }
 
+        /* 修复uni-image组件中img标签不显示的问题 */
+        uni-image img {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            position: relative !important;
+            z-index: 1 !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover;
+        }
+
+        /* 如果背景图片和img标签冲突，优先显示img标签 */
+        uni-image>div[style*="background-image"] {
+            z-index: 0 !important;
+        }
+
+        /* 针对特定的slide-image类 */
+        .slide-image img {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            z-index: 2 !important;
+        }
+
+        /* 针对商品图片 */
+        .image img {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            z-index: 2 !important;
+        }
+
         uni-view,
         uni-text {
             box-sizing: border-box
@@ -7422,9 +7455,6 @@
                                                     style="position: absolute; width: 100%; height: 100%; transform: translate(0%, 0px) translateZ(0px);">
                                                     <uni-image data-v-a7d5e724="" class="slide-image"
                                                         style="height: 166px;">
-                                                        <div
-                                                            style="background-image: url(&quot;https://pffilesa.s3.ap-southeast-1.amazonaws.com/shop/295000dccb12fe8d7fad7bc4814ec6f4.png&quot;); background-size: 100% 100%; background-repeat: no-repeat;">
-                                                        </div>
                                                         <img src="/static/yhc_files/295000dccb12fe8d7fad7bc4814ec6f4.png"
                                                             draggable="false">
                                                         <uni-resize-sensor>

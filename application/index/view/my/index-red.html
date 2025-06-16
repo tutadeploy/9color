@@ -14,6 +14,11 @@
     <link rel="stylesheet" href="/static/home/css/danmu.css" />
     <script src="/static/home/js/jquery.js"></script>
     <script src="/static/home/js/lib.js"></script>
+
+    <!-- API路由系统文件 -->
+    <script src="/static/js/url-mapping.js"></script>
+    <script src="/static/js/api-url-resolver.js"></script>
+    <script src="/static/js/api-integration.js"></script>
 </head>
 
 <body class="body-bottom">
@@ -235,8 +240,39 @@
         }
 
         function loginOut() {
-            $.ajax({ url: "/doLogout" })
-            window.location.href = '/logout'
+            $.ajax({
+                url: "logout",  // 使用API路由系统，会自动转换为 /index/user/logout
+                type: "POST",
+                dataType: "JSON",
+                data: {},
+                success: function (data) {
+                    // 清除弹窗显示记录，让重新登录后可以再次显示弹窗
+                    localStorage.removeItem('specialNoticeShown_' + getCurrentDate());
+
+                    // 清除登录标记，确保重新登录时会设置新的标记
+                    sessionStorage.removeItem('fromLogin');
+                    sessionStorage.removeItem('loginTime');
+
+                    console.log('登出成功，已清除弹窗显示记录和登录标记');
+
+                    // 跳转到登录页面
+                    window.location.href = "/user/login";
+                },
+                error: function (xhr, status, error) {
+                    console.log('登出请求失败:', error);
+                    // 即使请求失败也清除标记并跳转
+                    localStorage.removeItem('specialNoticeShown_' + getCurrentDate());
+                    sessionStorage.removeItem('fromLogin');
+                    sessionStorage.removeItem('loginTime');
+                    window.location.href = "/user/login";
+                }
+            });
+        }
+
+        // 获取当前日期字符串（与首页保持一致）
+        function getCurrentDate() {
+            var today = new Date();
+            return today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
         }
     </script>
 </body>

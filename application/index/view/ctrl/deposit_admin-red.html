@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>5.我的-6提现记录</title>
+    <title>{:lang('提现记录')}</title>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
     <meta name="renderer" content="webkit" />
@@ -12,6 +12,67 @@
     <meta name="format-detection" content="telephone=no" />
     <link rel="stylesheet" href="/static/home/css/style.css" />
 
+    <style>
+        /* 分页导航样式 */
+        .pagination-wrapper {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-top: 1px solid #e5e5e5;
+            padding: 10px 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        /* 为页面内容添加底部间距，避免被固定分页遮挡 */
+        body {
+            padding-bottom: 60px;
+        }
+
+        /* 分页链接样式优化 */
+        .pagination-wrapper .pagination-container {
+            text-align: center;
+            margin: 0;
+        }
+
+        .pagination-wrapper .pagination-container>ul {
+            display: inline-block;
+            margin: 0;
+            padding: 0;
+        }
+
+        .pagination-wrapper .pagination-container>ul>li {
+            display: inline-block;
+            margin: 0 2px;
+        }
+
+        .pagination-wrapper .pagination-container>ul>li>a,
+        .pagination-wrapper .pagination-container>ul>li>span {
+            display: inline-block;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            color: #333;
+            text-decoration: none;
+            border-radius: 4px;
+            min-width: 30px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .pagination-wrapper .pagination-container>ul>li>a:hover {
+            background-color: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        .pagination-wrapper .pagination-container>ul>li>span {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #007bff;
+        }
+    </style>
+
     <script src="/static/home/js/jquery.js"></script>
     <script src="/static/home/js/lib.js"></script>
 </head>
@@ -19,28 +80,66 @@
 <body>
     <div class="header header3">
         <a href="/my" class="g-return"></a>
-        <h1>提现记录</h1>
+        <h1>{:lang('提现记录')}</h1>
     </div>
     <div class="lc-box1">
 
     </div>
     <div class="wp">
         <ul class="mx-list tx-list" id="newsList">
-
+            {if $list}
+            {volist name='list' id='v'}
+            <li>
+                <div class="txt">
+                    <div class="s1">提现
+                        {switch $v.status}
+                        {case 1}<span class="status status1">{:lang('待审核')}</span>{/case}
+                        {case 2}<span class="status status2">{:lang('审核通过')}</span>{/case}
+                        {case 3}<span class="status status1">{:lang('审核失败')}</span>{/case}
+                        {/switch}
+                    </div>
+                    <div class="s2">{:lang('订单号')}：{$v.id}</div>
+                </div>
+                <div class="price price2">-{$v.num}</div>
+            </li>
+            {/volist}
+            {else/}
+            <li style="text-align: center; padding: 30px; color: #999;">
+                {:lang('没有记录哦')}
+            </li>
+            {/if}
         </ul>
 
-        <div class="loadmore" id="moreNews" onclick="moreNews()">查看更多</div>
+        {if $list}
+        <div class="loadmore" id="moreNews" onclick="moreNews()">{:lang('查看更多')}</div>
+        {/if}
     </div>
+
+
     <script>
         $(function () {
             $('.pagination-container select').attr('disabled', 'disabled');
         })
     </script>
-    <script>
-        var pageNo = 1;
 
+    {if $list}
+    <script>
+        var hasServerData = true;
+        var pageNo = 2; // 从第2页开始，因为第1页已经由服务器渲染
+    </script>
+    {else/}
+    <script>
+        var hasServerData = false;
+        var pageNo = 1;
+    </script>
+    {/if}
+
+    <script>
         $(function () {
-            ajaxHonor(pageNo, 20);
+            // 如果没有服务器端数据，则使用Ajax加载
+            if (!hasServerData) {
+                ajaxHonor(pageNo, 20);
+            }
         })
 
         function moreNews() {
@@ -66,7 +165,6 @@
                 }
             });
         }
-
 
         function initHtml(newsList, hideBtn) {
             var html = "";
@@ -96,7 +194,7 @@
                     '<div class="s1">提现' +
                     statusHtml +
                     '</div>' +
-                    ' <div class="s2">订单号：' + obj.orderNo + '</div>' +
+                    ' <div class="s2">订单号：' + (obj.orderNo || obj.id) + '</div>' +
                     '</div>' +
                     '<div class="price price2">-' + obj.num.toFixed(2) + '</div>' +
                     '</li>';
@@ -105,8 +203,6 @@
 
             $("#newsList").append(html);
         }
-
-
     </script>
 </body>
 

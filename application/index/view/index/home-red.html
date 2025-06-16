@@ -18,7 +18,7 @@
     <script src="/static/home/js/lib.js"></script>
     <script src="/static/home/js/swiper.min.js"></script>
 
-    <!--		轮播图-->
+    <!--轮播图-->
     <link rel="stylesheet" href="/static/banner/css/normalize.css">
     <link rel="stylesheet" href="/static/banner/css/style.css">
     <script src="/static/banner/js/awesome-slider.min.js"></script>
@@ -272,32 +272,6 @@
             class="w-btn js-pop-close">我已阅读</a>
     </div>
 
-    <div class="pop-win" id="pop1">
-        <div class="bg"></div>
-        <div class="title">
-            <div class="s1">平台简介</div>
-            <div class="s2">Platform Introduction</div>
-        </div>
-        <div class="box">
-            <div class="time">2020年08月27日 19:04:26</div>
-            <div class="con">
-                <p>平台每天都会将需要提高曝光度的商家产品放到
-                    平台上，提供给平台用户进行抢单。为了规避网
-                    购平台的检测，提高订单的真实性，新用户在抢
-                    单前必须先完善个人真实信息，并填写真实的收
-                    货地址。</p>
-                <p>为了有效的帮助商家提升订单成功率， 规避商家
-                    被检查到虚假订单的风险，平台将会根据您当前
-                    的操作IP，设备型号对当天的订单进行优化匹配。
-                    所有订单匹配均需要通过智能云算法实现，
-                    请您耐心等待。</p>
-            </div>
-        </div>
-        <a href="javascript:;" class="w-btn js-pop-close">已了解，返回首页</a>
-    </div>
-
-
-
     <div id="danmu" style="display:none">
 
         <div class='banner_img' style="width:8rem;height:3.89rem">
@@ -305,8 +279,6 @@
         </div>
 
         <div class="summary-card">
-
-
 
             <div class="order-info">
                 <div class="order-text">
@@ -335,14 +307,94 @@
                 }
             });
             $('.footer li:eq(0)').addClass('active');
+
+            // 检查是否从登录页面跳转过来，决定是否显示特别公告弹窗
+            checkAndShowSpecialNotice();
         })
 
+        // 检查并显示特别公告弹窗
+        function checkAndShowSpecialNotice() {
+            var fromLogin = sessionStorage.getItem('fromLogin');
+            var loginTime = sessionStorage.getItem('loginTime');
+
+            console.log('弹窗检查 - fromLogin:', fromLogin, 'loginTime:', loginTime);
+
+            if (fromLogin === 'true') {
+                // 检查是否是最近5分钟内的登录（避免长时间后还显示）
+                var now = new Date().getTime();
+                var timeDiff = now - parseInt(loginTime || 0);
+
+                console.log('时间差检查 - 当前时间:', now, '登录时间:', loginTime, '时间差:', timeDiff, '分钟');
+
+                if (timeDiff < 5 * 60 * 1000) { // 5分钟内
+                    // 检查今天是否已显示过
+                    var hasShownToday = localStorage.getItem('specialNoticeShown_' + getCurrentDate());
+
+                    console.log('今日显示检查 - 日期:', getCurrentDate(), '已显示:', hasShownToday);
+
+                    if (!hasShownToday) {
+                        console.log('满足条件，显示弹窗');
+                        showSpecialNotice();
+                        // 只有在显示弹窗后才清除标记
+                        sessionStorage.removeItem('fromLogin');
+                        sessionStorage.removeItem('loginTime');
+                    } else {
+                        console.log('今日已显示过弹窗，跳过');
+                    }
+                } else {
+                    console.log('登录时间超过5分钟，清除过期标记');
+                    // 超过5分钟，清除过期的标记
+                    sessionStorage.removeItem('fromLogin');
+                    sessionStorage.removeItem('loginTime');
+                }
+            } else {
+                console.log('未检测到登录标记');
+            }
+        }
+
+        // 显示特别公告弹窗
+        function showSpecialNotice() {
+            console.log('开始显示弹窗');
+            $('.pop-mask').show();
+            $('.pop-win1').show();
+
+            // 记录今天已显示过
+            localStorage.setItem('specialNoticeShown_' + getCurrentDate(), 'true');
+            console.log('弹窗已显示，设置今日显示标记:', 'specialNoticeShown_' + getCurrentDate());
+        }
+
+        // 获取当前日期字符串
+        function getCurrentDate() {
+            var today = new Date();
+            return today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
+        }
+
+        // 测试用：手动清除弹窗显示记录（在控制台调用）
+        function clearPopupRecord() {
+            localStorage.removeItem('specialNoticeShown_' + getCurrentDate());
+            console.log('已清除今日弹窗显示记录，刷新页面可重新显示弹窗');
+        }
+
         function closeTc() {
+            // 隐藏弹窗
+            $('.pop-mask').hide();
+            $('.pop-win1').hide();
+
+            // 可选：调用后端记录用户已读状态（如果后端接口存在）
             $.ajax({
                 url: "/closeTc",
                 type: "POST",
                 dataType: "JSON",
                 data: {
+                    type: 'special_notice',
+                    action: 'close'
+                },
+                success: function (res) {
+                    console.log('特别公告关闭状态已记录');
+                },
+                error: function () {
+                    // 即使后端接口不存在也不影响前端功能
+                    console.log('后端接口暂未实现，但弹窗功能正常');
                 }
             })
         }

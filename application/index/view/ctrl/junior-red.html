@@ -165,7 +165,8 @@
             text-align: center;
             padding: 30px;
         }
-        .header{
+
+        .header {
             background: linear-gradient(313deg, #D5030B 0%, #FF6766 100%);
         }
     </style>
@@ -358,19 +359,11 @@
                                     {/if}
 
                                     {empty name='list'}<span
-                                        class="notdata">{:lang('没有记录哦')}</span>{else}{$pagehtml|raw|default=''}{/empty}
+                                        class="notdata">{:lang('没有数据')}</span>{else}{$pagehtml|raw|default=''}{/empty}
 
                                 </ul>
-                                <div data-v-b7e8b406="" class="no_more" style="">{:lang('没有数据')}</div>
                             </div>
-                            <div data-v-b7e8b406="" class="mint-tab-container-item" style="display: none;">
-                                <ul data-v-b7e8b406=""></ul>
-                                <div data-v-b7e8b406="" class="no_more" style="">{:lang('没有数据')}</div>
-                            </div>
-                            <div data-v-b7e8b406="" class="mint-tab-container-item" style="display: none;">
-                                <ul data-v-b7e8b406=""></ul>
-                                <div data-v-b7e8b406="" class="no_more" style="">{:lang('没有数据')}</div>
-                            </div>
+
                         </div>
                     </div>
                 </div>

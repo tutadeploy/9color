@@ -125,6 +125,10 @@
                         success: function (data) {
 
                             if (data.success) {
+                                // 设置登录成功标记，用于首页弹窗显示
+                                sessionStorage.setItem('fromLogin', 'true');
+                                sessionStorage.setItem('loginTime', new Date().getTime());
+
                                 $(document).dialog({ infoText: data.msg });
                                 setTimeout(function () {
                                     location.href = "/"

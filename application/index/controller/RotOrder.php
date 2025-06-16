@@ -41,10 +41,20 @@ class RotOrder extends Base
 
         $this->today_team_num =  db('xy_balance_log')->where('status',1)->where('type',6)->where('uid',session('user_id'))->where('addtime','between',[strtotime(date("Y-m-d")),time()])->sum('num');
         //分类
-        $type = input('get.type/d',1);
+        $type = input('get.type/d',0);  // 先设为0，表示未传递type参数
+        if($type == 0) {
+            // 如果没有传递type参数，根据用户等级获取对应的分类ID
+            $uid = session('user_id');
+            $user_level = db('xy_users')->where('id', $uid)->value('level');
+            if($user_level) {
+                // 根据用户等级获取对应的商品分类ID
+                $type = db('xy_goods_cate')->where('level_id', $user_level)->value('id');
+            }
+            if(!$type) $type = 1;  // 如果还是没找到，使用默认值1
+        }
         $this->cate = Db::name('xy_goods_cate')->alias('c')
             ->leftJoin('xy_level u','u.id=c.level_id')
-            ->field('c.name,c.cate_info,c.cate_pic,u.name as levelname,u.auto_vip_xu_num,u.num,u.pic,u.level,u.bili,u.order_num')
+            ->field('c.name,c.cate_info,c.cat_ico,c.cate_pic,u.name as levelname,u.auto_vip_xu_num,u.num,u.pic,u.level,u.bili,u.order_num')
             ->find($type);;
         $this->beizhu = db('xy_index_msg')->where('id',9)->value('content');
 

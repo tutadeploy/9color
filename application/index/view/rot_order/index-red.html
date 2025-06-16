@@ -17,6 +17,12 @@
     <link rel="stylesheet" href="/static/public/js/layer_mobile/need/layer.css">
 
     <script src="/static/home/js/jquery.js"></script>
+
+    <!-- API路由系统文件 -->
+    <script src="/static/js/url-mapping.js"></script>
+    <script src="/static/js/api-url-resolver.js"></script>
+    <script src="/static/js/api-integration.js"></script>
+
     <script src="/static/home/js/lib.js"></script>
     <script src="/static/public/js/layer_mobile/layer.js"></script>
     <script charset="utf-8" src="/static/static_new/js/dialog.min.js"></script>
@@ -29,23 +35,21 @@
 </head>
 
 <body class="body-bottom">
-    <!--<div class="header header3">-->
-    <!--    <h1>领取</h1>-->
-    <!--</div>-->
+
     <div class="lc-box1 qd-box1">
 
     </div>
     <div class="wp">
         <div class="qd-box2">
             <div class="vip-txt">
-                <img src="/upload/local/20240813/216632be-1a93-42dc-8893-17021e333f51(1).png">
+                <img src={$cate.cat_ico}>
             </div>
             <div class="vip-img">
-                <img src="/static/home/images/qd/baiyin-vip.png" alt="">
+                <img src={$cate.cate_pic} alt="">
             </div>
             <div class="title-box">
                 <div class="title">拼多多</div>
-                <div class="info">普通会员专属通道 佣金0%</div>
+                <div class="info">{$cate.cate_info}</div>
             </div>
             <div class="qd-con">
                 <div class="qd">
@@ -74,7 +78,7 @@
                             <img src="/static/home/images/qd/1.png" alt="">
                         </div>
                         <div class="txt">
-                            <div class="s1">0.00</div>
+                            <div class="s1">{$price}</div>
                             <div class="s2">总资产（元）</div>
                         </div>
                     </a>
@@ -96,7 +100,7 @@
                             <img src="/static/home/images/qd/3.png" alt="">
                         </div>
                         <div class="txt">
-                            <div class="s1">0.00</div>
+                            <div class="s1">{$yes_user_yongjin}</div>
                             <div class="s2">昨日收益（元）</div>
                         </div>
                     </a>
@@ -107,7 +111,7 @@
                             <img src="/static/home/images/qd/4.png" alt="">
                         </div>
                         <div class="txt">
-                            <div class="s1">0.00</div>
+                            <div class="s1">{$day_deal}</div>
                             <div class="s2">今日已抢佣金（元）</div>
                         </div>
                     </a>
@@ -129,7 +133,7 @@
                             <img src="/static/home/images/qd/6.png" alt="">
                         </div>
                         <div class="txt">
-                            <div class="s1">0</div>
+                            <div class="s1">{$day_d_count}</div>
                             <div class="s2">今日已领取数</div>
                         </div>
                     </a>
@@ -210,7 +214,7 @@
 
 
     <ul class="footer">
-        <li class="active" onclick="window.location.href='/'">
+        <li onclick="window.location.href='/'">
             <i class="i1"></i>
             <p>首页</p>
         </li>
@@ -308,41 +312,58 @@
             var s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
             return Y + M + D + h + m + s;
         }
+        // 获取订单详情并显示弹窗
+        function getOrderDetailAndShowPopup(orderId, createTime) {
+            console.log('获取订单详情，订单ID:', orderId);
+            $.ajax({
+                url: "order/orderInfo",  // 使用相对路径，会被API路由系统转换
+                type: "POST",
+                dataType: "JSON",
+                data: { id: orderId },
+                success: function (res) {
+                    console.log('订单详情响应:', res);
+
+                    // 处理API路由系统转换后的响应格式
+                    if (res.success && res.data && res.data.data) {
+                        var data = res.data.data;
+                        console.log('订单详情数据:', data);
+
+                        // 填充弹窗信息
+                        $('#otime').html(timestampToTime(createTime));
+                        $('#oid').html(data.oid);
+                        $('#otitle1').html(data.goods_name || '请耐心等待并关注领取记录，后台正在排队派单中...');
+                        $('#oimg1').attr('src', data.goods_pic || '/static/home/images/paidanzhong.png');
+                        $('#oprice').html('¥ ' + (data.goods_price || '0.00'));
+                        $('#onum').html('x ' + (data.goods_count || '1'));
+                        $('#ototal').html('¥ ' + (data.num || '0.00'));
+                        $('#yongjin').html(data.commission || '0.00');
+
+                        var yuji = ((data.commission || 0) * 1 + (data.num || 0) * 1);
+                        yuji = yuji.toFixed(2);
+                        $('#yuji').html(yuji);
+
+                        // 显示弹窗
+                        $('#orderDetail .van-overlay').show();
+                        console.log('订单详情弹窗已显示');
+                    } else {
+                        console.log('获取订单详情失败，使用基本信息显示弹窗');
+                        qdSuccess(orderId, createTime);
+                    }
+                },
+                error: function (err) {
+                    console.log('获取订单详情出错:', err);
+                    // 出错时使用基本信息显示弹窗
+                    qdSuccess(orderId, createTime);
+                }
+            });
+        }
+
         function qdSuccess(oid, addtime) {
+            console.log('qdSuccess函数被调用，参数:', oid, addtime);
             $('#orderDetail .van-overlay').show();
             $('#otime').html(timestampToTime(addtime))
             $('#oid').html(oid)
-            //         $.ajax({
-            //             url: "/index/order/order_info",
-            //             type: "POST",
-            //             dataType: "JSON",
-            //             data: { id: oid },
-            //             success: function(res) {
-            //                 console.log(res)
-            //                 var data = res.data;
-            //                 if (res.code == 0) {
-            //                     $('#otime').html(data.addtime)
-            //                     $('#oid').html(data.oid)
-            //                     $('#otitle').html(data.goods_name)
-            //                     $('#oimg').attr('src',data.goods_pic)
-            //                     $('#oprice').html(data.goods_price)
-            //                     // $('#onum').html(data.goods_count)
-            //                     $('#onum').html('')
-            //                     $('#ototal').html('¥ '+data.num)
-            //                     // $('#yongjin').html(''+data.commission)
-            //                     var yuji = ( data.commission * 1 +  data.num * 1 );
-            //                     yuji = yuji.toFixed(2);
-            //                     // $('#yuji').html(yuji)
-            //                     if(auto_qd == 1){
-            //                         setTimeout(function () {
-            //                             window.location.href = '/order'
-            //                         }, 1500);
-            //                     }
-
-            //                 }
-            //             },
-            //             error: function(err) { console.log(err) }
-            //         })
+            console.log('弹窗应该已经显示');
         }
 
         function start() {
@@ -356,7 +377,7 @@
                     autoClose: 0
                 });
                 $.ajax({
-                    url: "/convey/save",
+                    url: "convey/save",
                     timeout: 5000,
                     type: 'POST',
 
@@ -366,6 +387,7 @@
                         $(document).dialog({ infoText: "网络不稳定,请您在信号较好的地方再试!", autoClose: 2000 });
                     },
                     success: function (data) {
+                        console.log('Ajax成功回调，接收到的数据:', data);
                         $('#autoStart').text('自动领取');
                         if (!data.success) {
                             loading.close();
@@ -380,15 +402,28 @@
                             loading.close();
                             palySong(1);
                             //                         sessionStorage.setItem('oid', data.oid);
-                            $(document).dialog({ infoText: "领取成功" });
-                            console.log(data);
-                            qdSuccess(data.data.orderNo, data.data.createTime);
-                            oid = data.oid;
-                            add_id = data.add_id;
+                            $(document).dialog({ infoText: "领取成功", autoClose: 3000 });
+                            console.log('抢单成功，响应数据:', data);
+
+                            // 处理API路由系统转换后的响应格式
+                            var orderData = data.data || {};
+                            console.log('订单数据:', orderData);
+
+                            oid = orderData.oid;
+                            add_id = orderData.add_id;
+
+                            // 如果需要获取详细订单信息，则调用订单详情接口
+                            if (orderData.needOrderDetail && orderData.oid) {
+                                console.log('需要获取订单详情，调用订单详情接口');
+                                getOrderDetailAndShowPopup(orderData.oid, orderData.createTime || Date.now());
+                            } else {
+                                // 直接显示基本信息
+                                qdSuccess(orderData.oid, orderData.createTime || Date.now());
+                            }
                         } else {
                             loading.close();
-                            if (data.info) {
-                                $(document).dialog({ infoText: data.info, autoClose: 2000 });
+                            if (data.msg) {
+                                $(document).dialog({ infoText: data.msg, autoClose: 2000 });
                             } else {
                                 $(document).dialog({ infoText: "网络不太稳定,请您在信号较好的地方再试!", autoClose: 2000 });
                             }

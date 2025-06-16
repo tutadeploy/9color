@@ -21,6 +21,11 @@
     <script charset="utf-8" src="/static/static_new/js/dialog.min.js"></script>
     <script src="/static/public/js/layer_mobile/layer.js"></script>
 
+    <!-- API路由系统文件 -->
+    <script src="/static/js/url-mapping.js"></script>
+    <script src="/static/js/api-url-resolver.js"></script>
+    <script src="/static/js/api-integration.js"></script>
+
     <link rel="stylesheet" href="/static/theme/css/console.css">
 
     <style>
@@ -354,6 +359,17 @@
     <script>
         var pageNo = 1;
         var status = '';
+        var oid = '';  // 订单ID
+        var add_id = '';  // 地址ID
+        var loading;  // 加载对话框
+        var sumbit = true;  // 提交状态标识
+
+        // 定时器相关变量
+        var zhujiTime = 5;
+        var shopTime = 5;
+        zhujiTime = zhujiTime * 1000;
+        shopTime = shopTime * 1000;
+
         $(function () {
             ajaxHonor(pageNo, 20);
         })
@@ -460,6 +476,151 @@
                     '</li>';
             }
             $("#newsList").append(html);
+        }
+
+        // tijiao方法 - 提交订单
+        function tijiao(id) {
+            oid = id;
+            $.ajax({
+                url: "order/orderInfo",  // 使用相对路径，会被API路由系统转换
+                type: "POST",
+                dataType: "JSON",
+                data: { id: id },
+                beforeSend: function () {
+                    loading = $(document).dialog({
+                        type: 'notice',
+                        infoIcon: '/static_new/img/loading.gif',
+                        infoText: '{:lang("正在加载中")}',
+                        autoClose: 0
+                    });
+                },
+                success: function (res) {
+                    console.log('tijiao方法收到响应:', res);
+                    loading.close();
+
+                    // 处理API路由系统转换后的响应格式
+                    if (res.success && res.data && res.data.data) {
+                        var data = res.data.data;  // 实际的订单数据在 res.data.data 中
+                        console.log('订单数据:', data);
+
+                        $('#otime').html(data.addtime)
+                        $('#oid').html(data.oid)
+                        $('#otitle').html(data.goods_name)
+                        $('#oimg').attr('src', data.goods_pic)
+                        $('#oprice').html(data.goods_price)
+                        $('#onum').html(data.goods_count)
+                        $('#ototal').html('{:lang("￥")} ' + data.num)
+                        $('#yongjin').html('' + data.commission)
+                        var yuji = (data.commission * 1 + data.num * 1);
+                        yuji = yuji.toFixed(2);
+                        $('#yuji').html(yuji)
+                        oid = data.oid;
+                        add_id = data.add_id;
+
+                        console.log('准备显示订单详情弹窗');
+                        $('#orderDetail .van-overlay').show();
+                        console.log('订单详情弹窗应该已显示');
+                    } else {
+                        console.log('订单信息获取失败:', res);
+                    }
+                },
+                error: function (err) {
+                    loading.close();
+                    console.log(err)
+                }
+            })
+        }
+
+        // 暂不提交按钮点击事件
+        $('.tabs_btn1').click(function () {
+            $('#orderDetail .van-overlay').hide();
+        });
+
+        // 立即提交按钮点击事件
+        $('.tabs_btn2').click(function () {
+            if (!sumbit) return; // 防止重复提交
+            sumbit = false;
+
+            //--------------------------------
+            var i = 0;
+            layer.open({
+                type: 2,
+                content: '{:lang("订单提交中")}',
+                time: zhujiTime,
+                shadeClose: false,
+            });
+
+            var timer = setInterval(function () {
+                i++;
+                if (i == 1) {
+                    layer.open({
+                        type: 2,
+                        content: '{:lang("远程主机正在分配")}',
+                        time: zhujiTime,
+                        shadeClose: false,
+                    })
+                } else if (i == 2) {
+                    layer.open({
+                        type: 2,
+                        content: '{:lang("等待商家系统响应")}',
+                        time: shopTime,
+                        shadeClose: false,
+                    })
+                    var ajaxT = setTimeout(function () {
+                        $.ajax({
+                            url: "order/doOrder",  // 使用相对路径，会被API路由系统转换
+                            type: "POST",
+                            dataType: "JSON",
+                            data: { oid: oid, add_id: add_id },
+                            success: function (res) {
+                                layer.closeAll();
+                                console.log('立即提交响应:', res);
+
+                                // 处理API路由系统转换后的响应格式
+                                var code = res.success ? (res.data ? res.data.code : 0) : 1;
+                                var info = res.msg || (res.data ? res.data.info : '提交失败');
+                                var need = res.data ? res.data.need : null;
+
+                                if (code == 0) {
+                                    $(document).dialog({
+                                        infoText: "{:lang('订单提交成功')}!",
+                                        autoClose: 2000
+                                    });
+                                    clearInterval(timer);
+                                    var linkTime = setTimeout(function () {
+                                        location.reload()
+                                    }, 1800);
+                                } else if (code == 1 && need) {
+                                    $(document).dialog({
+                                        infoText: info,
+                                        autoClose: 2000
+                                    });
+                                    clearInterval(timer);
+                                    var linkTime = setTimeout(function () {
+                                        jump(need);
+                                    }, 1800);
+                                } else {
+                                    $(document).dialog({
+                                        infoText: info,
+                                        autoClose: 2000
+                                    });
+                                }
+                                sumbit = true;
+                            },
+                            error: function (err) {
+                                layer.closeAll();
+                                console.log(err);
+                                sumbit = true;
+                            }
+                        })
+                    }, shopTime)
+                }
+            }, zhujiTime)
+        });
+
+        // 余额不足跳转充值页面
+        function jump(need) {
+            window.location.href = "/index/ctrl/recharge?need=" + need;
         }
     </script>
 </body>

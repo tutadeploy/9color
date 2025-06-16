@@ -96,12 +96,30 @@
    * 从URL中提取API名称
    */
   function extractApiName(url) {
-    // 检查映射表中的匹配
+    // 首先检查是否是原始API名称（在转换前）
+    if (window.ApiUrlMapping.mappings[url]) {
+      return url;
+    }
+
+    // 然后检查映射表中的匹配（转换后的URL）
     for (let apiName in window.ApiUrlMapping.mappings) {
-      if (window.ApiUrlMapping.mappings[apiName] === url || apiName === url) {
+      if (window.ApiUrlMapping.mappings[apiName] === url) {
         return apiName;
       }
     }
+
+    // 最后尝试从URL路径中提取
+    if (url.startsWith("/")) {
+      const pathParts = url.split("/").filter((part) => part);
+      if (pathParts.length >= 2) {
+        // 尝试构建可能的API名称
+        const possibleApiName = pathParts.slice(-2).join("/");
+        if (window.ApiUrlMapping.responseTransforms[possibleApiName]) {
+          return possibleApiName;
+        }
+      }
+    }
+
     return null;
   }
 
@@ -113,6 +131,29 @@
     const config = window.ApiUrlMapping.responseTransforms[apiName];
     if (!config || !config.enabled) {
       return responseData;
+    }
+
+    // 如果有自定义转换函数，优先使用
+    if (
+      config.customTransform &&
+      typeof config.customTransform === "function"
+    ) {
+      try {
+        const customResult = config.customTransform(responseData);
+        stats.transformedResponses++;
+
+        if (window.ApiUrlMapping.debug.logTransforms) {
+          console.log(`[API Custom Transform] ${apiName}:`, {
+            original: responseData,
+            transformed: customResult,
+          });
+        }
+
+        return customResult;
+      } catch (error) {
+        log(`自定义转换函数执行出错: ${error.message}`, "error");
+        // 出错时继续使用默认转换
+      }
     }
 
     const isSuccess = responseData[config.successField] === config.successValue;
@@ -129,6 +170,8 @@
     if (isSuccess && config.redirectUrl) {
       transformedData.redirectUrl = transformRedirectUrl(config.redirectUrl);
     }
+
+    stats.transformedResponses++;
 
     if (window.ApiUrlMapping.debug.logTransforms) {
       console.log(`[API Transform] ${apiName}:`, {
@@ -215,13 +258,30 @@
     if (transformedOptions && transformedOptions.url) {
       transformedOptions.success = function (data, textStatus, xhr) {
         try {
-          // 转换响应数据
-          const apiName = extractApiName(transformedOptions.url);
-          const transformedData = transformResponseData(apiName, data);
+          // 尝试从原始URL和转换后的URL中提取API名称
+          const originalApiName = extractApiName(options.url);
+          const transformedApiName = extractApiName(transformedOptions.url);
+          const apiName = originalApiName || transformedApiName;
 
-          // 调用原始成功回调
-          if (originalSuccess) {
-            originalSuccess.call(this, transformedData, textStatus, xhr);
+          if (apiName) {
+            log(
+              `响应转换: API名称=${apiName}, 原始URL=${options.url}, 转换URL=${transformedOptions.url}`
+            );
+            const transformedData = transformResponseData(apiName, data);
+
+            // 调用原始成功回调
+            if (originalSuccess) {
+              originalSuccess.call(this, transformedData, textStatus, xhr);
+            }
+          } else {
+            log(
+              `未找到API名称配置: 原始URL=${options.url}, 转换URL=${transformedOptions.url}`,
+              "warn"
+            );
+            // 没有找到API配置，直接调用原始回调
+            if (originalSuccess) {
+              originalSuccess.call(this, data, textStatus, xhr);
+            }
           }
         } catch (error) {
           log(`成功回调处理出错: ${error.message}`, "error");

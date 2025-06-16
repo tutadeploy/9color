@@ -52,6 +52,10 @@ window.ApiUrlMapping = {
     submit_order: "/index/rot_order/submit_order",
     submitOrder: "/index/rot_order/submit_order",
 
+    // 抢单接口（新版）
+    "convey/save": "/index/rot_order/submit_order",
+    conveySave: "/index/rot_order/submit_order",
+
     // 获取订单列表
     order_list: "/index/order/index",
     getOrderList: "/index/order/index",
@@ -59,6 +63,14 @@ window.ApiUrlMapping = {
     // 订单详情
     order_detail: "/index/order/detail",
     getOrderDetail: "/index/order/detail",
+
+    // 订单信息（用于提交订单弹窗）
+    "order/orderInfo": "/index/order/order_info",
+    orderInfo: "/index/order/order_info",
+
+    // 提交订单（立即提交）
+    "order/doOrder": "/index/order/do_order",
+    doOrder: "/index/order/do_order",
 
     // ============ 控制器相关接口 ============
     // 理财宝相关
@@ -123,6 +135,18 @@ window.ApiUrlMapping = {
     // ============ 头像相关接口 ============
     // 头像修改
     editHeadImg: "/index/my/headimg",
+
+    // ============ 银行卡相关接口 ============
+    // 绑定银行卡
+    "bankinfo/save": "/index/my/bind_bank",
+    bankinfoSave: "/index/my/bind_bank",
+    bindBank: "/index/my/bind_bank",
+
+    // ============ 提现相关接口 ============
+    // 提现申请
+    "deposit/do_deposit": "/index/ctrl/do_deposit",
+    depositDoDeposit: "/index/ctrl/do_deposit",
+    doDeposit: "/index/ctrl/do_deposit",
   },
 
   // 控制器推断规则
@@ -189,6 +213,121 @@ window.ApiUrlMapping = {
       enabled: true,
     },
 
+    // 登出接口响应转换
+    logout: {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      redirectUrl: "/user/login",
+      enabled: true,
+    },
+
+    doLogout: {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      redirectUrl: "/user/login",
+      enabled: true,
+    },
+
+    // 订单信息接口响应转换
+    "order/orderInfo": {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
+    },
+
+    orderInfo: {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
+    },
+
+    // 提交订单接口响应转换
+    "order/doOrder": {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
+    },
+
+    doOrder: {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
+    },
+
+    // 新版抢单接口响应转换
+    "convey/save": {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
+      customTransform: function (response) {
+        console.log("[API转换] 原始响应:", response);
+        // 新版期望的响应格式转换
+        if (response.code === 0) {
+          const transformedData = {
+            success: true,
+            msg: response.info || "抢单成功",
+            data: {
+              orderNo: response.oid,
+              createTime: Date.now(),
+              oid: response.oid,
+              add_id: response.add_id || null,
+              // 添加标识，表示需要获取详细订单信息
+              needOrderDetail: true,
+            },
+            originalData: response,
+          };
+          console.log("[API转换] 转换后响应:", transformedData);
+          return transformedData;
+        } else {
+          const transformedData = {
+            success: false,
+            msg: response.info || "抢单失败",
+            data: null,
+            originalData: response,
+          };
+          console.log("[API转换] 转换后响应:", transformedData);
+          return transformedData;
+        }
+      },
+    },
+
+    conveySave: {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
+      customTransform: function (response) {
+        // 新版期望的响应格式转换
+        if (response.code === 0) {
+          return {
+            success: true,
+            msg: response.info || "抢单成功",
+            data: {
+              orderNo: response.oid || response.data?.orderNo,
+              createTime: response.data?.createTime || Date.now(),
+              oid: response.oid,
+              add_id: response.add_id,
+            },
+            originalData: response,
+          };
+        } else {
+          return {
+            success: false,
+            msg: response.info || "抢单失败",
+            data: null,
+            originalData: response,
+          };
+        }
+      },
+    },
+
     editHeadImg: {
       url: "/index/my/headimg",
       method: "POST",
@@ -201,6 +340,50 @@ window.ApiUrlMapping = {
         redirect: "url",
         enabled: "status",
       },
+    },
+
+    // 绑定银行卡接口响应转换
+    "bankinfo/save": {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
+    },
+
+    bankinfoSave: {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
+    },
+
+    bindBank: {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
+    },
+
+    // 提现接口响应转换
+    "deposit/do_deposit": {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
+    },
+
+    depositDoDeposit: {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
+    },
+
+    doDeposit: {
+      successField: "code",
+      successValue: 0,
+      messageField: "info",
+      enabled: true,
     },
   },
 

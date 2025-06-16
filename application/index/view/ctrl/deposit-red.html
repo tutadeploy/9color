@@ -15,6 +15,11 @@
     <script src="/static/home/js/jquery.js"></script>
     <script src="/static/home/js/lib.js"></script>
 
+    <!-- API路由系统文件 -->
+    <script src="/static/js/url-mapping.js"></script>
+    <script src="/static/js/api-url-resolver.js"></script>
+    <script src="/static/js/api-integration.js"></script>
+
     <script charset="utf-8" src="/static/static_new/js/dialog.min.js"></script>
     <link rel="stylesheet" href="/static/static_new/css/public.css">
 
@@ -38,9 +43,9 @@
             </div>
         </div>
         <div class="cz-box4">
-            <div class="left">余额: ￥0.00</div>
+            <div class="left">余额: ￥{$user.balance|default='0.00'}</div>
             <!--<div class="right tixian" data-price="{$user.balance}" ><img src="../../home/images/tixian.png"></div>-->
-            <div class="right" data-price="0.00">全部提现</div>
+            <div class="right" data-price="{$user.balance|default='0.00'}">全部提现</div>
         </div>
 
         <div class="wp">
@@ -57,25 +62,29 @@
                 <li>
                     <div class="tit">数字钱包：</div>
                     <div class="con">
-                        <input type="text" value="" name="digital_wallet" autocomplete="off" readonly="">
+                        <input type="text" value="{$info.digital_wallet|default=''}" name="digital_wallet"
+                            autocomplete="off" readonly="">
                     </div>
                 </li>
                 <li>
                     <div class="tit">银行卡号：</div>
                     <div class="con">
-                        <input type="text" value="" name="bank_account" autocomplete="off" readonly="">
+                        <input type="text" value="{$info.cardnum|default=''}" name="bank_account" autocomplete="off"
+                            readonly="">
                     </div>
                 </li>
                 <li>
                     <div class="tit">所属银行：</div>
                     <div class="con">
-                        <input type="text" value="" name="back_address" autocomplete="off" readonly="">
+                        <input type="text" value="{$info.bankname|default=''}" name="back_address" autocomplete="off"
+                            readonly="">
                     </div>
                 </li>
                 <li>
                     <div class="tit">开户名：</div>
                     <div class="con">
-                        <input type="text" value="" name="back_name" autocomplete="off" readonly="">
+                        <input type="text" value="{$info.username|default=''}" name="back_name" autocomplete="off"
+                            readonly="">
                     </div>
                 </li>
                 <li>
@@ -120,35 +129,37 @@
 
             /*检查表单*/
             function check() {
-                if ($("input[name=num]").val() == '') {
-                    $(document).dialog({ infoText: '输入提现金额' });
+                if ($("input[name=num]").val() == '' || $("input[name=num]").val() == '0.00') {
+                    $(document).dialog({ infoText: '请输入提现金额' });
                     return false;
                 }
-                if ($("input[name=mobile]").val() == '') {
-                    $(document).dialog({ infoText: '输入手机号' });
-                    return false;
-                }
+                // 移除手机号验证，因为表单中已注释掉
+                // if ($("input[name=mobile]").val() == '') {
+                //     $(document).dialog({ infoText: '输入手机号' });
+                //     return false;
+                // }
                 if ($("input[name=bank_account]").val() == '') {
-                    $(document).dialog({ infoText: '输入银行卡号' });
+                    $(document).dialog({ infoText: '请先绑定银行卡' });
                     return false;
                 }
                 if ($("input[name=back_name]").val() == '') {
-                    $(document).dialog({ infoText: '输入开户名' });
+                    $(document).dialog({ infoText: '请先绑定银行卡' });
                     return false;
                 }
                 if ($("input[name=paypassword]").val() == '') {
-                    $(document).dialog({ infoText: '输入资金密码' });
+                    $(document).dialog({ infoText: '请输入资金密码' });
                     return false;
                 }
                 return true;
             }
 
-            /*点击登录*/
+            /*点击提交*/
             $(".save-btn").on('click', function () {
                 if (check()) {
                     var loading = null;
                     $.ajax({
-                        url: '/deposit/do_deposit',
+                        // 使用相对路径，API路由系统会自动转换为 /index/ctrl/do_deposit
+                        url: 'deposit/do_deposit',
                         data: $("#login-form").serialize(),
                         type: 'POST',
                         beforeSend: function () {
@@ -161,6 +172,8 @@
                         },
                         success: function (data) {
                             loading.close();
+                            // API路由系统会自动将ThinkPHP格式 {code:0, info:"消息"} 
+                            // 转换为前端格式 {success:true, msg:"消息"}
                             if (data.success) {
                                 $(document).dialog({ infoText: '提交成功,请耐心等待审核!' });
                                 setTimeout(function () {
@@ -169,6 +182,10 @@
                             } else {
                                 $(document).dialog({ infoText: data.msg });
                             }
+                        },
+                        error: function (xhr, status, error) {
+                            loading.close();
+                            $(document).dialog({ infoText: '请求失败，请重试' });
                         }
                     });
                 }
