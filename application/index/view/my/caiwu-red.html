@@ -11,7 +11,7 @@
 		content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
 	<meta name="format-detection" content="telephone=no" />
 	<link rel="stylesheet" href="/static/home/css/style.css" />
-
+<link href="/static_new6/css/app.red.css" rel="stylesheet">
 	<script src="/static/home/js/jquery.js"></script>
 	<script src="/static/home/js/lib.js"></script>
 	<style>
@@ -19,6 +19,60 @@
 			display: flex;
 
 		}
+         .circle-color-8 > div::before {
+            background-color: #ccc;
+        }
+        /* 通用分页 */
+        .pagination-container {
+			padding: .2rem;
+            line-height: 40px;
+            text-align: left;
+        }
+        .pagination-container > span {
+            color: #666;
+            font-size: 9pt;
+        }
+        .pagination-container > ul {
+            float: right;
+            display: inline-block;
+            margin: 0;
+            padding: 0;
+        }
+        .pagination-container > ul > li {
+            z-index: 1;
+            display: inline-block;
+        }
+        .pagination-container > ul > li > a, .pagination-container > ul > li > span {
+            color: #333;
+            width: 33px;
+            height: 30px;
+            border: 1px solid #dcdcdc;
+            display: inline-block;
+            margin-left: -1px;
+            text-align: center;
+            line-height: 28px;
+        }
+        .pagination-container > ul > li > span {
+            background: #dcdcdc;
+            cursor: default;
+        }
+        .van-tab--active span{
+            color: #ff9a2c;
+        }
+        .circle-color-23 > div::before {
+            background-color: #ccc;
+        }
+        .notdata{
+            display: block;
+            text-align: center;
+            padding: 30px;
+        }
+        .nav .btn[data-v-5a05e720]{
+            width:25%;
+        }
+          .header{
+            background: linear-gradient(313deg, #D5030B 0%, #FF6766 100%);
+        }
 	</style>
 </head>
 
@@ -40,16 +94,56 @@
 	</div>
 	<div class="wp">
 		<ul class="z-tab TAB_CLICK">
-			<li class="<?php echo !$type?'on':'';  ?>"><a href="/my/caiwu">所有类型</a></li>
-			<li class="<?php echo $type == 1?'on':'';  ?>"><a href="/my/caiwu.html?type=7">提现记录</a></li>
-			<li class="<?php echo $type == 2?'on':'';  ?>"><a href="/my/caiwu.html?type=1">充值记录</a></li>
+			<li class="<?php echo !$type?'on':'';  ?>"><a href="/index/my/caiwu">所有类型</a></li>
+			<li class="<?php echo $type == 1?'on':'';  ?>"><a href="/index/my/caiwu.html?type=1">提现记录</a></li>
+			<li class="<?php echo $type == 2?'on':'';  ?>"><a href="/index/my/caiwu.html?type=2">充值记录</a></li>
 		</ul>
-		<ul class="mx-list" id="newsList">
+		<ul class="mx1-list" id="newsList">
+			<div data-v-5a05e720="" class="page-tab-container">
+				<div data-v-5a05e720="" class="mint-tab-container page-tabbar-tab-container">
+					<div class="mint-tab-container-wrap">
+						<div data-v-5a05e720="" class="mint-tab-container-item">
+							<ul data-v-5a05e720="">
 
+								{if $list}
+								{volist name='list' id='v'}
+								<li data-v-5a05e720="">
+									<p data-v-5a05e720="">{$v.addtime|format_datetime="Y-m-d H:i"} </p>
+									<h3 data-v-5a05e720="" class="caiwu-row-info">
+										{switch $v.type}
+										{case 1}<font color="red">{:lang('用户充值')}</font>{/case}
+										{case 2}<font color="#2a28c3">{:lang('用户接单')}</font>{/case}
+										{case 3}<font color="red">{:lang('接单返佣')}</font>{/case}
+										{case 6}<font color="#ffaa00">{:lang('下级返佣')}</font>{/case}
+										{case 7}<font color="#d814c9">{:lang('用户提现')}</font>{/case}
+										{case 11}<font color="#d814c9">{:lang('充值彩金')}</font>{/case}
+										{case 21}<font color="green">{:lang('余额宝转入')}</font>{/case}
+										{case 22}<font color="red">{:lang('余额宝转出')}</font>{/case}
+										{case 23}<font color="red">{:lang('余额宝收益')}</font>{/case}
+										{/switch}
+										<span data-v-5a05e720=""
+											class="mint-badge {if $v.status==1}is-error{else/}is-success{/if}  is-size-normal">{if
+											$v.status==1}+{else/}-{/if}{$v.num}</span>
+
+									</h3>
+								</li>
+								{/volist}
+								{else\}
+
+								{/if}
+
+								{empty name='list'}<span
+									class="notdata">{:lang('没有记录哦')}</span>{else}{$pagehtml|raw|default=''}{/empty}
+
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
 
 		</ul>
 	</div>
-	<div class="loadmore" id="moreNews" onclick="moreNews()">查看更多</div>
+
 
 	<link rel="stylesheet" href="/static/home/css/weui.min.css">
 	<link rel="stylesheet" href="/static/home/css/jquery-weui.css">
@@ -230,6 +324,43 @@
 
 
 	</script>
+    <script>
+    $('.pagination li').click(function () {
+        var class2= $(this).attr('class');
+        if( class2 == 'active' || class2 == 'disabled' ) {
+
+        }else{
+            var url = $(this).find('a').attr('href');
+            window.location.href = url;
+        }
+    })
+    $(function () {
+        $('.pagination-container select').attr('disabled','disabled');
+
+        ///
+        // 主题
+        new rolldate.Date({
+            el:'#start',
+            format:'YYYY-MM-DD',
+            beginYear:2000,
+            endYear:2100,
+            theme:'blue'
+        })
+
+
+        // 主题
+        new rolldate.Date({
+            el:'#end',
+            format:'YYYY-MM-DD',
+            beginYear:2000,
+            endYear:2100,
+            theme:'blue'
+        })
+    });
+
+
+</script>
+
 </body>
 
 </html>
