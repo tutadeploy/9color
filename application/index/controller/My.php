@@ -544,7 +544,13 @@ class My extends Base
         $level = $user['level'];
         !$level ? $level = 0 : '';
         $this->level_name = db('xy_level')->where('level',$level)->value('name');
-        $this->info = db('xy_users')->field('username,tel,level,id,headpic,balance,freeze_balance,lixibao_balance,invite_code,show_td')->find($uid);
+        
+        // 添加info变量包含用户信息
+        $this->info = [
+            'username' => $user['username'],
+            'invite_code' => $user['invite_code']
+        ];
+       
         $color = sysconf('app_color');
         if($color){
             return $this->fetch('invite-'.$color);

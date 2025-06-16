@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cn">
 
 <head>
     <meta charset="UTF-8">
@@ -11,6 +11,26 @@
         content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
     <meta name="format-detection" content="telephone=no" />
     <link rel="stylesheet" href="/static/home/css/style.css?ver=1.1" />
+    <style>
+        /* 复制成功提示样式 */
+        .copy-success-toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .copy-success-toast.show {
+            opacity: 1;
+        }
+    </style>
 
     <script charset="utf-8" src="/static_new/js/jquery.min.js"></script>
     <script charset="utf-8" src="/static_new/js/dialog.min.js"></script>
@@ -29,36 +49,97 @@
         <div class="vip">{$level_name}</div>
         <div class="name">{$info.username}</div>
         <div class="code">邀请码：<span id="c">{$info.invite_code}</span> <i class="btn-copy"></i></div>
- 	 <div class="promote-wrpa">
-	 	
-     <div data-v-268420fc="" class="user" style="display: block;text-align: center;">
-      <div id="qrcode" class="ewm qr" ></div>
-                          
+        <div class="promote-wrpa">
 
-<script>
-jQuery('#qrcode').qrcode({
-    render: "canvas", //也可以替换为table
-    width: 100,
-    height: 100,
-    text: "{$url}"
-});
-</script>
-        <a href="javascript:;" class="btn-share js-share">立即分享</a>
+            <div data-v-268420fc="" class="user" style="display: block;text-align: center;">
+                <div id="qrcode" class="ewm qr"></div>
+                <script>
+                    jQuery('#qrcode').qrcode({
+                        render: "canvas", //也可以替换为table
+                        width: 100,
+                        height: 100,
+                        text: "{$url}"
+                    });
+                </script>
+            </div>
+            <input name="" id="webcopyinput" type="text"
+                style="color: #FF0000; font-size: 20px; width: 1px; height: 1px; border: hidden; font-weight: bold; text-align: center;"
+                value="">
+            <div class="copy btn-share js-share" style="display: block;" onclick="copy_txt('{$url}')">
+                立即分享
+            </div>
+        </div>
+
     </div>
-   
-    <script src="/static/home/js/clipboard.min.js"></script>
-    <script>
-        var c = document.getElementById("c");
-        var s = c.innerHTML;
-        var clipboard = new Clipboard('.btn-copy', {
-            text: function () {
-                return s;
-            }
-        });
-        clipboard.on('success', function (e) {
-            alert("复制成功");
-        });
-    </script>
 </body>
+<script>
+    function copy_txt(xx) {
+        //var text = document.createElement('input');
+        var text = document.getElementById("webcopyinput");
+        text.id = 'webcopyinput';
+        text.value = '' + xx + '';
+        //text.style.position = 'fixed';
+        // text.style.top = '- 10000px';
+        // document.body.appendChild(text);
+        text.focus();//给input输入框聚焦
+        text.setSelectionRange(0, text.value.length);//设置input框选中的范围
+        copied = document.execCommand('Copy');//执行复制操作
+        text.blur();
+        copied = false;
+        document.body.scrollTop = 0;
+        
+        // 添加复制成功提示
+        showCopySuccess();
+    }
+    
+    // 显示复制成功提示
+    function showCopySuccess() {
+        // 方式1: 使用toast提示
+        showToast('复制成功！');
+        
+    }
+    // Toast提示函数
+    function showToast(message) {
+        // 移除已存在的toast
+        $('.copy-success-toast').remove();
+        
+        // 创建新的toast
+        var toast = $('<div class="copy-success-toast">' + message + '</div>');
+        $('body').append(toast);
+        
+        // 显示动画
+        setTimeout(function() {
+            toast.addClass('show');
+        }, 10);
+        
+        // 自动隐藏
+        setTimeout(function() {
+            toast.removeClass('show');
+            setTimeout(function() {
+                toast.remove();
+            }, 300);
+        }, 2000);
+    }
+    $(function () {
+        var w = $(window).width(); //375  667  9.333333rem
+        var h = $(window).height();
+        console.log(w)
+        console.log(h)
+        // console.log(375/667)
+        // console.log(w/h)
+
+        var tt = h / 667 * 9.333333;
+        //var tt = h/2 - 30;
+        console.log("-----------------------")
+        console.log($('#user').css('width'));//275
+        console.log($('#user').css('height'));//400
+
+        //var h2 = $('#user').css('height')
+        //tt - tt*0.07
+
+        //$('#user').css('padding-top',h2)
+
+    })
+</script>
 
 </html>
