@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1" />
+    <meta name="renderer" content="webkit" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="stylesheet" href="/static/home/css/style.css" />
+    <link rel="stylesheet" href="/static/home/css/danmu.css" />
+    <link rel="stylesheet" href="/static/home/css/swiper.css">
+
+    <script src="/static/home/js/jquery.js"></script>
+    <script src="/static/home/js/lib.js"></script>
+    <script src="/static/home/js/swiper.min.js"></script>
+
+    <!--		轮播图-->
+    <link rel="stylesheet" href="/static/banner/css/normalize.css">
+    <link rel="stylesheet" href="/static/banner/css/style.css">
+    <script src="/static/banner/js/awesome-slider.min.js"></script>
+    <script src="/static/banner/js/index.js"></script>
+</head>
+
+<body class="body-bottom">
+    <div class="wp">
+        <div class="ind-box1">
+            <div class="tit">
+                <img src="/upload/local/20250531/019e7ac3-8a37-45fd-8e95-a2ec4c7f2cd7.png" alt="">
+                悠享手工
+            </div>
+            <a href="" class="user">
+                <i></i>
+                15816393445
+            </a>
+        </div>
+        <!--			<div class="ind-box2">-->
+        <!--				<div class="ind-box2-top">-->
+        <!--					<img th:src="@{/static/home/images/ind-img1.png}" src="../../home/images/ind-img1.png" alt="">-->
+        <!--					<div class="tit">我的总资产(元)</div>-->
+        <!--					<div class="con">-->
+        <!--						<div class="price">0.00</div>-->
+        <!--						<a href="/ctrl/deposit" class="btn btn1">提现</a>-->
+        <!--						<a href="/ctrl/recharge" class="btn btn2">储入</a>-->
+        <!--					</div>-->
+        <!--				</div>-->
+        <!--				<ul class="count-list">-->
+        <!--					<li>-->
+        <!--						<div class="s1">0.00</div>-->
+        <!--						<div class="s2">昨日收益（元）</div>-->
+        <!--					</li>-->
+        <!--					<li>-->
+        <!--						<div class="s1">0.00</div>-->
+        <!--						<div class="s2">今日收益（元）</div>-->
+        <!--					</li>-->
+        <!--					<li>-->
+        <!--						<div class="s1">0.00</div>-->
+        <!--						<div class="s2">累计收益（元）</div>-->
+        <!--					</li>-->
+        <!--				</ul>-->
+        <!--			</div>-->
+        <!--			<div class="ind-row3">-->
+        <!--				<div class="box">-->
+        <!--					<div class="swiper-wrapper">-->
+        <!--						<div class="swiper-slide" th:each="vo,it:${lines}">-->
+        <!--							<a href="###" class="tit"><img th:src="@{/static/home/images/icon-laba.png}"-->
+        <!--									alt=""></a>-->
+        <!--							<a href="###" class="more">了解</a>-->
+        <!--						</div>-->
+
+        <!--					</div>-->
+        <!--				</div>-->
+        <!--			</div>-->
+
+        <!--轮播图-->
+        <div id="root">
+
+        </div>
+        <ul class="ind-row4">
+            <li>
+                <a href="/shop/index2">
+                    <i class="i1"></i>
+                    <p>手工商城</p>
+                </a>
+            </li>
+            <li>
+                <!--自由领取权-->
+                <a href="/index/msg">
+                    <i class="i2_0"></i>
+
+                    <p></span>待激活权益</p>
+
+                </a>
+            </li>
+            <li>
+                <a href="/ctrl/recharge">
+                    <i class="i3"></i>
+                    <p>马上储入</p>
+                </a>
+            </li>
+            <li>
+                <a href="/ctrl/deposit">
+                    <i class="i4"></i>
+                    <p>快速提现</p>
+                </a>
+            </li>
+            <li>
+                <a href="/my/tc">
+                    <i class="i5"></i>
+                    <p>弹窗记录</p>
+                </a>
+            </li>
+        </ul>
+        <div class="ind-row5">
+            <div class="w-tit1">
+                <div class="tit">任务大厅</div>
+            </div>
+            <ul>
+                <!-- /rotOrder?type=1   /ctrl/vip  -->
+                <li class="li1">
+                    <a href="/rotOrder?type=1">
+                        <div class="pic"><img src="/static/home/images/rw1.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/8f4b6891-692c-4f8e-af71-f307f98e18c0.png"
+                                alt="代还"></div>
+                        <div class="tit">拼多多</div>
+                        <div class="info">普通会员专属通道</div>
+
+                    </a>
+                </li>
+                <li class="li2">
+                    <a href="/ctrl/vip">
+                        <div class="pic"><img src="/static/home/images/rw2.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/64505490-03f1-4608-9beb-2e43e34db158.png"
+                                alt="代还"></div>
+                        <div class="tit">淘宝</div>
+                        <div class="info">白银会员专属通道</div>
+                        <div class="status">储入解锁</div>
+                    </a>
+                </li>
+                <li class="li3">
+                    <a href="/ctrl/vip">
+                        <div class="pic"><img src="/static/home/images/rw3.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/03bc00fb-e1d6-4576-b7b5-dd862c9df6a7.png"
+                                alt="代还"></div>
+                        <div class="tit">天猫</div>
+                        <div class="info">黄金会员专属通道</div>
+                        <div class="status">储入解锁</div>
+                    </a>
+                </li>
+                <li class="li4">
+                    <a href="/ctrl/vip">
+                        <div class="pic"><img src="/static/home/images/rw4.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/95c07748-7bc7-46e4-b37a-5acf083953b8.png"
+                                alt="代还"></div>
+                        <div class="tit">京东</div>
+                        <div class="info">铂金会员专属通道</div>
+                        <div class="status">储入解锁</div>
+                    </a>
+                </li>
+                <li class="li5">
+                    <a href="/ctrl/vip">
+                        <div class="pic"><img src="/static/home/images/rw5.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/95c07748-7bc7-46e4-b37a-5acf083953b8.png"
+                                alt="代还"></div>
+                        <div class="tit">京东+淘宝</div>
+                        <div class="info">钻石会员专属通道</div>
+                        <div class="status">储入解锁</div>
+                    </a>
+                </li>
+                <li class="li6">
+                    <a href="/ctrl/vip">
+                        <div class="pic"><img src="/static/home/images/rw6.png" alt="代还"></div>
+                        <div class="icon"><img src="/upload/local/20230506/8f4b6891-692c-4f8e-af71-f307f98e18c0.png"
+                                alt="代还"></div>
+                        <div class="tit">天猫+淘宝</div>
+                        <div class="info">至尊会员专属通道</div>
+                        <div class="status">储入解锁</div>
+                    </a>
+                </li>
+                <!-- 					<li class="li1"><a href="/rotOrder?type=2"> -->
+                <!-- 							<div class="pic"><img  th:src="@{/static/home/images/rw2.png}" src="../../home/images/rw2.png" alt="淘宝"></div> -->
+                <!-- 							<div class="icon"><img th:src="@{/static/static_new6/img/vip_2a.be0ead6.png}"  src="/static_new6/img/vip_2a.be0ead6.png" alt="淘宝"></div> -->
+                <!-- 							<div class="tit">淘宝</div> -->
+                <!-- 							<div class="info">黄金会员专属通道</div> -->
+                <!-- 						</a></li> -->
+                <!-- 					<li class="li2"> -->
+                <!-- 						<a href="/ctrl/vip"> -->
+                <!-- 							<div class="pic"><img th:src="@{/static/home/images/rw3.png}" src="../../home/images/rw3.png" alt="天猫"></div> -->
+                <!-- 							<div class="icon"><img th:src="@{/static//static_new6/img/vip_3a.90bd5b6.png}"  src="/static_new6/img/vip_3a.90bd5b6.png" alt="天猫"></div> -->
+                <!-- 							<div class="tit">天猫</div> -->
+                <!-- 							<div class="info">铂金会员专属通道</div> -->
+
+                <!-- 							<div class="status">储入解锁</div> -->
+                <!-- 						</a></li> -->
+                <!-- 					<li class="li3"> -->
+                <!-- 						<a href="/ctrl/vip"> -->
+                <!-- 							<div class="pic"><img th:src="@{/static/home/images/rw4.png}"  src="../../home/images/rw4.png" alt="京东"></div> -->
+                <!-- 							<div class="icon"><img th:src="@{/static/static_new6/img/vip_4a.fe406d7.png}" src="/static_new6/img/vip_4a.fe406d7.png" alt="京东"></div> -->
+                <!-- 							<div class="tit">京东</div> -->
+                <!-- 							<div class="info">钻石会员专属通道</div> -->
+                <!-- 							<div class="status">储入解锁</div> -->
+                <!-- 						</a></li> -->
+            </ul>
+        </div>
+
+        <div class="ind-row6">
+            <div class="w-tit1">
+                <div class="tit">相关信息</div>
+            </div>
+            <ul>
+                <li>
+                    <a href="/my/detail.html?id=2" class="myfancy">
+                        <div class="icon">
+                            <img src="/static/home/images/xx1.png" alt="">
+                        </div>
+                        <div class="txt">
+                            <div class="cn">平台简介</div>
+                            <div class="en">Platform Introduction</div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/my/detail.html?id=3">
+                        <div class="icon">
+                            <img src="/static/home/images/xx2.png" alt="">
+                        </div>
+                        <div class="txt">
+                            <div class="cn">规则说明</div>
+                            <div class="en">Rule Description</div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/my/detail.html?id=4">
+                        <div class="icon">
+                            <img src="/static/home/images/xx3.png" alt="">
+                        </div>
+                        <div class="txt">
+                            <div class="cn">代理合作</div>
+                            <div class="en">Agency Cooperation</div>
+                        </div>
+                    </a>
+                </li>
+                <li>
+                    <a href="/my/detail.html?id=12">
+                        <div class="icon">
+                            <img src="/static/home/images/xx4.png" alt="">
+                        </div>
+                        <div class="txt">
+                            <div class="cn">公司资质</div>
+                            <div class="en">Company Qualifications</div>
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+    <ul class="footer">
+        <li class="" onclick="window.location.href='/'">
+            <i class="i1"></i>
+            <p>首页</p>
+        </li>
+        <li onclick="window.location.href='/order'">
+            <i class="i2"></i>
+            <p>记录</p>
+        </li>
+        <li onclick="window.location.href='/rotOrder'">
+            <i class="i3"></i>
+            <p>领取</p>
+        </li>
+        <li onclick="window.location.href='/support'">
+            <i class="i4"></i>
+            <p>客服</p>
+        </li>
+        <li onclick="window.location.href='/my'">
+            <i class="i5"></i>
+            <p>我的</p>
+        </li>
+    </ul>
+
+
+    <div class="pop-mask" style="display:none"></div>
+    <div class="pop-win1" style="display:none">
+        <div class="bg"></div>
+        <div class="title">特别公告通知</div>
+        <div class="con">
+            <p><span
+                    style="color: rgb(0, 0, 0); font-size: 12px;">最新推出线下购换充值卡福利，线下购买指定充值卡卷到本平台进行兑换的基于充值金额给与一定优惠，卡卷兑换金额达到一万元以上可获得赠送</span><span
+                    style="color: rgb(255, 77, 79); font-size: 12px;">奖励金额188元到1888元不等！<span
+                        style="color: rgb(255, 77, 79); font-size: 14px;">> </span></p>
+        </div>
+        <a href="javascript:void(0);" onclick="closeTc()" style="margin-bottom: 0.8rem"
+            class="w-btn js-pop-close">我已阅读</a>
+    </div>
+
+    <div class="pop-win" id="pop1">
+        <div class="bg"></div>
+        <div class="title">
+            <div class="s1">平台简介</div>
+            <div class="s2">Platform Introduction</div>
+        </div>
+        <div class="box">
+            <div class="time">2020年08月27日 19:04:26</div>
+            <div class="con">
+                <p>平台每天都会将需要提高曝光度的商家产品放到
+                    平台上，提供给平台用户进行抢单。为了规避网
+                    购平台的检测，提高订单的真实性，新用户在抢
+                    单前必须先完善个人真实信息，并填写真实的收
+                    货地址。</p>
+                <p>为了有效的帮助商家提升订单成功率， 规避商家
+                    被检查到虚假订单的风险，平台将会根据您当前
+                    的操作IP，设备型号对当天的订单进行优化匹配。
+                    所有订单匹配均需要通过智能云算法实现，
+                    请您耐心等待。</p>
+            </div>
+        </div>
+        <a href="javascript:;" class="w-btn js-pop-close">已了解，返回首页</a>
+    </div>
+
+
+
+    <div id="danmu" style="display:none">
+
+        <div class='banner_img' style="width:8rem;height:3.89rem">
+            <img src="/static/home/images/danmu.jpg" width="100%" height="100%">
+        </div>
+
+        <div class="summary-card">
+
+
+
+            <div class="order-info">
+                <div class="order-text">
+                    <div class="summary-card_h1">消息通知</div>
+                    <p class="summary-card_p" id="content"></p>
+                    <input type="hidden" id="tc_id">
+                </div>
+
+                <div class="order-actions">
+                    <button class="btn btn-primary summary-card_button" onclick="closeDanmu()">我知道了</button>
+                    <!--<button class="btn btn-no-outline">Cancel Order</button>-->
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(function () {
+            var swiper = new Swiper('.ind-row3 .box', {
+                loop: true,
+                direction: "vertical",
+                autoplay: {
+                    delay: 3000,
+                    disableOnInteraction: false,
+                }
+            });
+            $('.footer li:eq(0)').addClass('active');
+        })
+
+        function closeTc() {
+            $.ajax({
+                url: "/closeTc",
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                }
+            })
+        }
+    </script>
+    <script>
+        get_user_tc();
+
+        setInterval(get_user_tc, 5000);
+        var flag = false;
+
+        function showDanmu(content, id) {
+
+            $("#danmu").show();
+            $(".pop-mask").show();
+            $("#content").html(content);
+            $("#tc_id").val(id);
+        }
+
+        function closeDanmu() {
+            $("#danmu").hide();
+            $(".pop-mask").hide();
+            flag = false;
+            $.ajax({
+                url: "/user-tc/saveOrUpdate",
+                type: "POST",
+                dataType: "JSON",
+                data: {
+                    status: 1,
+                    id: $("#tc_id").val()
+                },
+            })
+        }
+
+        function get_user_tc() {
+            if (flag) {
+                return false;
+            }
+            $.ajax({
+                url: ("/user-tc/select"),
+                type: "GET",
+                data: {},
+                success: function (res) {
+                    if (res.success) {
+                        flag = true;
+                        var data_tc = res.data;
+                        var html = '';
+                        showDanmu(data_tc.content, data_tc.id)
+
+                    }
+                },
+            })
+
+        }
+    </script>
+
+</body>
+
+</html>

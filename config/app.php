@@ -4,8 +4,8 @@ return [
     
         // 是否开启多语言
     'lang_switch_on'         => true,
-    'default_lang' => 'en-us',
-    'lang_list' => ['zh-cn','en-us'],
+    'default_lang' => 'zh-cn',
+    'lang_list' => ['zh-cn','en-us','th-th'],
     
     // 应用调试模式
     'app_debug'                 => true,
@@ -82,10 +82,10 @@ return [
     '3_d_reward'=>'0.08',               //上三级会员获得交易奖励
     '4_d_reward'=>'0',               //上四级会员获得交易奖励
     '5_d_reward'=>'0',                  //上五级会员获得交易奖励
-    'master_cardnum'=>'ติดต่อแอดมิน',             //银行卡号
-    'master_name'=>'ติดต่อแอดมิน',                              //收款人
-    'master_bank'=>'ติดต่อแอดมิน',                          //所属银行
-    'master_bk_address'=>'ติดต่อแอดมิน',         //银行地址
+    'master_cardnum'=>'请联系客服',             //银行卡号
+    'master_name'=>'请联系客服',                //收款人
+    'master_bank'=>'请联系客服',                //所属银行
+    'master_bk_address'=>'请联系客服',         //银行地址
     'deal_zhuji_time'=>'2',         //远程主机分配时间
     'deal_shop_time'=>'2',          //等待商家响应时间
     'tixian_time_1'=>'00',           //提现开始时间

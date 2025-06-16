@@ -176,7 +176,7 @@ class Base extends Controller
                     cookie('think_var', 'th-th', time()+3600*24);
                     break;
                 default:
-                    cookie('think_var','th-th' ,time()+3600*24);
+                    cookie('think_var','zh-cn' ,time()+3600*24);
                     break;
             }
     }

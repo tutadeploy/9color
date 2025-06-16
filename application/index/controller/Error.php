@@ -8,7 +8,7 @@ class Error
     public function index(Request $request)
     {
         $action = $request->controller();
-        return $action.lang('Ò³Ãæ²»´æÔÚ');
+        return $action.lang('Ò³ï¿½æ²»ï¿½ï¿½ï¿½ï¿½');
     }
    
 }

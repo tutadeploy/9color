@@ -119,7 +119,6 @@
                 <div class="tit">任务大厅</div>
             </div>
             <ul>
-                <!-- /rotOrder?type=1   /ctrl/vip  -->
                 <li class="li1">
                     <a href="/rotOrder?type=1">
                         <div class="pic"><img src="/static/home/images/rw1.png" alt="代还"></div>
@@ -127,135 +126,111 @@
                                 alt="代还"></div>
                         <div class="tit">拼多多</div>
                         <div class="info">普通会员专属通道</div>
-
                     </a>
                 </li>
                 <li class="li2">
-                    <a href="/ctrl/vip">
+                    <a href="{$info.level >= 1 ? '/rotOrder?type=2' : '/ctrl/vip'}">
                         <div class="pic"><img src="/static/home/images/rw2.png" alt="代还"></div>
                         <div class="icon"><img src="/upload/local/20230506/64505490-03f1-4608-9beb-2e43e34db158.png"
                                 alt="代还"></div>
                         <div class="tit">淘宝</div>
                         <div class="info">白银会员专属通道</div>
-                        <div class="status">储入解锁</div>
-                    </a>
-                </li>
-                <li class="li3">
-                    <a href="/ctrl/vip">
-                        <div class="pic"><img src="/static/home/images/rw3.png" alt="代还"></div>
-                        <div class="icon"><img src="/upload/local/20230506/03bc00fb-e1d6-4576-b7b5-dd862c9df6a7.png"
-                                alt="代还"></div>
-                        <div class="tit">天猫</div>
-                        <div class="info">黄金会员专属通道</div>
-                        <div class="status">储入解锁</div>
-                    </a>
-                </li>
-                <li class="li4">
-                    <a href="/ctrl/vip">
-                        <div class="pic"><img src="/static/home/images/rw4.png" alt="代还"></div>
-                        <div class="icon"><img src="/upload/local/20230506/95c07748-7bc7-46e4-b37a-5acf083953b8.png"
-                                alt="代还"></div>
-                        <div class="tit">京东</div>
-                        <div class="info">铂金会员专属通道</div>
-                        <div class="status">储入解锁</div>
-                    </a>
-                </li>
-                <li class="li5">
-                    <a href="/ctrl/vip">
-                        <div class="pic"><img src="/static/home/images/rw5.png" alt="代还"></div>
-                        <div class="icon"><img src="/upload/local/20230506/95c07748-7bc7-46e4-b37a-5acf083953b8.png"
-                                alt="代还"></div>
-                        <div class="tit">京东+淘宝</div>
-                        <div class="info">钻石会员专属通道</div>
-                        <div class="status">储入解锁</div>
-                    </a>
-                </li>
-                <li class="li6">
-                    <a href="/ctrl/vip">
-                        <div class="pic"><img src="/static/home/images/rw6.png" alt="代还"></div>
-                        <div class="icon"><img src="/upload/local/20230506/8f4b6891-692c-4f8e-af71-f307f98e18c0.png"
-                                alt="代还"></div>
-                        <div class="tit">天猫+淘宝</div>
-                        <div class="info">至尊会员专属通道</div>
-                        <div class="status">储入解锁</div>
-                    </a>
-                </li>
-                <!-- 					<li class="li1"><a href="/rotOrder?type=2"> -->
-                <!-- 							<div class="pic"><img  th:src="@{/static/home/images/rw2.png}" src="../../home/images/rw2.png" alt="淘宝"></div> -->
-                <!-- 							<div class="icon"><img th:src="@{/static/static_new6/img/vip_2a.be0ead6.png}"  src="/static_new6/img/vip_2a.be0ead6.png" alt="淘宝"></div> -->
-                <!-- 							<div class="tit">淘宝</div> -->
-                <!-- 							<div class="info">黄金会员专属通道</div> -->
-                <!-- 						</a></li> -->
-                <!-- 					<li class="li2"> -->
-                <!-- 						<a href="/ctrl/vip"> -->
-                <!-- 							<div class="pic"><img th:src="@{/static/home/images/rw3.png}" src="../../home/images/rw3.png" alt="天猫"></div> -->
-                <!-- 							<div class="icon"><img th:src="@{/static//static_new6/img/vip_3a.90bd5b6.png}"  src="/static_new6/img/vip_3a.90bd5b6.png" alt="天猫"></div> -->
-                <!-- 							<div class="tit">天猫</div> -->
-                <!-- 							<div class="info">铂金会员专属通道</div> -->
+                        {if $info.level < 1}<div class="status">储入解锁
+        </div>{/if}
+        </a>
+        </li>
+        <li class="li3">
+            <a href="{$info.level >= 2 ? '/rotOrder?type=3' : '/ctrl/vip'}">
+                <div class="pic"><img src="/static/home/images/rw3.png" alt="代还"></div>
+                <div class="icon"><img src="/upload/local/20230506/03bc00fb-e1d6-4576-b7b5-dd862c9df6a7.png" alt="代还">
+                </div>
+                <div class="tit">天猫</div>
+                <div class="info">黄金会员专属通道</div>
+                {if $info.level < 2}<div class="status">储入解锁
+    </div>{/if}
+    </a>
+    </li>
+    <li class="li4">
+        <a href="{$info.level >= 3 ? '/rotOrder?type=4' : '/ctrl/vip'}">
+            <div class="pic"><img src="/static/home/images/rw4.png" alt="代还"></div>
+            <div class="icon"><img src="/upload/local/20230506/95c07748-7bc7-46e4-b37a-5acf083953b8.png" alt="代还"></div>
+            <div class="tit">京东</div>
+            <div class="info">铂金会员专属通道</div>
+            {if $info.level < 3}<div class="status">储入解锁</div>{/if}
+        </a>
+    </li>
+    <li class="li5">
+        <a href="{$info.level >= 4 ? '/rotOrder?type=5' : '/ctrl/vip'}">
+            <div class="pic"><img src="/static/home/images/rw5.png" alt="代还"></div>
+            <div class="icon"><img src="/upload/local/20230506/95c07748-7bc7-46e4-b37a-5acf083953b8.png" alt="代还"></div>
+            <div class="tit">京东+淘宝</div>
+            <div class="info">钻石会员专属通道</div>
+            {if $info.level < 4}<div class="status">储入解锁</div>{/if}
+        </a>
+    </li>
+    <li class="li6">
+        <a href="{$info.level >= 5 ? '/rotOrder?type=6' : '/ctrl/vip'}">
+            <div class="pic"><img src="/static/home/images/rw6.png" alt="代还"></div>
+            <div class="icon"><img src="/upload/local/20230506/8f4b6891-692c-4f8e-af71-f307f98e18c0.png" alt="代还"></div>
+            <div class="tit">天猫+淘宝</div>
+            <div class="info">至尊会员专属通道</div>
+            {if $info.level < 5}<div class="status">储入解锁</div>{/if}
+        </a>
+    </li>
+    </ul>
+    </div>
 
-                <!-- 							<div class="status">储入解锁</div> -->
-                <!-- 						</a></li> -->
-                <!-- 					<li class="li3"> -->
-                <!-- 						<a href="/ctrl/vip"> -->
-                <!-- 							<div class="pic"><img th:src="@{/static/home/images/rw4.png}"  src="../../home/images/rw4.png" alt="京东"></div> -->
-                <!-- 							<div class="icon"><img th:src="@{/static/static_new6/img/vip_4a.fe406d7.png}" src="/static_new6/img/vip_4a.fe406d7.png" alt="京东"></div> -->
-                <!-- 							<div class="tit">京东</div> -->
-                <!-- 							<div class="info">钻石会员专属通道</div> -->
-                <!-- 							<div class="status">储入解锁</div> -->
-                <!-- 						</a></li> -->
-            </ul>
+    <div class="ind-row6">
+        <div class="w-tit1">
+            <div class="tit">相关信息</div>
         </div>
-        <div class="ind-row6">
-            <div class="w-tit1">
-                <div class="tit">相关信息</div>
-            </div>
-            <ul>
-                <li>
-                    <a href="/my/detail.html?id=2" class="myfancy">
-                        <div class="icon">
-                            <img src="/static/home/images/xx1.png" alt="">
-                        </div>
-                        <div class="txt">
-                            <div class="cn">平台简介</div>
-                            <div class="en">Platform Introduction</div>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="/my/detail.html?id=3">
-                        <div class="icon">
-                            <img src="/static/home/images/xx2.png" alt="">
-                        </div>
-                        <div class="txt">
-                            <div class="cn">规则说明</div>
-                            <div class="en">Rule Description</div>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="/my/detail.html?id=4">
-                        <div class="icon">
-                            <img src="/static/home/images/xx3.png" alt="">
-                        </div>
-                        <div class="txt">
-                            <div class="cn">代理合作</div>
-                            <div class="en">Agency Cooperation</div>
-                        </div>
-                    </a>
-                </li>
-                <li>
-                    <a href="/my/detail.html?id=12">
-                        <div class="icon">
-                            <img src="/static/home/images/xx4.png" alt="">
-                        </div>
-                        <div class="txt">
-                            <div class="cn">公司资质</div>
-                            <div class="en">Company Qualifications</div>
-                        </div>
-                    </a>
-                </li>
-            </ul>
-        </div>
+        <ul>
+            <li>
+                <a href="/my/detail.html?id=2" class="myfancy">
+                    <div class="icon">
+                        <img src="/static/home/images/xx1.png" alt="">
+                    </div>
+                    <div class="txt">
+                        <div class="cn">平台简介</div>
+                        <div class="en">Platform Introduction</div>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="/my/detail.html?id=3">
+                    <div class="icon">
+                        <img src="/static/home/images/xx2.png" alt="">
+                    </div>
+                    <div class="txt">
+                        <div class="cn">规则说明</div>
+                        <div class="en">Rule Description</div>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="/my/detail.html?id=4">
+                    <div class="icon">
+                        <img src="/static/home/images/xx3.png" alt="">
+                    </div>
+                    <div class="txt">
+                        <div class="cn">代理合作</div>
+                        <div class="en">Agency Cooperation</div>
+                    </div>
+                </a>
+            </li>
+            <li>
+                <a href="/my/detail.html?id=12">
+                    <div class="icon">
+                        <img src="/static/home/images/xx4.png" alt="">
+                    </div>
+                    <div class="txt">
+                        <div class="cn">公司资质</div>
+                        <div class="en">Company Qualifications</div>
+                    </div>
+                </a>
+            </li>
+        </ul>
+    </div>
     </div>
 
 
