@@ -1448,8 +1448,24 @@ class Ctrl extends Base
         $o_pwd = input('old_pwd/s','');
         $pwd = input('new_pwd/s','');
         $type = input('type/d',1);
-        $uinfo = db('xy_users')->field('pwd,salt,tel')->find(session('user_id'));
-        if($uinfo['pwd']!=sha1($o_pwd.$uinfo['salt'].config('pwd_str'))) return json(['code'=>1,'info'=>lang('密码错误')]);
+        $uinfo = db('xy_users')->field('pwd,salt,tel,pwd2,salt2')->find(session('user_id'));
+        
+        // 根据密码类型验证不同的密码
+        if($type == 1) {
+            // 验证登录密码
+            if($uinfo['pwd']!=sha1($o_pwd.$uinfo['salt'].config('pwd_str'))) {
+                return json(['code'=>1,'info'=>lang('登录密码错误')]);
+            }
+        } elseif($type == 2) {
+            // 验证交易密码
+            if(empty($uinfo['pwd2'])) {
+                return json(['code'=>1,'info'=>lang('未设置交易密码')]);
+            }
+            if($uinfo['pwd2']!=sha1($o_pwd.$uinfo['salt2'].config('pwd_str'))) {
+                return json(['code'=>1,'info'=>lang('交易密码错误')]);
+            }
+        }
+        
        // $res = model('admin/Users')->reset_pwd($uinfo['tel'],$pwd,$type);
         $res = model('admin/Users')->reset_pwd_byid(session('user_id'),$pwd,$type);
         

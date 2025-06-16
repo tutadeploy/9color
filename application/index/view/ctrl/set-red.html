@@ -37,9 +37,9 @@
                     </a>
                 </li>
                 <li>
-                    <a href="javascript:void(0)" class="js-open-change">
+                    <a onclick="location.href=`{:url('/index/my/edit_username')}`">
                         <span class="u2">系统账号</span>
-                        <input type="text" disabled value="15816393445">
+                        <input type="text" disabled value="{$info.username}">
                     </a>
                 </li>
             </ul>
@@ -47,7 +47,7 @@
                 <li>
                     <a href="">
                         <span class="u3">我的手机号码</span>
-                        <input type="tel" value="15816393445">
+                        <input type="tel" disabled value="{$info.tel}">
                     </a>
                 </li>
                 <li>

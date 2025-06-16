@@ -127,7 +127,7 @@
                 if (check()) {
                     var loading = null;
                     $.ajax({
-                        url: '/bankinfo/save',
+                        url:  '/index/my/bind_bank',
                         data: $("#login-form").serialize(),
                         type: 'POST',
                         beforeSend: function () {
@@ -140,10 +140,10 @@
                         },
                         success: function (data) {
 
-                            if (data.success) {
+                            if (data.code==0) {
                                 $(document).dialog({ infoText: '保存成功' });
                                 setTimeout(function () {
-                                    window.location.reload();
+                                  window.history.back();
                                 }, 2000);
                             } else {
                                 loading.close();
