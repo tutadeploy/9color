@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  # PHP-FPM服务
+  php-fpm:
+    build:
+      context: ..
+      dockerfile: local-nginx-fpm/Dockerfile
+    container_name: 9color_local_php
+    volumes:
+      - ..:/var/www/html
+    environment:
+      - PHP_IDE_CONFIG=serverName=9color-local
+    networks:
+      - 9color_local
+    working_dir: /var/www/html
+
+  # Nginx服务
+  nginx:
+    image: nginx:alpine
+    container_name: 9color_local_nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ..:/var/www/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php-fpm
+    networks:
+      - 9color_local
+
+  # MySQL服务
+  mysql:
+    image: mysql:8.0
+    container_name: 9color_local_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: 6ui
+      TZ: Asia/Shanghai
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_local_data:/var/lib/mysql
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --lower_case_table_names=0
+    networks:
+      - 9color_local
+
+networks:
+  9color_local:
+    driver: bridge
+
+volumes:
+  mysql_local_data:
