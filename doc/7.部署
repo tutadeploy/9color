@@ -1,0 +1,41 @@
+sudo apt install -y curl wget git vim nano unzip software-properties-common apt-transport-https ca-certificates gnupg lsb-release
+
+# 安装 Docker
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io
+
+# 启动 Docker 服务
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# 将当前用户加入 docker 组
+sudo usermod -aG docker $USER
+
+# 安装 Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# 安装 PHP 8.1 及扩展
+sudo apt install -y php8.1 php8.1-cli php8.1-fpm php8.1-mysql php8.1-xml php8.1-gd php8.1-curl php8.1-zip php8.1-mbstring php8.1-json php8.1-bcmath php8.1-tokenizer
+
+# 安装 Composer
+curl -sS https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
+sudo chmod +x /usr/local/bin/composer
+
+# 网络工具
+sudo apt install -y net-tools htop tree
+
+# 防火墙配置
+sudo ufw enable
+sudo ufw allow 22    # SSH
+sudo ufw allow 80    # HTTP
+sudo ufw allow 443   # HTTPS
+sudo ufw allow 3306  # MySQL (如果需要外部访问)
+
+# 安装 Certbot (Let's Encrypt)
+sudo apt install -y certbot python3-certbot-nginx
