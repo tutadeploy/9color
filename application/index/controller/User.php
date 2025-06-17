@@ -25,12 +25,15 @@ class User extends Base
     //用户登录页面
     public function login()
     {
-        if(session('user_id')) $this->redirect('index/home');
+        // 如果已经登录，直接返回首页
+        if(session('user_id')) {
+            return $this->redirect('/');  // 重定向到根路径，让Nginx和路由正确处理
+        }
+        
         $color = sysconf('app_color');
         if($color){
             return $this->fetch('login-'.$color);
         }else{
-
             return $this->fetch('login-blue');
         }
     }
@@ -151,7 +154,7 @@ function get_real_ip()
 
     public function logout(){
         \Session::delete('user_id');
-        $this->redirect('login');
+        $this->redirect('/login');  // 统一使用绝对路径
     }
 
     /**

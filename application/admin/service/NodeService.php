@@ -89,7 +89,7 @@ class NodeService
     public static function getMenuNodeList()
     {
         static $nodes = [];
-        if (count($nodes) > 0) return $nodes;
+        if (is_array($nodes) && count($nodes) > 0) return $nodes;
         foreach (self::getMethodList() as $node => $method) if ($method['menu']) {
             $nodes[] = ['node' => $node, 'title' => $method['title']];
         }
@@ -141,9 +141,10 @@ class NodeService
     public static function getAuthList()
     {
         static $nodes = [];
-        if (count($nodes) > 0) return $nodes;
+        if (is_array($nodes) && count($nodes) > 0) return $nodes;
         $nodes = Cache::tag('system')->get('NodeAuthList', []);
-        if (count($nodes) > 0) return $nodes;
+        if (is_array($nodes) && count($nodes) > 0) return $nodes;
+        $nodes = []; // 确保$nodes是数组
         foreach (self::getMethodList() as $key => $node) {
             if ($node['auth']) $nodes[$key] = $node['title'];
         }
@@ -201,7 +202,8 @@ class NodeService
     public static function getAuthTree($checkeds = [])
     {
         static $nodes = [];
-        if (count($nodes) > 0) return $nodes;
+        if (is_array($nodes) && count($nodes) > 0) return $nodes;
+        $nodes = []; // 重置为空数组
         foreach (self::getAuthList() as $node => $title) {
             $pnode = substr($node, 0, strripos($node, '/'));
             $nodes[$node] = ['node' => $node, 'title' => $title, 'pnode' => $pnode, 'checked' => in_array($node, $checkeds)];
@@ -253,9 +255,10 @@ class NodeService
     public static function getClassList()
     {
         static $nodes = [];
-        if (count($nodes) > 0) return $nodes;
+        if (is_array($nodes) && count($nodes) > 0) return $nodes;
         $nodes = Cache::tag('system')->get('NodeClassData', []);
-        if (count($nodes) > 0) return $nodes;
+        if (is_array($nodes) && count($nodes) > 0) return $nodes;
+        $nodes = []; // 确保$nodes是数组
         self::eachController(function (\ReflectionClass $reflection, $prenode) use (&$nodes) {
             list($node, $comment) = [trim($prenode, ' / '), $reflection->getDocComment()];
             $nodes[$node] = preg_replace('/^\/\*\*\*(.*?)\*.*?$/', '$1', preg_replace("/\s/", '', $comment));
@@ -273,9 +276,10 @@ class NodeService
     public static function getMethodList()
     {
         static $nodes = [];
-        if (count($nodes) > 0) return $nodes;
+        if (is_array($nodes) && count($nodes) > 0) return $nodes;
         $nodes = Cache::tag('system')->get('NodeMethodData', []);
-        if (count($nodes) > 0) return $nodes;
+        if (is_array($nodes) && count($nodes) > 0) return $nodes;
+        $nodes = []; // 确保$nodes是数组
         self::eachController(function (\ReflectionClass $reflection, $prenode) use (&$nodes) {
             foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
                 $action = strtolower($method->getName());

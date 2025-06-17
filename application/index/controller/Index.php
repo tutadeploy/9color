@@ -15,15 +15,12 @@ class Index extends Base
     public function index()
     {
         $this->changelang();
-            $this->redirect('home');
+        return $this->home();
     }
 
     public function home()
     {
-        
         $uid = session('user_id');
-        
-         if(!$uid) $this->redirect('User/login');
         
         $this->info = Db::name('xy_index_msg')->field('content')->select();
         $this->balance = Db::name('xy_users')->where('id',session('user_id'))->sum('balance');
@@ -34,64 +31,39 @@ class Index extends Base
         $this->guize = db('xy_index_msg')->where('id',3)->value('content');
         $this->gundong = db('xy_index_msg')->where('id',8)->find();
         $this->tanchunag = db('xy_index_msg')->where('id',11)->find();
-      
-
+        
         $this->assign('pic','/upload/qrcode/user/'.(session('user_id')%20).'/'.session('user_id').'-1.png');
         $this->cate = db('xy_goods_cate')->alias('c')
             ->leftJoin('xy_level u','u.id=c.level_id')
             ->field('c.name,c.id,c.cate_info,c.cat_ico,c.bili,u.order_num,u.num,u.auto_vip_xu_num,c.cate_pic,c.deal_min_num,u.name as levelname,u.pic,u.level')
             ->order('c.id asc')->select();
 
-
         //一天的
         $this->lixibao = db('xy_lixibao_list')->order('id asc')->find();
 
-        //
+        // 获取用户信息，包括等级
         $uid = session('user_id');
         if(isset($uid)){
-           $yes1 = strtotime( date("Y-m-d 00:00:00",strtotime("-1 day")) );
+            $yes1 = strtotime( date("Y-m-d 00:00:00",strtotime("-1 day")) );
             $yes2 = strtotime( date("Y-m-d 23:59:59",strtotime("-1 day")) );
-$this->tod_user_yongjin = db('xy_convey')->where('uid',$uid)->where('status',1)->where('addtime','between',[strtotime(date("Y-m-d")),time()])->sum('commission');
-$this->yes_user_yongjin = db('xy_convey')->where('uid',$uid)->where('status',1)->where('addtime','between',[$yes1,$yes2])->sum('commission');
-$this->user_yongjin = db('xy_convey')->where('uid',$uid)->where('status',1)->sum('commission');
-            $userinfo= db('xy_users')->find($uid);
-            if($userinfo['level']==0&&$userinfo['balance']<30){$userinfo['level']=-1;}
-            $this->info = $userinfo;
-        }else{
-            $this->tod_user_yongjin = 0;
-            $this->yes_user_yongjin = 0;
-            $this->user_yongjin = 0;
-            $info['username']=lang("未登录用户");
-            $info['balance']="0";
-            $info['headpic']="";
-            $info['level']="";
-            $this->info=$info;
+            
+            // 获取用户详细信息，包括等级
+            $this->info = db('xy_users')->where('id', $uid)->find();
+            if(!$this->info) {
+                // 如果用户不存在，设置默认等级
+                $this->info = ['level' => 0];
+            }
+        } else {
+            // 未登录用户设置默认等级
+            $this->info = ['level' => 0];
         }
         
-      
-        $percent=$this->getpercent();
-         $this->percent=$percent;
-          /**
-        $scrollarray=array();
-                    $fileurl = APP_PATH . "../config/indexscrollnew.txt";
-                    $text = file_get_contents($fileurl);
-                    $text = explode("\r\n",$text);
-                    if($text){
-                       foreach( $text as $k=>&$_list ) {
-                        $temp=explode(";",$_list);
-                        $scrollarray[$k]['tel']=$temp[0];
-                        $scrollarray[$k]['num']=intval($temp[1]*$percent);
-                        } 
-                    }
-        $this->scrollarray=$scrollarray;
-    **/
-
+        // 根据系统配置的颜色主题选择对应的模板
         $color = sysconf('app_color');
         if($color){
             return $this->fetch('home-'.$color);
         }else{
-
-            return $this->fetch('home-blue');
+            return $this->fetch('home');
         }
     }
 

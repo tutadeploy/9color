@@ -14,63 +14,55 @@ class Base extends Controller
     protected $msg  = ['__token__'  => 'error token！'];
 
     function __construct() {
-        
         parent::__construct();
         
-           if(!cookie('think_var')){
-             $url=$this->getUrl();
-             cookie('think_var', 'zh-cn', time()+3600*24);
-             $this->redirect($url);
-             
-        } 
+        // 检查是否是登录相关页面
+        $request = Request::instance();
+        $isLoginPage = ($request->controller() == 'User' && in_array($request->action(), ['login', 'do_login', 'register', 'do_register']));
         
+        // 语言Cookie检查 - 只在非登录页面进行，避免循环重定向
+        if(!cookie('think_var') && !$isLoginPage){
+            cookie('think_var', 'zh-cn', time()+3600*24);
+            // 不进行重定向，直接设置默认语言
+        }
+        
+        // 获取用户ID
         $uid = session('user_id');
         if (!$uid) {
             $uid = cookie('user_id');
         }
+        
+        // 用户升级检查
         if($uid){
             model('admin/Users')->auto_check_up_vip($uid);
         }
-   if (sysconf('isopenpcindex')) {
-        $dev = new \org\Mobile();
-        $t = $dev->isMobile();
-        if (!$t) {
-                 $this->redirect('/download');
-            }
-            
-        }
-     /**if(sysconf('allowindex')){
-        $request = Request::instance();
-       if(!($request->module()=="index"&&$request->controller()=="Index"&&$request->action()=="home")||!($request->module()=="index"&&$request->controller()=="RotOrder"&&$request->action()=="index")){
         
-       }else{
-            if(!$uid && request()->isPost()){
+        // PC端检查
+        if (sysconf('isopenpcindex')) {
+            $dev = new \org\Mobile();
+            $t = $dev->isMobile();
+            if (!$t) {
+                $this->redirect('/download');
+            }
+        }
+        
+        // 登录检查 - 如果不是登录相关页面，且用户未登录，则重定向到登录页面
+        if (!$isLoginPage && !$uid) {
+            if (request()->isPost()) {
                 $this->error(lang('请先登录'));
             }
-            if(!$uid) $this->redirect('User/login'); 
-       }
-            
-        }else{
-            
-        if(!$uid && request()->isPost()){
-            $this->error(lang('请先登录'));
+            $this->redirect('/login');  // 使用Nginx配置的路径
         }
-        if(!$uid) $this->redirect('User/login');
+        
+        // 用户状态检查
+        if($uid) {
+            $uinfo = db('xy_users')->find($uid);
+            if($uinfo && $uinfo['status'] != 1){
+                \Session::delete('user_id');
+                $this->redirect('/login');  // 统一使用绝对路径
+            }
         }
-       
-        $request = Request::instance();
-       if($request->module()=="index"&&$request->controller()=="Index"&&$request->action()=="home"){
-         echo "当前模块名称是" . $request->module(); 
-         echo "当前控制器名称是" . $request->controller(); 
-         echo "当前操作名称是" . $request->action(); 
-         die;
-       }**/
-        /***实时监测账号状态***/
-        $uinfo = db('xy_users')->find($uid);
-        if($uinfo['status']!=1){
-            \Session::delete('user_id');
-             $this->redirect('User/login');
-        }
+        
         $this->console = db('xy_script')->where('id',1)->value('script');
     }
 

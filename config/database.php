@@ -10,9 +10,9 @@ return [
     // 数据库名
     'database'    => '6ui',
     // 用户名
-    'username'    => 'root',
+    'username'    => 'appuser',
     // 密码
-    'password'    => 'root123456',
+    'password'    => 'app123456',
     // 编码
     'charset'     => 'utf8mb4',
     // 端口
