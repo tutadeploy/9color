@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# 9Color 数据库部署脚本
-# 适用于 Ubuntu 20/22 系统
+# 9Color 生产环境一键部署脚本
+# 包含 PHP + Nginx + MySQL
 
 set -e
 
-echo "=== 9Color 数据库部署脚本 ==="
+echo "=== 9Color 生产环境一键部署脚本 ==="
 
 # 检查系统
 if ! grep -q "Ubuntu" /etc/os-release; then
@@ -35,54 +35,124 @@ if ! command -v docker-compose &> /dev/null; then
 fi
 
 # 检查端口是否被占用
-if netstat -tuln | grep -q :3306; then
-    echo "错误: 端口 3306 已被占用，请停止其他MySQL服务或修改docker-compose.yml中的端口映射"
+echo "检查端口占用..."
+if netstat -tuln 2>/dev/null | grep -q :80; then
+    echo "错误: 端口 80 已被占用，请停止其他Web服务"
     exit 1
 fi
 
-if netstat -tuln | grep -q :8080; then
-    echo "警告: 端口 8080 已被占用，phpMyAdmin将无法启动"
+if netstat -tuln 2>/dev/null | grep -q :3306; then
+    echo "错误: 端口 3306 已被占用，请停止其他MySQL服务"
+    exit 1
 fi
+
+# 创建必要目录
+echo "创建必要目录..."
+mkdir -p logs/nginx logs/mysql
 
 # 设置目录权限
 echo "设置目录权限..."
-sudo chown -R $USER:$USER ./mysql-data ./mysql-init ./mysql-config
+sudo chown -R $USER:$USER . 2>/dev/null || chown -R $USER:$USER .
 
-# 启动服务
-echo "启动 Docker Compose 服务..."
-docker-compose down --remove-orphans
-docker-compose up -d
+# 停止可能运行的服务
+echo "停止旧服务..."
+docker-compose down --remove-orphans 2>/dev/null || true
 
-# 等待MySQL启动
-echo "等待MySQL启动..."
+# 构建并启动服务
+echo "构建并启动服务..."
+docker-compose up -d --build
+
+# 等待服务启动
+echo "等待服务启动..."
+sleep 10
+
+# 检查PHP容器
+echo "检查PHP服务..."
 for i in {1..30}; do
-    if docker-compose exec mysql mysqladmin ping -h localhost --silent; then
-        echo "MySQL 启动成功！"
+    if docker-compose ps | grep -q "9color_php.*Up"; then
+        echo "PHP 服务启动成功！"
         break
     fi
     if [ $i -eq 30 ]; then
+        echo "错误: PHP 服务启动超时"
+        docker-compose logs php
+        exit 1
+    fi
+    echo "等待PHP启动... ($i/30)"
+    sleep 2
+done
+
+# 检查Nginx容器
+echo "检查Nginx服务..."
+for i in {1..30}; do
+    if docker-compose ps | grep -q "9color_nginx.*Up"; then
+        echo "Nginx 服务启动成功！"
+        break
+    fi
+    if [ $i -eq 30 ]; then
+        echo "错误: Nginx 服务启动超时"
+        docker-compose logs nginx
+        exit 1
+    fi
+    echo "等待Nginx启动... ($i/30)"
+    sleep 2
+done
+
+# 检查MySQL容器
+echo "检查MySQL服务..."
+for i in {1..60}; do
+    if docker-compose exec mysql mysqladmin ping -h localhost --silent 2>/dev/null; then
+        echo "MySQL 服务启动成功！"
+        break
+    fi
+    if [ $i -eq 60 ]; then
         echo "错误: MySQL 启动超时"
         docker-compose logs mysql
         exit 1
     fi
-    echo "等待中... ($i/30)"
-    sleep 2
+    echo "等待MySQL启动... ($i/60)"
+    sleep 3
 done
+
+# 测试网站访问
+echo "测试网站访问..."
+sleep 5
+if curl -s -o /dev/null -w "%{http_code}" http://localhost | grep -q "200\|404\|500"; then
+    echo "网站访问测试成功！"
+else
+    echo "警告: 网站可能无法正常访问，请检查PHP配置"
+fi
+
+# 获取服务器IP
+SERVER_IP=$(curl -s ifconfig.me 2>/dev/null || curl -s ipinfo.io/ip 2>/dev/null || echo "服务器IP")
 
 echo ""
 echo "=== 部署完成 ==="
-echo "MySQL 连接信息:"
-echo "  主机: localhost (或服务器IP)"
+echo "服务状态:"
+docker-compose ps
+
+echo ""
+echo "访问信息:"
+echo "  网站地址: http://$SERVER_IP"
+echo "  本地访问: http://localhost"
+
+echo ""
+echo "数据库连接信息:"
+echo "  主机: $SERVER_IP (外部) 或 mysql (容器内)"
 echo "  端口: 3306"
-echo "  数据库: 9color"
-echo "  root密码: root123456"
+echo "  数据库: 6ui"
+echo "  Root密码: root123456"
 echo "  应用用户: appuser"
 echo "  应用密码: app123456"
+
 echo ""
-echo "phpMyAdmin 访问地址: http://localhost:8080 (如果启用)"
-echo ""
-echo "常用命令:"
+echo "常用管理命令:"
 echo "  查看日志: docker-compose logs -f"
 echo "  停止服务: docker-compose down"
 echo "  重启服务: docker-compose restart"
-echo "  进入MySQL: docker-compose exec mysql mysql -u root -p" 
+echo "  进入MySQL: docker-compose exec mysql mysql -u root -p"
+
+echo ""
+echo "如有问题，请查看日志文件："
+echo "  Nginx日志: ./logs/nginx/"
+echo "  MySQL日志: ./logs/mysql/" 
