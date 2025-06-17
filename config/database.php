@@ -10,7 +10,7 @@ return [
     // 数据库名
     'database'    => '6ui',
     // 用户名
-    'username'    => 'appuser',
+    'username'    => 'app',
     // 密码
     'password'    => 'app123456',
     // 编码
