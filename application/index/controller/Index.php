@@ -203,5 +203,54 @@ $this->user_yongjin = db('xy_convey')->where('uid',$uid)->where('status',1)->sum
         }
     }
 
+    /**
+     * 获取用户消息列表（分页）
+     */
+    public function get_user_message_list()
+    {
+        $uid = session('user_id');
+        if (!$uid) {
+            return json(['code'=>0,'info'=>'用户未登录']);
+        }
+
+        $page = input('get.page/d', 1);
+        $limit = input('get.limit/d', 20);
+        $type = input('get.type/d', 0); // 0=全部，1=公告，2=通知
+
+        $where = ['uid' => $uid];
+        if ($type > 0) {
+            $where['type'] = $type;
+        }
+
+        // 获取总数
+        $total = Db::table('xy_message')->where($where)->count();
+
+        // 获取列表
+        $list = Db::table('xy_message')
+            ->where($where)
+            ->order('id desc')
+            ->page($page, $limit)
+            ->select();
+
+        // 处理时间格式
+        foreach ($list as &$item) {
+            $item['addtime_format'] = date('Y-m-d H:i:s', $item['addtime']);
+            $item['type_text'] = $item['type'] == 1 ? '公告' : '通知';
+            $item['status_text'] = $item['status'] == 0 ? '未读' : '已读';
+        }
+
+        return json([
+            'code' => 1,
+            'info' => '获取成功',
+            'data' => [
+                'list' => $list,
+                'total' => $total,
+                'page' => $page,
+                'limit' => $limit,
+                'pages' => ceil($total / $limit)
+            ]
+        ]);
+    }
+
   
 }

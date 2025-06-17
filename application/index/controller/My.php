@@ -23,7 +23,7 @@ class My extends Base
             if(!$uid) $this->redirect('User/login'); 
         
         
-        $this->info = db('xy_users')->field('username,tel,level,id,headpic,balance,freeze_balance,lixibao_balance,invite_code,show_td')->find($uid);
+        $this->info = db('xy_users')->field('username,tel,level,id,headpic,balance,freeze_balance,lixibao_balance,invite_code,show_td,credit_score')->find($uid);
         $this->lv3 = [0,config('vip_3_num')];
         $this->lv2 = [0,config('vip_2_num')];
         $this->sell_y_num = db('xy_convey')->where('status',1)->where('uid',$uid)->sum('commission');

@@ -282,7 +282,7 @@
 
             <div class="order-info">
                 <div class="order-text">
-                    <div class="summary-card_h1">消息通知</div>
+                    <div class="summary-card_h1" id="title">消息通知</div>
                     <p class="summary-card_p" id="content"></p>
                     <input type="hidden" id="tc_id">
                 </div>
@@ -405,12 +405,13 @@
         setInterval(get_user_tc, 5000);
         var flag = false;
 
-        function showDanmu(content, id) {
+        function showDanmu(content,title, id) {
 
             $("#danmu").show();
             $(".pop-mask").show();
             $("#content").html(content);
             $("#tc_id").val(id);
+            $("#title").html(title);
         }
 
         function closeDanmu() {
@@ -418,11 +419,10 @@
             $(".pop-mask").hide();
             flag = false;
             $.ajax({
-                url: "/user-tc/saveOrUpdate",
+               url: "{:url('set_user_msg')}",
                 type: "POST",
                 dataType: "JSON",
                 data: {
-                    status: 1,
                     id: $("#tc_id").val()
                 },
             })
@@ -432,21 +432,22 @@
             if (flag) {
                 return false;
             }
+
             $.ajax({
-                url: ("/user-tc/select"),
-                type: "GET",
-                data: {},
+                type: 'GET',
+                url: "{:url('get_user_msg')}",
+                data: {
+                    'id': 2
+                },
                 success: function (res) {
-                    if (res.success) {
+                    if (res.code==1&&res.info) {
                         flag = true;
-                        var data_tc = res.data;
                         var html = '';
-                        showDanmu(data_tc.content, data_tc.id)
+                        showDanmu(res.info.content,res.info.title, res.info.id)
 
                     }
-                },
-            })
-
+                }
+            });
         }
     </script>
 

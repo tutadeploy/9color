@@ -24,6 +24,13 @@
         </div>
 
         <div class="layui-form-item">
+            <label class="layui-form-label label-required">信用分</label>
+            <div class="layui-input-block">
+                <input name="credit_score" type="number" min="0" max="100" required placeholder="请输入信用分(0-100)" value="{$info.credit_score}" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
             <label class="layui-form-label label-required">冻结金额</label>
             <div class="layui-input-block">
                 <input name="freeze_balance" type="number" min="0" required placeholder="冻结金额" value="{$info.freeze_balance}" class="layui-input">

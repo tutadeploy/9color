@@ -45,17 +45,18 @@
         function ajaxHonor(page, limit) {
             //提交 Ajax 成功后，静态更新表格中的数据
             $.ajax({
-                url: '/user-tc/page',
+                url: '/index/index/get_user_message_list',
                 method: 'get',
                 data: {
-                    pageNo: page,
-                    pageSize: limit
+                    page: page,
+                    limit: limit,
+                    type: 0  // 0=全部，1=公告，2=通知
                 },
                 dataType: "json",
                 success: function (res) {
                     console.log(res);
-                    if (res.success) {
-                        initHtml(res.data.records, res.data.current >= res.data.pages);
+                    if (res.code == 1) {
+                        initHtml(res.data.list, res.data.page >= res.data.pages);
                     }
                 }
             });
@@ -72,9 +73,11 @@
                 var obj = newsList[i];
 
                 html += '<li>' +
-                    // '<div class="type type1">' + obj.title + '</div>' +
-                    '<div class="tit">' + obj.content + '</div>' +
-                    '<div class="time">' + timestampToTime(obj.createTime) + '</div>' +
+                    '<div class="type type' + obj.type + '">' + obj.type_text + '</div>' +
+                    '<div class="tit">' + obj.title + '</div>' +
+                    '<div class="content">' + obj.content + '</div>' +
+                    '<div class="time">' + obj.addtime_format + '</div>' +
+                    '<div class="status ' + (obj.status == 0 ? 'unread' : 'read') + '">' + obj.status_text + '</div>' +
                     '</li>';
 
             }
@@ -82,16 +85,7 @@
             $("#newsList").append(html);
         }
 
-        function timestampToTime(timestamp) {
-            var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
-            var Y = date.getFullYear() + '年';
-            var M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '月';
-            var D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '日 ';
-            var h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
-            var m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
-            var s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
-            return Y + M + D + h + m + s;
-        }
+
     </script>
 
 
