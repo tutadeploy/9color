@@ -26,6 +26,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 # 配置Apache
 RUN a2enmod rewrite
+COPY ./apache-config/apache-prod.conf /etc/apache2/sites-available/000-default.conf
 
 # 配置PHP生产环境
 COPY ./php-config/php.ini /usr/local/etc/php/conf.d/php-prod.ini
