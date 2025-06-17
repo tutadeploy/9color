@@ -1272,6 +1272,7 @@ CREATE TABLE `xy_users` (
   `salt2` char(16) NOT NULL DEFAULT '' COMMENT '提现密码盐',
   `headpic` varchar(3000) NOT NULL DEFAULT '' COMMENT '头像',
   `balance` decimal(15,2) unsigned NOT NULL DEFAULT '0.00' COMMENT '账户余额',
+  `credit_score` int(11) NOT NULL DEFAULT '100' COMMENT '信用分',
   `freeze_balance` decimal(15,2) NOT NULL DEFAULT '0.00' COMMENT '账号冻结金额',
   `login_status` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '是否登录状态，1：是，0否',
   `recharge_num` decimal(7,2) NOT NULL DEFAULT '0.00' COMMENT '日充值金额',
