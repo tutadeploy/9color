@@ -3,7 +3,7 @@
 {block name="button"}
 
 {if auth("add_goods")}
-<button data-open='{:url("add_goods")}' data-title="添加公告" class='layui-btn'>添加商品</button>
+<button data-open='{:admin_url("admin/shop/add_goods")}' data-title="添加公告" class='layui-btn'>添加商品</button>
 {/if}
 
 {/block}
@@ -52,8 +52,9 @@
 
 
                     {if auth("edit_goods")}
-                    <a class="layui-btn layui-btn-xs layui-btn" data-open="{:url('edit_goods',['id'=>$vo.id])}"
-                        data-value="id#{$vo.id}" style='background:green;'>编辑</a>
+                    <a class="layui-btn layui-btn-xs layui-btn"
+                        data-open="{:admin_url('admin/shop/edit_goods',['id'=>$vo.id])}" data-value="id#{$vo.id}"
+                        style='background:green;'>编辑</a>
                     {/if}
                     {if auth("del_goods")}
                     <a class="layui-btn layui-btn-xs layui-btn" style='background:red;'
@@ -61,9 +62,9 @@
                     {/if}
 
                     <!-- {if $vo.is_tj eq 1}
-                <a class="layui-btn layui-btn-warm layui-btn-xs" data-action="{:url('forbid')}" data-value="id#{$vo.id};status#0" data-csrf="{:systoken('admin/shop/forbid')}">取消推荐</a>
+                <a class="layui-btn layui-btn-warm layui-btn-xs" data-action="{:admin_url('forbid')}" data-value="id#{$vo.id};status#0" data-csrf="{:systoken('admin/shop/forbid')}">取消推荐</a>
                 {elseif $vo.is_tj eq 0}
-                <a class="layui-btn layui-btn-warm layui-btn-xs" data-action="{:url('resume')}" data-value="id#{$vo.id};status#1" data-csrf="{:systoken('admin/shop/resume')}">推 荐</a>
+                <a class="layui-btn layui-btn-warm layui-btn-xs" data-action="{:admin_url('resume')}" data-value="id#{$vo.id};status#1" data-csrf="{:systoken('admin/shop/resume')}">推 荐</a>
                 {/if} -->
 
                 </td>
@@ -80,7 +81,7 @@
         layer.confirm("确认要删除吗，删除后不能恢复", { title: "删除确认" }, function (index) {
             $.ajax({
                 type: 'POST',
-                url: "{:url('del_goods')}",
+                url: "{:admin_url('admin/shop/del_goods')}",
                 data: {
                     'id': id,
                     '_csrf_': "{:systoken('admin/shop/del_goods')}"

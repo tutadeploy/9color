@@ -1,11 +1,12 @@
-
 <fieldset>
     <legend>条件搜索</legend>
-    <form class="layui-form layui-form-pane form-search" action="{:request()->url()}" onsubmit="return false" method="get" autocomplete="off">
+    <form class="layui-form layui-form-pane form-search" action="{:request()->url()}" onsubmit="return false"
+        method="get" autocomplete="off">
         <div class="layui-form-item layui-inline">
             <label class="layui-form-label">用户名称</label>
             <div class="layui-input-inline">
-                <input name="username" value="{$Think.get.username|default=''}" placeholder="请输入用户名称" class="layui-input">
+                <input name="username" value="{$Think.get.username|default=''}" placeholder="请输入用户名称"
+                    class="layui-input">
             </div>
         </div>
         <div class="layui-form-item layui-inline">
@@ -17,7 +18,8 @@
         <div class="layui-form-item layui-inline">
             <label class="layui-form-label">注册时间</label>
             <div class="layui-input-inline">
-                <input data-date-range name="addtime" value="{$Think.get.addtime|default=''}" placeholder="请选择注册时间" class="layui-input">
+                <input data-date-range name="addtime" value="{$Think.get.addtime|default=''}" placeholder="请选择注册时间"
+                    class="layui-input">
             </div>
         </div>
 
@@ -31,7 +33,7 @@
                 </select>
             </div>
         </div>
-           <div class="layui-form-item layui-inline">
+        <div class="layui-form-item layui-inline">
             <label class="layui-form-label">在线状态</label>
             <div class="layui-input-inline">
                 <select name="isonline" id="isonline">
@@ -43,19 +45,21 @@
         <div class="layui-form-item layui-inline">
             <button class="layui-btn layui-btn-primary"><i class="layui-icon">&#xe615;</i> 搜 索</button>
             {if auth("edit_users") }
-            <a href="/admin/users/daochu.html" class="layui-btn layui-btn-danger" ><i class="layui-icon">&#xe615;</i> 导 出</a>
+            <a href="/sgcpj/users/daochu.html" class="layui-btn layui-btn-danger"><i class="layui-icon">&#xe615;</i> 导
+                出</a>
             {/if}
         </div>
     </form>
     {if $daili==1}
- <div class="layui-form-item layui-inline" onclick="window.location.href='/admin.html#/admin/users/mytuandui.html?spm=m-69-72-74'">
-            <button class="layui-btn layui-btn-primary"  ><i class="layui-icon">&#xe615;</i> 团队总报表 </button>
-        </div>
-         {/if}
+    <div class="layui-form-item layui-inline"
+        onclick="window.location.href='/sgcpj.html#/sgcpj/users/mytuandui.html?spm=m-69-72-74'">
+        <button class="layui-btn layui-btn-primary"><i class="layui-icon">&#xe615;</i> 团队总报表 </button>
+    </div>
+    {/if}
 </fieldset>
 
 <script>
     var test = "{$Think.get.is_jia|default='0'}";
-    $("#selectList").find("option[value="+test+"]").prop("selected",true);
+    $("#selectList").find("option[value=" + test + "]").prop("selected", true);
     form.render()
 </script>

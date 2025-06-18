@@ -26,7 +26,7 @@ class Index extends Controller
     public function index()
     {
         if (empty($this->menus) && !NodeService::islogin()) {
-            $this->redirect('@admin/login');
+            $this->redirect('@sgcpj/login');
         }
         $this->title = '系统管理后台';
         NodeService::applyUserAuth(true);

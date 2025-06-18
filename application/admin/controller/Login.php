@@ -27,7 +27,7 @@ class Login extends Controller
     {
         if (Request::isGet()) {
             if (NodeService::islogin()) {
-                $this->redirect('@admin');
+                $this->redirect('@sgcpj');
             } else {
                 $this->title = '系统登录';
                 $this->domain = Request::host(true);
@@ -74,7 +74,7 @@ class Login extends Controller
 
             NodeService::applyUserAuth(true);
             sysoplog('系统管理', '用户登录系统成功');
-            $this->success('登录成功', url('@admin'));
+            $this->success('登录成功', url('@sgcpj'));
         }
     }
 
@@ -85,7 +85,7 @@ class Login extends Controller
     {
         \think\facade\Session::clear();
         \think\facade\Session::destroy();
-        $this->success('退出登录成功！', url('@admin/login'));
+        $this->success('退出登录成功！', url('@sgcpj/login'));
     }
 
 }

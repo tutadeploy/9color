@@ -103,7 +103,7 @@ class Pay extends Controller
             }
             
                 sysoplog('系统管理', '管理员:'.session('admin_user.username').'编辑支付地址:['.$address.']');
-            $this->success('编辑成功','/admin.html#/admin/pay/index.html');
+            $this->success('编辑成功',admin_url('admin/pay/index'));
         }
         if(!$id) $this->error('参数错误');
         $this->info = Db::table($this->table)->find($id);

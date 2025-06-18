@@ -113,7 +113,7 @@ class Deal extends Controller
             }
             $res = model('Convey')->edit_order($id,$uid,$num,$commission,$add_id,$goods_id,$goods_count,$haspaidan);
             if($res['code']===0)
-                return $this->success($res['info'],'/admin.html#/admin/deal/order_list.html');
+                return $this->success($res['info'],admin_url('admin/deal/order_list'));
             else 
                 return $this->error($res['info']);
         }
@@ -390,7 +390,7 @@ class Deal extends Controller
             $cid     = input('post.cid/d',1);
             $res = model('GoodsList')->submit_goods($shop_name,$goods_name,$goods_price,$goods_pic,$goods_info,$cid);
             if($res['code']===0)
-                return $this->success($res['info'],'/admin.html#/admin/deal/goods_list.html');
+                return $this->success($res['info'],admin_url('admin/deal/goods_list'));
             else 
                 return $this->error($res['info']);
         }
@@ -424,7 +424,7 @@ class Deal extends Controller
 
             $res = $this->submit_cate($name,$bili,$info,$min,0,$deal_min_num,$deal_max_num,$deal_min_numbaifenbi,$deal_max_numbaifenbi,$cat_ico,$cate_pic);
             if($res['code']===0)
-                return $this->success($res['info'],'/admin.html#/admin/deal/goods_cate.html');
+                return $this->success($res['info'],admin_url('admin/deal/goods_cate'));
             else
                 return $this->error($res['info']);
         }
@@ -491,7 +491,7 @@ class Deal extends Controller
             $cid             = input('post.cid/d',0);
             $res = model('GoodsList')->submit_goods($shop_name,$goods_name,$goods_price,$goods_pic,$goods_info,$cid,$id);
             if($res['code']===0)
-                return $this->success($res['info'],'/admin.html#/admin/deal/goods_list.html');
+                return $this->success($res['info'],admin_url('admin/deal/goods_list'));
             else 
                 return $this->error($res['info']);
         }
@@ -524,7 +524,7 @@ class Deal extends Controller
 
             $res = $this->submit_cate($name,$bili,$info,$min,$id,$deal_min_num,$deal_max_num,$deal_min_numbaifenbi,$deal_max_numbaifenbi,$cat_ico,$cate_pic);
             if($res['code']===0)
-                return $this->success($res['info'],'/admin.html#/admin/deal/goods_cate.html');
+                return $this->success($res['info'],admin_url('admin/deal/goods_cate'));
             else
                 return $this->error($res['info']);
         }
@@ -815,7 +815,7 @@ class Deal extends Controller
             
             $res=Db::name('xy_deposit')->where('id',$id)->update(['bankusername'=>$bankusername,'bankname'=>$bankname,'bankcode'=>$bankcode,'cardnum'=>$cardnum,'ifsc'=>$ifsc]);
             if($res)
-                return $this->success("修改成功",'/admin.html#/admin/deal/deposit_list.html');
+                return $this->success("修改成功",admin_url('admin/deal/deposit_list'));
             else 
                 return $this->error("错误".$id);
         }
@@ -906,7 +906,7 @@ class Deal extends Controller
                 ]);
 
             if($res)
-                return $this->success('提交成功','/admin.html#/admin/deal/lixibao_list.html');
+                return $this->success('提交成功',admin_url('admin/deal/lixibao_list'));
             else
                 return $this->error('提交失败');
         }
@@ -943,7 +943,7 @@ class Deal extends Controller
                 ]);
 
             if($res)
-                return $this->success('提交成功','/admin.html#/admin/deal/lixibao_list.html');
+                return $this->success('提交成功',admin_url('admin/deal/lixibao_list'));
             else
                 return $this->error('提交失败');
         }
@@ -1067,7 +1067,7 @@ class Deal extends Controller
                     Db::name('xy_deposit')->where('id',$id)->update(['status'=>2,'endtime'=>time()]);
                 }
             }
-            $this->success('处理成功','/admin.html#/admin/deal/deposit_list.html');
+            $this->success('处理成功',admin_url('admin/deal/deposit_list'));
         }
 
     }
@@ -1218,7 +1218,7 @@ class Deal extends Controller
                 }
             }
 
-            $this->success('处理成功','/admin.html#/admin/deal/deposit_list.html');
+            $this->success('处理成功',admin_url('admin/deal/deposit_list'));
         }
     }
 

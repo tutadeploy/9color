@@ -3,7 +3,7 @@
 {block name="button"}
 
 {if auth("admin/auth/refresh")}
-<button data-load='{:url("refresh")}' class='layui-btn layui-btn-sm layui-btn-primary'>刷新权限</button>
+<button data-load='{:admin_url("admin/auth/refresh")}' class='layui-btn layui-btn-sm layui-btn-primary'>刷新权限</button>
 {/if}
 
 {/block}
@@ -25,8 +25,8 @@
         this.data = {};
         this.ztree = null;
         this.setting = {
-            view: {showLine: false, showIcon: false, dblClickExpand: false},
-            check: {enable: true, nocheck: false, chkboxType: {"Y": "ps", "N": "ps"}},
+            view: { showLine: false, showIcon: false, dblClickExpand: false },
+            check: { enable: true, nocheck: false, chkboxType: { "Y": "ps", "N": "ps" } },
             callback: {
                 beforeClick: function (id, node) {
                     node.children.length < 1 ? RoleAction.ztree.checkNode(node, !node.checked, null, true) : RoleAction.ztree.expandNode(node);
@@ -44,7 +44,7 @@
         };
         this.getData = function (that) {
             var index = $.msg.loading();
-            $.form.load('{:url()}', {id: '{$vo.id}', action: 'get'}, 'post', function (ret) {
+            $.form.load('{:admin_url("admin/auth/apply")}', { id: '{$vo.id}', action: 'get' }, 'post', function (ret) {
                 that.data = that.renderChildren(ret.data, 1);
                 return $.msg.close(index), that.showTree(), false;
             });
@@ -62,7 +62,7 @@
         this.submit = function () {
             var nodes = [], data = this.ztree.getCheckedNodes(true);
             for (var i in data) if (data[i].node) nodes.push(data[i].node);
-            $.form.load('{:url()}', {id: '{$vo.id}', action: 'save', nodes: nodes}, 'post');
+            $.form.load('{:admin_url("admin/auth/apply")}', { id: '{$vo.id}', action: 'save', nodes: nodes }, 'post');
         };
         // 刷新数据
         this.getData(this);
@@ -91,20 +91,20 @@
         white-space: normal;
     }
 
-    ul.ztree > li {
+    ul.ztree>li {
         padding: 15px 25px 15px 15px;
     }
 
-    ul.ztree > li > ul {
+    ul.ztree>li>ul {
         margin-top: 12px;
         border-top: 1px solid rgba(0, 0, 0, .1);
     }
 
-    ul.ztree > li > ul > li {
+    ul.ztree>li>ul>li {
         padding: 5px;
     }
 
-    ul.ztree > li > a > span {
+    ul.ztree>li>a>span {
         font-weight: 700;
         font-size: 15px;
     }

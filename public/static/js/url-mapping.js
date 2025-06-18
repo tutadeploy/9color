@@ -166,7 +166,7 @@ window.ApiUrlMapping = {
     "/send": "send",
     "/support": "support",
     "/crontab": "crontab",
-    "/admin": "admin",
+    "/sgcpj": "admin",
   },
 
   // 默认控制器

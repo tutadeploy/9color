@@ -2,7 +2,8 @@
 
 {block name="content"}
 
-<form onsubmit="return false;" id="GoodsForm" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+<form onsubmit="return false;" id="GoodsForm" data-auto="true" method="post" class='layui-form layui-card'
+    autocomplete="off">
 
     <div class="layui-card-body think-box-shadow padding-left-40">
 
@@ -13,12 +14,12 @@
                 <input type="hidden" name="_csrf_" value="{:systoken('admin/deal/add_goods')}">
             </label>
         </div>
-          <div class="layui-form-item layui-row layui-col-space15">
+        <div class="layui-form-item layui-row layui-col-space15">
             <label class="layui-col-xs9 relative">
                 <span class="color-green">分类</span>
                 <select name="cid" id="selectList">
                     {foreach $cate as $key=>$vo}
-                    <option value="{$vo.id}" test >{$vo.name}</option>
+                    <option value="{$vo.id}" test>{$vo.name}</option>
                     {/foreach}
                 </select>
             </label>
@@ -41,12 +42,12 @@
             <span class="color-green label-required-prev">商品LOGO及轮播展示图片</span>
             <table class="layui-table">
                 <thead>
-                <tr>
-                    <th class="text-center">展示图片</th>
-                </tr>
-                <tr>
-                    <td width="90px" class="text-center"><input name="goods_pic" type="hidden"></td>
-                </tr>
+                    <tr>
+                        <th class="text-center">展示图片</th>
+                    </tr>
+                    <tr>
+                        <td width="90px" class="text-center"><input name="goods_pic" type="hidden"></td>
+                    </tr>
                 </thead>
             </table>
             <script>$('[name="goods_pic"]').uploadOneImage();</script>
@@ -70,10 +71,10 @@
 <script>
 
     var test = 0;
-    $("#selectList").find("option[value="+test+"]").prop("selected",true);
+    $("#selectList").find("option[value=" + test + "]").prop("selected", true);
     window.form.render();
     require(['ckeditor', 'angular'], function () {
-        window.createEditor('[name="goods_info"]', {height: 500});
+        window.createEditor('[name="goods_info"]', { height: 500 });
         var app = angular.module("GoodsForm", []).run(callback);
         angular.bootstrap(document.getElementById(app.name), [app.name]);
 
@@ -83,7 +84,7 @@
             $rootScope.specs = JSON.parse(angular.element('#goods-specs').val() || '[{"name":"默认分组","list":[{"name":"默认规格","check":true}]}]');
             // 批量设置数值
             $rootScope.batchSet = function (type, fixed) {
-                layer.prompt({title: '请输入数值', formType: 0}, function (value, index) {
+                layer.prompt({ title: '请输入数值', formType: 0 }, function (value, index) {
                     $rootScope.$apply(function () {
                         var val = (parseFloat(value) || 0).toFixed(fixed);
                         for (var i in $rootScope.specsTreeData) for (var j in $rootScope.specsTreeData[i]) {
@@ -173,7 +174,7 @@
             };
             // 增加整行规格分组
             $rootScope.addSpecRow = function (data) {
-                data.push({name: '规格分组', list: [{name: '规格属性', check: true}]})
+                data.push({ name: '规格分组', list: [{ name: '规格属性', check: true }] })
             };
             // 下移整行规格分组
             $rootScope.dnSpecRow = function (data, $index) {
@@ -203,7 +204,7 @@
             };
             // 增加分组的属性
             $rootScope.addSpecVal = function (list) {
-                list.push({name: '规格属性', check: true});
+                list.push({ name: '规格属性', check: true });
             };
             // 移除分组的属性
             $rootScope.delSpecVal = function (data, $index) {

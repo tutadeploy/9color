@@ -126,7 +126,7 @@ class NodeService
             elseif ($menu['url'] === '#') unset($menus[$key]);
             else {
                 $node = join('/', array_slice(explode('/', preg_replace('/[\W]/', '/', $menu['url'])), 0, 3));
-                $menu['url'] = url($menu['url']) . (empty($menu['params']) ? '' : "?{$menu['params']}");
+                $menu['url'] = admin_url($menu['url']) . (empty($menu['params']) ? '' : "?{$menu['params']}");
                 if (!self::checkAuth($node)) unset($menus[$key]);
             }
         }

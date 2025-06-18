@@ -145,9 +145,72 @@ Middleware::add(function (Request $request, \Closure $next) {
     } elseif (NodeService::islogin()) {
         return json(['code' => 0, 'msg' => '抱歉，没有访问该操作的权限！']);
     } else {
-        return json(['code' => 0, 'msg' => '抱歉，需要登录获取访问权限！', 'url' => url('@admin/login')]);
+        return json(['code' => 0, 'msg' => '抱歉，需要登录获取访问权限！', 'url' => url('@sgcpj/login')]);
     }
 });
+
+// 自定义admin模块URL生成函数
+if (!function_exists('admin_url')) {
+    /**
+     * 生成admin模块的URL，自动转换为sgcpj路径
+     * @param string $url URL地址
+     * @param array $vars URL参数
+     * @param string $suffix URL后缀
+     * @param string $domain 域名
+     * @return string
+     */
+    function admin_url($url = '', $vars = [], $suffix = true, $domain = false)
+    {
+        // 调用原生url函数生成URL
+        $generatedUrl = url($url, $vars, $suffix, $domain);
+        
+        // 如果生成的URL以/admin/开头，替换为/sgcpj/
+        if (strpos($generatedUrl, '/admin/') === 0) {
+            $generatedUrl = str_replace('/admin/', '/sgcpj/', $generatedUrl);
+        }
+        
+        return $generatedUrl;
+    }
+}
+
+// 重写url函数，在admin模块中自动使用sgcpj路径
+if (!function_exists('admin_url_helper')) {
+    /**
+     * Admin模块专用的URL助手函数
+     * 自动将admin路径转换为sgcpj路径
+     */
+    function admin_url_helper($url = '', $vars = [], $suffix = true, $domain = false)
+    {
+        // 获取当前模块
+        $currentModule = \think\facade\Request::module();
+        
+        // 如果当前在admin模块，使用admin_url函数
+        if ($currentModule === 'admin') {
+            return admin_url($url, $vars, $suffix, $domain);
+    }
+        
+        // 否则使用原生url函数
+        return \think\facade\Url::build($url, $vars, $suffix, $domain);
+    }
+}
+
+// 在admin模块中重新定义url函数
+if (\think\facade\Request::module() === 'admin' && !function_exists('url_admin_override')) {
+    /**
+     * 在admin模块中重写url函数
+     */
+    function url_admin_override($url = '', $vars = [], $suffix = true, $domain = false)
+    {
+        return admin_url($url, $vars, $suffix, $domain);
+    }
+    
+    // 注册为url函数的别名（如果可能的话）
+    if (!function_exists('url')) {
+        function url($url = '', $vars = [], $suffix = true, $domain = false) {
+            return url_admin_override($url, $vars, $suffix, $domain);
+        }
+    }
+}
 
 // 注册系统服务指令
 Console::addDefaultCommands([

@@ -44,7 +44,7 @@ class Help extends Controller
 
             $res = Db::table('xy_message')->insert(['addtime'=>time(),'sid'=>0,'type'=>3,'title'=>$title,'content'=>$content,'status'=>0]);
             if($res){
-                $this->success('发送公告成功','/admin.html#/admin/help/message_ctrl.html');
+                $this->success('发送公告成功',admin_url('admin/help/message_ctrl'));
             }else
                 $this->error('发送公告失败');
         }
@@ -71,7 +71,7 @@ class Help extends Controller
 
             $res = Db::table('xy_message')->where('id',$id)->update(['addtime'=>time(),'type'=>3,'title'=>$title,'content'=>$content]);
             if($res){
-                $this->success('编辑成功','/admin.html#/admin/help/message_ctrl.html');
+                $this->success('编辑成功',admin_url('admin/help/message_ctrl'));
             }else
                 $this->error('编辑失败');
         }
@@ -88,13 +88,28 @@ class Help extends Controller
      */
     public function del_message()
     {
-        $this->applyCsrfToken();
-        $id = input('post.id/d',0);
-        $res = Db::table('xy_message')->where('id',$id)->delete();
-        if($res)
-            $this->success('删除成功!');
-        else
-            $this->error('删除失败!');
+        try {
+            $this->applyCsrfToken();
+            
+            $id = input('post.id/d', 0);
+            if (!$id) {
+                $this->error('删除ID不能为空');
+            }
+            
+            $res = Db::table('xy_message')->where('id', $id)->delete();
+            if ($res) {
+                $this->success('删除成功!');
+            } else {
+                $this->error('删除失败!');
+            }
+            
+        } catch (\Exception $e) {
+            // 如果是 HttpResponseException，说明是正常的响应，不需要处理
+            if ($e instanceof \think\exception\HttpResponseException) {
+                throw $e;
+            }
+            $this->error('删除过程中发生错误: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -137,7 +152,7 @@ class Help extends Controller
 
             $res = Db::table('xy_index_msg')->where('id',$id)->update(['addtime'=>time(),'content'=>$content,'en_content'=>$en_content,'en_title'=>$en_title,'fr_title'=>$fr_title,'fr_content'=>$fr_content,'es_title'=>$es_title,'es_content'=>$es_content,'pt_title'=>$pt_title,'pt_content'=>$pt_content,'kr_title'=>$kr_title,'kr_content'=>$kr_content,'jp_title'=>$jp_title,'jp_content'=>$jp_content]);
             if($res){
-                $this->success('编辑成功','/admin.html#/admin/help/home_msg.html');
+                $this->success('编辑成功',admin_url('admin/help/home_msg'));
             }else
                 $this->error('编辑失败');
         }
@@ -189,7 +204,7 @@ class Help extends Controller
 
             $res = Db::table('xy_banner')->where('id',$id)->update(['image'=>$image,'url'=>$url]);
             if($res){
-                $this->success('编辑成功','/admin.html#/admin/help/banner.html');
+                $this->success('编辑成功',admin_url('admin/help/banner'));
             }else
                 $this->error('编辑失败');
         }
@@ -217,7 +232,7 @@ class Help extends Controller
 
             $res = Db::table('xy_banner')->insert(['url'=>$url,'image'=>$image]);
             if($res){
-                $this->success('提交成功','/admin.html#/admin/help/banner.html');
+                $this->success('提交成功',admin_url('admin/help/banner'));
             }else
                 $this->error('提交失败');
         }

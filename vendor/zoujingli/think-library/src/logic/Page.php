@@ -95,13 +95,34 @@ class Page extends Logic
             $page = $this->query->paginate($limit, $this->total, ['query' => ($query = $this->controller->request->get())]);
             foreach ([10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160, 170, 180, 190, 200] as $num) {
                 list($query['limit'], $query['page'], $selected) = [$num, '1', $limit === $num ? 'selected' : ''];
-                $url = url('@admin') . '#' . $this->controller->request->baseUrl() . '?' . urldecode(http_build_query($query));
+                // 构建正确的SPA路径
+                $module = $this->controller->request->module();
+                $controller = $this->controller->request->controller();
+                $action = $this->controller->request->action();
+                $correctPath = "/sgcpj/{$controller}/{$action}.html";
+                $url = '/sgcpj#' . $correctPath . '?' . urldecode(http_build_query($query));
                 array_push($rows, "<option data-num='{$num}' value='{$url}' {$selected}>{$num}</option>");
             }
-            $select = "<select onchange='location.href=this.options[this.selectedIndex].value' data-auto-none>" . join('', $rows) . "</select>";
+            $select = "<select onchange='window.location.hash=this.options[this.selectedIndex].value.split(\"#\")[1]' data-auto-none>" . join('', $rows) . "</select>";
             //$html = "<div class='pagination-container nowrap'><span>total {$page->total()} Records, Currently displayed {$page->currentPage()} page.</span>{$page->render()}</div>";
              $html = "<div class='pagination-container nowrap'><span>总共 {$page->total()} 条记录，当前显示 {$select} ，共 {$page->lastPage()} 页，当前第 {$page->currentPage()} 页。</span>{$page->render()}</div>";
-            $this->controller->assign('pagehtml', preg_replace('|href="(.*?)"|', 'data-open="$1" onclick="return false" href="$1"', $html));
+            // 处理分页链接，确保使用SPA路由
+            $module = $this->controller->request->module();
+            $controller = $this->controller->request->controller();
+            $action = $this->controller->request->action();
+            $correctPath = "/sgcpj/{$controller}/{$action}.html";
+            
+            $pagehtml = preg_replace_callback('|href="(.*?)"|', function($matches) use ($correctPath) {
+                $url = $matches[1];
+                // 替换错误的baseUrl为正确的路径
+                if (strpos($url, '/index.php') !== false) {
+                    $url = str_replace('/index.php', $correctPath, $url);
+                }
+                // 转换为SPA格式
+                $url = '/sgcpj#' . $url;
+                return 'data-open="' . $url . '" onclick="return false" href="' . $url . '"';
+            }, $html);
+            $this->controller->assign('pagehtml', $pagehtml);
             $result = ['page' => ['limit' => intval($limit), 'total' => intval($page->total()), 'pages' => intval($page->lastPage()), 'current' => intval($page->currentPage())], 'list' => $page->items()];
         } else {
             $result = ['list' => $this->query->select()];

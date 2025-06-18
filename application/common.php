@@ -133,5 +133,56 @@ preg_match_all('/./us', $string, $match);
 return count($match[0]);
 }
 
+/**
+ * 自定义URL生成函数，自动将admin模块转换为sgcpj
+ * @param string $url
+ * @param array $vars
+ * @param bool|string $suffix
+ * @param bool|string $domain
+ * @return string
+ */
+function admin_url($url = '', $vars = [], $suffix = true, $domain = false)
+{
+    // 如果URL为空，记录错误并返回默认值
+    if (empty($url)) {
+        error_log("Error: admin_url() received empty URL parameter");
+        return '#'; // 返回锚点，避免生成无效URL
+    }
+    
+    // 处理URL路径
+    if (strpos($url, 'admin/') === 0) {
+        // admin/users/edit -> sgcpj/users/edit
+        $url = 'sgcpj/' . substr($url, 6);
+    } elseif (strpos($url, '/') === false && !empty($url)) {
+        // 对于相对路径，我们需要根据上下文判断
+        // 由于无法自动判断控制器，这里给出警告并使用默认处理
+        // 建议在模板中使用完整路径如：admin/users/method 或 admin/deal/method
+        error_log("Warning: admin_url() received relative path '{$url}', please use full path like 'admin/controller/method'");
+        
+        // 临时兼容：默认指向users控制器（保持向后兼容）
+        $url = 'sgcpj/users/' . $url;
+    }
+    
+    // 直接构建完整URL，不依赖ThinkPHP的url()函数
+    $fullUrl = '/' . $url;
+    
+    // 处理参数
+    if (!empty($vars)) {
+        $params = [];
+        foreach ($vars as $key => $value) {
+            $params[] = $key . '/' . $value;
+        }
+        $fullUrl .= '/' . implode('/', $params);
+    }
+    
+    // 添加后缀
+    if ($suffix) {
+        $fullUrl .= '.html';
+    }
+    
+    // 对于admin后台，统一返回SPA格式
+    return '/sgcpj#' . $fullUrl;
+}
+
 
 

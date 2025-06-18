@@ -22,7 +22,7 @@
     position: relative;
   }
 
-  .store-total-container .store-total-item > div:nth-child(2) {
+  .store-total-container .store-total-item>div:nth-child(2) {
     font-size: 46px;
     line-height: 46px;
   }
@@ -32,11 +32,13 @@
     font-weight: bold;
     line-height: 100%;
   }
-  .store-total-container .store-total-item > div:nth-child(2) {
+
+  .store-total-container .store-total-item>div:nth-child(2) {
     font-size: 26px;
     line-height: 36px;
     font-weight: bold;
   }
+
   .store-total-container .store-total-item {
     line-height: 2em;
   }
@@ -46,10 +48,7 @@
   <div class="margin-bottom-15">商城统计</div>
   <div class="layui-row layui-col-space15">
     <div class="layui-col-sm6 layui-col-md3">
-      <div
-        class="store-total-item nowrap"
-        style="background: linear-gradient(-125deg, #57bdbf, #2f9de2)"
-      >
+      <div class="store-total-item nowrap" style="background: linear-gradient(-125deg, #57bdbf, #2f9de2)">
         <div>商品总量</div>
         <div>{$goods_num}</div>
         <div>今日新增商品 <span class="num2">{$today_goods_num}</span></div>
@@ -58,10 +57,7 @@
       <i class="store-total-icon layui-icon layui-icon-template-1"></i>
     </div>
     <div class="layui-col-sm6 layui-col-md3">
-      <div
-        class="store-total-item nowrap"
-        style="background: linear-gradient(-125deg, #ff7d7d, #fb2c95)"
-      >
+      <div class="store-total-item nowrap" style="background: linear-gradient(-125deg, #ff7d7d, #fb2c95)">
         <div>用户总量</div>
         <div>{$users_num}</div>
         <div>今日新增用户 <span class="num2">{$today_users_num}</span></div>
@@ -70,10 +66,7 @@
       <i class="store-total-icon layui-icon layui-icon-user"></i>
     </div>
     <div class="layui-col-sm6 layui-col-md3">
-      <div
-        class="store-total-item nowrap"
-        style="background: linear-gradient(-113deg, #c543d8, #925cc3)"
-      >
+      <div class="store-total-item nowrap" style="background: linear-gradient(-113deg, #c543d8, #925cc3)">
         <div>订单总量</div>
         <div>{$order_num}</div>
         <div>今日新增订单 <span class="num2">{$today_order_num}</span></div>
@@ -83,10 +76,7 @@
     </div>
 
     <div class="layui-col-sm6 layui-col-md3">
-      <div
-        class="store-total-item nowrap"
-        style="background: linear-gradient(-113deg, #8e8cb3, #2219d0)"
-      >
+      <div class="store-total-item nowrap" style="background: linear-gradient(-113deg, #8e8cb3, #2219d0)">
         <div>订单总金额</div>
         <div>{$order_sum}</div>
         <div>
@@ -97,10 +87,7 @@
       <i class="store-total-icon layui-icon layui-icon-rmb"></i>
     </div>
     <div class="layui-col-sm6 layui-col-md2">
-      <div
-        class="store-total-item nowrap"
-        style="background: linear-gradient(-141deg, #ecca1b, #f39526)"
-      >
+      <div class="store-total-item nowrap" style="background: linear-gradient(-141deg, #ecca1b, #f39526)">
         <div>用户充值</div>
         <div>{$user_recharge}</div>
         <div>今日新增充值 <span class="num2">{$today_user_recharge}</span></div>
@@ -110,10 +97,7 @@
     </div>
 
     <div class="layui-col-sm6 layui-col-md2">
-      <div
-        class="store-total-item nowrap"
-        style="background: linear-gradient(-141deg, #ec4b1b, #f39526)"
-      >
+      <div class="store-total-item nowrap" style="background: linear-gradient(-141deg, #ec4b1b, #f39526)">
         <div>用户提现</div>
         <div>{$user_deposit}</div>
         <div>今日新增提现 <span class="num2">{$today_user_deposit}</span></div>
@@ -123,10 +107,7 @@
     </div>
 
     <div class="layui-col-sm6 layui-col-md2">
-      <div
-        class="store-total-item nowrap"
-        style="background: linear-gradient(-141deg, #963064, #8a0920)"
-      >
+      <div class="store-total-item nowrap" style="background: linear-gradient(-141deg, #963064, #8a0920)">
         <div>抢单佣金</div>
         <div>{$user_yongjin}</div>
         <div>今日新增佣金 <span class="num2">{$today_user_yongjin}</span></div>
@@ -136,10 +117,7 @@
     </div>
 
     <div class="layui-col-sm6 layui-col-md2">
-      <div
-        class="store-total-item nowrap"
-        style="background: linear-gradient(-141deg, #1bec78, #155623)"
-      >
+      <div class="store-total-item nowrap" style="background: linear-gradient(-141deg, #1bec78, #155623)">
         <div>利息宝转入</div>
         <div>{$user_lixibao}</div>
         <div>
@@ -151,10 +129,7 @@
     </div>
 
     <div class="layui-col-sm6 layui-col-md2">
-      <div
-        class="store-total-item nowrap"
-        style="background: linear-gradient(-141deg, #ea7575, #abd6c6)"
-      >
+      <div class="store-total-item nowrap" style="background: linear-gradient(-141deg, #ea7575, #abd6c6)">
         <div>下级返佣</div>
         <div>{$user_fanyong}</div>
         <div>今日新增佣金 <span class="num2">{$today_user_fanyong}</span></div>
@@ -164,10 +139,7 @@
     </div>
 
     <div class="layui-col-sm6 layui-col-md2">
-      <div
-        class="store-total-item nowrap"
-        style="background: linear-gradient(-141deg, #2f3331, #565115)"
-      >
+      <div class="store-total-item nowrap" style="background: linear-gradient(-141deg, #2f3331, #565115)">
         <div>用户总余额</div>
         <div style="font-size: 14px">{$user_yue}({$user_djyue})</div>
         <div>今日利息宝转出 <span class="num2">{$today_lxbzc}</span></div>
@@ -226,11 +198,7 @@
     </div>
   </div>
   <div class="layui-col-md6">
-    <div
-      class="think-box-shadow"
-      id="versionTest"
-      data-version="{$has_version}"
-    >
+    <div class="think-box-shadow" id="versionTest" data-version="{$has_version}">
       <table class="layui-table" lay-skin="line" lay-even>
         <caption class="text-left margin-bottom-15 font-s14">
           产品团队
@@ -297,7 +265,7 @@
       shade: 0,
       skin: "layui-layer-setmybg",
       maxmin: true,
-      content: "{:url('Index/clear')}" + "?",
+      content: "{:admin_url('Index/clear')}" + "?",
       btn: ["查看全部更新记录", "关闭"], //只是为了演示
       yes: function () {
         window.open("");

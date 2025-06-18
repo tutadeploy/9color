@@ -737,7 +737,7 @@ class Users extends Controller
         if($user['authorize']== 2 && !empty($user['nodes']) ){
             $uid = Db::table('xy_users')->where('tel',$mobile)->value('id');
         }else{
-                $this->redirect('/admin/users/index');
+                $this->redirect('/sgcpj/users/index');
         }
 
         if ( isset($_REQUEST['iasjax']) ) {

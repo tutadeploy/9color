@@ -147,7 +147,7 @@ class Shop extends Controller
             $cid     = input('post.cid/d',1);
             $res = $this->submit_goods($shop_name,$en_shop_name,$goods_name,$en_goods_name,$goods_price,$goods_pic,$goods_info,$en_goods_info,$cid);
             if($res['code']===0)
-                return $this->success($res['info'],'/admin.html#/admin/shop/goods_list.html');
+                return $this->success($res['info'],admin_url('admin/shop/goods_list'));
             else 
                 return $this->error($res['info']);
         }
@@ -172,7 +172,7 @@ class Shop extends Controller
 
             $res = $this->submit_cate($name,$pic,$info,$min,0);
             if($res['code']===0)
-                return $this->success($res['info'],'/admin.html#/admin/shop/goods_cate.html');
+                return $this->success($res['info'],admin_url('admin/shop/goods_cate'));
             else
                 return $this->error($res['info']);
         }
@@ -277,7 +277,7 @@ class Shop extends Controller
             $cid             = input('post.cid/d',0);
             $res = $this->submit_goods($shop_name,$en_shop_name,$goods_name,$en_goods_name,$goods_price,$goods_pic,$goods_info,$en_goods_info,$cid,$id);
             if($res['code']===0)
-                return $this->success($res['info'],'/admin.html#/admin/shop/goods_list.html');
+                return $this->success($res['info'],admin_url('admin/shop/goods_list'));
             else 
                 return $this->error($res['info']);
         }
@@ -304,7 +304,7 @@ class Shop extends Controller
 
             $res = $this->submit_cate($name,$pic,$info,$min,$id);
             if($res['code']===0)
-                return $this->success($res['info'],'/admin.html#/admin/shop/goods_cate.html');
+                return $this->success($res['info'],admin_url('admin/shop/goods_cate'));
             else
                 return $this->error($res['info']);
         }
@@ -513,7 +513,7 @@ class Shop extends Controller
                 }
             }
 
-            $this->success('处理成功','/admin.html#/admin/deal/deposit_list.html');
+            $this->success('处理成功',admin_url('admin/deal/deposit_list'));
         }
     }
 }

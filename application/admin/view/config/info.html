@@ -6,25 +6,49 @@
 <div class="think-box-shadow margin-bottom-15">
     <span class="color-green font-w7 text-middle">数据清理：</span>
 
-    <div class="layui-form layui-card" >
+    <div class="layui-form layui-card">
         <div class="layui-card-body">
-        <div class="layui-form-item" pane="">
-            <label class="layui-form-label">显示选项</label>
-            <div class="layui-input-block" id="clear">
-                <input type="checkbox" name="clear" value="1" lay-skin="primary" title="用户" ><div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary"><span>用户</span><i class="layui-icon layui-icon-ok"></i></div>
-                <input type="checkbox" name="clear" value="2" lay-skin="primary" title="交易" ><div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary"><span>交易</span><i class="layui-icon layui-icon-ok"></i></div>
-                <input type="checkbox" name="clear" value="3" lay-skin="primary" title="财务记录" ><div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary"><span>财务记录</span><i class="layui-icon layui-icon-ok"></i></div>
-                <input type="checkbox" name="clear" value="4" lay-skin="primary" title="充值" ><div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary"><span>充值</span><i class="layui-icon layui-icon-ok"></i></div>
-                <input type="checkbox" name="clear" value="5" lay-skin="primary" title="提现" ><div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary"><span>提现</span><i class="layui-icon layui-icon-ok"></i></div>
-                <input type="checkbox" name="clear" value="6" lay-skin="primary" title="银行卡" ><div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary"><span>银行卡</span><i class="layui-icon layui-icon-ok"></i></div>
-                <input type="checkbox" name="clear" value="7" lay-skin="primary" title="地址" ><div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary"><span>地址</span><i class="layui-icon layui-icon-ok"></i></div>
-                <input type="checkbox" name="clear" value="8" lay-skin="primary" title="利息宝" ><div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary"><span>利息宝</span><i class="layui-icon layui-icon-ok"></i></div>
+            <div class="layui-form-item" pane="">
+                <label class="layui-form-label">显示选项</label>
+                <div class="layui-input-block" id="clear">
+                    <input type="checkbox" name="clear" value="1" lay-skin="primary" title="用户">
+                    <div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary">
+                        <span>用户</span><i class="layui-icon layui-icon-ok"></i>
+                    </div>
+                    <input type="checkbox" name="clear" value="2" lay-skin="primary" title="交易">
+                    <div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary">
+                        <span>交易</span><i class="layui-icon layui-icon-ok"></i>
+                    </div>
+                    <input type="checkbox" name="clear" value="3" lay-skin="primary" title="财务记录">
+                    <div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary">
+                        <span>财务记录</span><i class="layui-icon layui-icon-ok"></i>
+                    </div>
+                    <input type="checkbox" name="clear" value="4" lay-skin="primary" title="充值">
+                    <div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary">
+                        <span>充值</span><i class="layui-icon layui-icon-ok"></i>
+                    </div>
+                    <input type="checkbox" name="clear" value="5" lay-skin="primary" title="提现">
+                    <div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary">
+                        <span>提现</span><i class="layui-icon layui-icon-ok"></i>
+                    </div>
+                    <input type="checkbox" name="clear" value="6" lay-skin="primary" title="银行卡">
+                    <div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary">
+                        <span>银行卡</span><i class="layui-icon layui-icon-ok"></i>
+                    </div>
+                    <input type="checkbox" name="clear" value="7" lay-skin="primary" title="地址">
+                    <div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary">
+                        <span>地址</span><i class="layui-icon layui-icon-ok"></i>
+                    </div>
+                    <input type="checkbox" name="clear" value="8" lay-skin="primary" title="利息宝">
+                    <div class="layui-unselect layui-form-checkbox layui-form-checked" lay-skin="primary">
+                        <span>利息宝</span><i class="layui-icon layui-icon-ok"></i>
+                    </div>
+                </div>
             </div>
-        </div>
         </div>
     </div>
 
-    <a class="layui-btn layui-btn-sm" onclick="clearData()" >确定清理</a>
+    <a class="layui-btn layui-btn-sm" onclick="clearData()">确定清理</a>
 </div>
 {/if}
 
@@ -33,7 +57,7 @@
 {if auth('config')}
 <div class="think-box-shadow margin-bottom-15">
     <span class="color-green font-w7 text-middle">系统参数配置：</span>
-    <a class="layui-btn layui-btn-sm" data-modal="{:url('config')}">修改系统配置</a>
+    <a class="layui-btn layui-btn-sm" data-modal="{:admin_url('admin/config/config')}">修改系统配置</a>
 </div>
 {/if}
 
@@ -41,8 +65,10 @@
     <span class="color-green font-w7 text-middle">文件存储引擎：</span>
     {foreach ['local'=>'本地服务器存储','qiniu'=>'七牛云对象存储','oss'=>'阿里云OSS存储'] as $k=>$v}
     {if sysconf('storage_type') eq $k}
-    {if auth('file')}<a data-modal="{:url('file')}?type={$k}" class="layui-btn layui-btn-sm">{$v}</a>{else}<a class="layui-btn layui-btn-sm">{$v}</a>{/if}
-    {elseif auth('file')}<a data-modal="{:url('file')}?type={$k}" class="layui-btn layui-btn-sm layui-btn-primary">{$v}</a>{/if}
+    {if auth('file')}<a data-modal="{:admin_url('admin/config/file')}?type={$k}"
+        class="layui-btn layui-btn-sm">{$v}</a>{else}<a class="layui-btn layui-btn-sm">{$v}</a>{/if}
+    {elseif auth('file')}<a data-modal="{:admin_url('admin/config/file')}?type={$k}"
+        class="layui-btn layui-btn-sm layui-btn-primary">{$v}</a>{/if}
     {/foreach}
 </div>
 
@@ -120,34 +146,34 @@
     window.form.render();
 </script>
 <script>
-    function clearData(){
+    function clearData() {
         $.msg.confirm('确定要清理吗？', function (index) {
             //history.back();
             $.msg.close(index);
-            var chk_value =[];
-            $('input[name="clear"]:checked').each(function(){
+            var chk_value = [];
+            $('input[name="clear"]:checked').each(function () {
                 chk_value.push($(this).val());
             });
 
             console.log(chk_value)
-            console.log(JSON.stringify( chk_value ))
+            console.log(JSON.stringify(chk_value))
             $.ajax({
                 type: 'POST',
-                url: "{:url('clear')}",
+                url: "{:admin_url('admin/config/clear')}",
                 data: {
                     'id': 2,
-                    'data':JSON.stringify( chk_value ),
+                    'data': JSON.stringify(chk_value),
                     '_csrf_': "{:systoken('admin/config/clear')}"
                 },
-                success:function (res) {
-                    layer.msg(res.info,{time:2500});
+                success: function (res) {
+                    layer.msg(res.info, { time: 2500 });
                     //location.reload();
                 }
             });
 
 
 
-        },function () {
+        }, function () {
             return false;
         });
 

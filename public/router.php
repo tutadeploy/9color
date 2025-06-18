@@ -33,17 +33,22 @@ if ($uri === '/') {
     // 注册页面路由
     $_GET['s'] = '/index/user/register';
     $_SERVER['REQUEST_URI'] = '/index.php?s=/index/user/register';
-} else if ($uri === '/admin' || preg_match('/^\/admin\//', $uri)) {
+} else if ($uri === '/sgcpj' || preg_match('/^\/sgcpj\//', $uri)) {
     // 后台管理路由 - 直接路由到admin模块
-    if ($uri === '/admin') {
+    if ($uri === '/sgcpj') {
         $_GET['s'] = '/admin/index/index';
         $_SERVER['REQUEST_URI'] = '/index.php?s=/admin/index/index';
     } else {
-        // 处理 /admin/controller/action 格式
-        $adminPath = preg_replace('/^\/admin/', '/admin', $uri);
+        // 处理 /sgcpj/controller/action 格式
+        $adminPath = preg_replace('/^\/sgcpj/', '/admin', $uri);
         $_GET['s'] = $adminPath;
         $_SERVER['REQUEST_URI'] = '/index.php?s=' . $adminPath;
     }
+} else if (preg_match('/^\/admin\/sgcpj\//', $uri)) {
+    // 容错处理：修复错误的 /admin/sgcpj/ URL
+    $adminPath = preg_replace('/^\/admin\/sgcpj/', '/admin', $uri);
+    $_GET['s'] = $adminPath;
+    $_SERVER['REQUEST_URI'] = '/index.php?s=' . $adminPath;
 } else if (preg_match('/^\/index\/user\/(do_login|do_register|logout)$/', $uri, $matches)) {
     // 处理用户相关的API接口
     $_GET['s'] = $uri;
