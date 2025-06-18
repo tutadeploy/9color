@@ -98,7 +98,7 @@ class Plugs extends Controller
             $file = File::instance('qiniu');
             return ['url' => $file->upload(true), 'token' => $file->buildUploadToken(), 'uptype' => $this->getUploadType()];
         } else {
-            return ['url' => '?s=sgcpj/api.plugs/upload', 'token' => uniqid('local_upload_'), 'uptype' => $this->getUploadType()];
+            return ['url' => '/sgcpj/api.plugs/upload.html', 'token' => uniqid('local_upload_'), 'uptype' => $this->getUploadType()];
         }
     }
 

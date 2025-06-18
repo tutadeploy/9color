@@ -2,7 +2,7 @@
 {block name="button"}
 
 {if auth("add_lixibao")}
-<button data-open='{:admin_url("add_lixibao")}' data-title="添加选项" class='layui-btn'>添加选项</button>
+<button data-open='{:admin_url("admin/deal/add_lixibao")}' data-title="添加选项" class='layui-btn'>添加选项</button>
 {/if}
 
 {/block}
@@ -74,15 +74,16 @@
                 <td class='text-left nowrap'>{$vo.addtime|format_datetime}</td>
                 <td class='text-left nowrap'>
                     {if $vo.status eq 1}
-                    <a class="layui-btn layui-btn-warm layui-btn-xs" data-action="{:admin_url('lxb_forbid')}"
+                    <a class="layui-btn layui-btn-warm layui-btn-xs" data-action="{:admin_url('admin/deal/lxb_forbid')}"
                         data-value="id#{$vo.id};status#0" data-csrf="{:systoken('admin/deal/lxb_forbid')}">禁 用</a>
                     {elseif $vo.status eq 0}
-                    <a class="layui-btn layui-btn-warm layui-btn-xs" data-action="{:admin_url('lxb_resume')}"
+                    <a class="layui-btn layui-btn-warm layui-btn-xs" data-action="{:admin_url('admin/deal/lxb_resume')}"
                         data-value="id#{$vo.id};status#1" data-csrf="{:systoken('admin/deal/lxb_resume')}">启 用</a>
                     {/if}
                     {if auth("edit_lixibao")}
-                    <a class="layui-btn layui-btn-xs layui-btn" data-open="{:admin_url('edit_lixibao',['id'=>$vo.id])}"
-                        data-value="id#{$vo.id}" style='background:green;'>编辑</a>
+                    <a class="layui-btn layui-btn-xs layui-btn"
+                        data-open="{:admin_url('admin/deal/edit_lixibao',['id'=>$vo.id])}" data-value="id#{$vo.id}"
+                        style='background:green;'>编辑</a>
                     {/if}
                     {if auth("del_lixibao")}
                     <a class="layui-btn layui-btn-xs layui-btn" style='background:red;'
@@ -111,7 +112,7 @@
             layer.confirm("确认要删除吗，删除后不能恢复", { title: "删除确认" }, function (index) {
                 $.ajax({
                     type: 'POST',
-                    url: "{:admin_url('del_lixibao')}",
+                    url: "{:admin_url('admin/deal/del_lixibao')}",
                     data: {
                         'id': id,
                         '_csrf_': "{:systoken('admin/deal/del_lixibao')}"

@@ -158,13 +158,23 @@ class Grouping extends Controller
      */
     public function delete_grouping()
     {
-        $this->applyCsrfToken();
-        $id = input('post.id/d',0);
-        $res = Db::table($this->table)->where('id',$id)->delete();
-        if($res)
-            $this->success('删除成功!');
-        else
-            $this->error('删除失败!');
+        try {
+            $this->applyCsrfToken();
+            $id = input('post.id/d',0);
+            $res = Db::table($this->table)->where('id',$id)->delete();
+            if($res)
+                $this->success('删除成功!');
+            else
+                $this->error('删除失败!');
+        } catch (\Exception $e) {
+            // 检查是否是 ThinkPHP 的正常响应异常
+            if ($e instanceof \think\exception\HttpResponseException) {
+                throw $e; // 重新抛出，让框架正常处理
+            }
+            // 其他异常才记录错误
+            error_log("delete_grouping error: " . $e->getMessage());
+            $this->error('删除失败: ' . $e->getMessage());
+        }
     }
     
     

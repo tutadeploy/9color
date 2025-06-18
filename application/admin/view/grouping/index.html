@@ -3,7 +3,7 @@
 {block name="button"}
 
 {if auth("edit_grouping")}
-<button data-modal='{:admin_url("edit_grouping")}' data-title="添加分组" class='layui-btn'>添加分组</button>
+<button data-modal='{:admin_url("admin/grouping/edit_grouping")}' data-title="添加分组" class='layui-btn'>添加分组</button>
 {/if}
 
 {/block}
@@ -76,12 +76,12 @@
                     {if ($vo.status == 1) and auth("edit_grouping_status")}
                     <a class="layui-btn layui-btn-xs layui-btn-warm"
                         data-csrf="{:systoken('admin/grouping/edit_grouping_status')}"
-                        data-action="{:admin_url('edit_grouping_status',['status'=>2,'id'=>$vo.id])}"
+                        data-action="{:admin_url('admin/grouping/edit_grouping_status',['status'=>2,'id'=>$vo.id])}"
                         data-value="id#{$vo.id};status#2" style='background:red;'>禁用</a>
                     {elseif ($vo.status == 2) and auth("edit_grouping_status") /}
                     <a class="layui-btn layui-btn-xs layui-btn-warm"
                         data-csrf="{:systoken('admin/grouping/edit_grouping_status')}"
-                        data-action="{:admin_url('edit_grouping_status',['status'=>1,'id'=>$vo.id])}"
+                        data-action="{:admin_url('admin/grouping/edit_grouping_status',['status'=>1,'id'=>$vo.id])}"
                         data-value="id#{$vo.id};status#1" style='background:green;'>启用</a>
                     {/if}
 
@@ -98,7 +98,7 @@
             layer.confirm("确认要删除吗，删除后不能恢复", { title: "删除确认" }, function (index) {
                 $.ajax({
                     type: 'POST',
-                    url: "{:admin_url('delete_grouping')}",
+                    url: "/sgcpj/grouping/delete_grouping.html",
                     data: {
                         'id': id,
                         '_csrf_': "{:systoken('admin/grouping/delete_grouping')}"
