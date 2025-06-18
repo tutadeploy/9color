@@ -34,7 +34,7 @@
             </div>
             <a href="" class="user">
                 <i></i>
-                15816393445
+                {$info.username}
             </a>
         </div>
         <!--			<div class="ind-box2">-->
@@ -88,7 +88,7 @@
             </li>
             <li>
                 <!--自由领取权-->
-                <a href="/index/msg">
+                <a href="/my/msg">
                     <i class="i2_0"></i>
 
                     <p></span>待激活权益</p>
@@ -405,7 +405,7 @@
         setInterval(get_user_tc, 5000);
         var flag = false;
 
-        function showDanmu(content,title, id) {
+        function showDanmu(content, title, id) {
 
             $("#danmu").show();
             $(".pop-mask").show();
@@ -419,7 +419,7 @@
             $(".pop-mask").hide();
             flag = false;
             $.ajax({
-               url: "{:url('set_user_msg')}",
+                url: "{:url('set_user_msg')}",
                 type: "POST",
                 dataType: "JSON",
                 data: {
@@ -440,10 +440,10 @@
                     'id': 2
                 },
                 success: function (res) {
-                    if (res.code==1&&res.info) {
+                    if (res.code == 1 && res.info) {
                         flag = true;
                         var html = '';
-                        showDanmu(res.info.content,res.info.title, res.info.id)
+                        showDanmu(res.info.content, res.info.title, res.info.id)
 
                     }
                 }
