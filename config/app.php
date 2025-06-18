@@ -56,7 +56,7 @@ return [
     'app_only' => 0,            //只允许app访问
     'vip_sj_bu'=> 1,            //vip升级 是否补交
     'app_url'=>'app',          //app下载地址
-    'version'=>'20210406',  //版本号
+    'version'=>'20250618',  //版本号
 
 
     'verify'    => false,
