@@ -55,7 +55,7 @@
                 <input class="file-upload" id="file" type="file" accept="image/*" name="file" />
                 <div class="avatar" id="btn">
 
-                    <img class="js-avatar" src="{$info.headpic}" onerror="this.src='/static/home/images/avatar.png'"
+                    <img class="js-avatar" src="{$info.headpic+1}" onerror="this.src='/static/home/images/avatar.png'"
                         alt="15816393445">
                 </div>
                 <div class="name-vip">
@@ -526,7 +526,7 @@
         $(function () {
             // 根据当前用户头像设置默认选中状态
             setDefaultActiveAvatar();
-            
+
             $('.avatar-list').on('click', '.avatar', function () {
                 var index = $(this).parents('li').index()
                 $(this).parents('li').addClass('active').siblings().removeClass('active');
@@ -535,27 +535,27 @@
                 }
             });
         })
-        
+
         // 设置默认选中的头像
         function setDefaultActiveAvatar() {
             var currentAvatar = $('.js-avatar').attr('src');
-            
+
             // 遍历头像列表，找到匹配的头像
-            $('.avatar-list .avatar img').each(function() {
+            $('.avatar-list .avatar img').each(function () {
                 var avatarSrc = $(this).attr('src');
-                
+
                 // 比较头像路径（处理可能的相对路径和绝对路径差异）
-                if (avatarSrc === currentAvatar || 
+                if (avatarSrc === currentAvatar ||
                     avatarSrc === currentAvatar.replace(window.location.origin, '') ||
                     currentAvatar.indexOf(avatarSrc) !== -1 ||
                     avatarSrc.indexOf(currentAvatar.split('/').pop()) !== -1) {
-                    
+
                     // 找到匹配的头像，设置为选中状态
                     $(this).closest('li').addClass('active');
-                    
+
                     // 设置pic变量为当前头像
                     pic = avatarSrc;
-                    
+
                     return false; // 跳出each循环
                 }
             });
@@ -658,7 +658,7 @@
                             });
                         },
                         success: function (data) {
-                            if (data.code==0) {
+                            if (data.code == 0) {
                                 $(document).dialog({ infoText: '保存成功' });
                                 setTimeout(function () {
                                     location.href = '/my';
