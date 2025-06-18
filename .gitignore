@@ -44,5 +44,4 @@ yarn.lock
 *.rar
 *.7z
 *.pkg 
-.DS_Store
 /runtime
