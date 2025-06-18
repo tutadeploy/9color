@@ -31,8 +31,8 @@ echo ""
 echo "✅ 项目启动完成！"
 echo ""
 echo "📱 访问信息："
-echo "   前台地址: http://localhost:9080"
-echo "   后台地址: http://localhost:9080/admin"
+echo "   前台地址: http://localhost"
+echo "   后台地址: http://localhost/admin"
 echo "   MySQL端口: 3306"
 echo ""
 echo "🔐 登录信息："
@@ -54,7 +54,7 @@ echo ""
 # 测试网站连通性
 echo "🔍 测试网站连通性..."
 sleep 3
-if curl -s -o /dev/null -w "%{http_code}" http://localhost:9080 | grep -q "200\|301\|302"; then
+if curl -s -o /dev/null -w "%{http_code}" http://localhost | grep -q "200\|301\|302"; then
     echo "✅ 网站可以正常访问"
 else
     echo "⚠️  网站可能还在启动中，请稍后再试"

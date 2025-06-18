@@ -23,6 +23,6 @@ docker-compose up -d --build
 Write-Host "检查容器状态..." -ForegroundColor Yellow
 docker-compose ps
 
-Write-Host "项目启动完成！访问 http://localhost:9080" -ForegroundColor Green
+Write-Host "项目启动完成！访问 http://localhost" -ForegroundColor Green
 Write-Host "MySQL端口: 3307" -ForegroundColor Cyan
 Write-Host "查看日志: docker-compose logs -f" -ForegroundColor Cyan 
