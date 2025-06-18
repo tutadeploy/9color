@@ -22,7 +22,89 @@
     <link rel="stylesheet" href="/static/banner/css/normalize.css">
     <link rel="stylesheet" href="/static/banner/css/style.css">
     <script src="/static/banner/js/awesome-slider.min.js"></script>
-    <script src="/static/banner/js/index.js"></script>
+    <script>
+        function main() {
+            // 从HTML中读取轮播图数据
+            var bannerDataElement = document.getElementById('banner-data');
+            var bannerData = [];
+
+            if (bannerDataElement) {
+                try {
+                    bannerData = JSON.parse(bannerDataElement.textContent);
+                    // 过滤掉空的图片项
+                    bannerData = bannerData.filter(function (item) {
+                        return item.image && item.image.trim() !== '';
+                    });
+                } catch (e) {
+                    console.error('轮播图数据解析失败:', e);
+                    bannerData = [];
+                }
+            }
+
+            // 如果没有有效数据，使用默认数据
+            if (bannerData.length === 0) {
+                bannerData = [
+                    { image: "/static/banner/img/1.jpg", url: "" },
+                    { image: "/static/banner/img/2.jpg", url: "" },
+                    { image: "/static/banner/img/3.jpg", url: "" },
+                    { image: "/static/banner/img/4.jpg", url: "" }
+                ];
+            }
+
+            var root = document.getElementById("root");
+
+            function appendContainer(text) {
+                var container = document.createElement("div");
+                container.className = "container";
+                root.appendChild(container);
+
+                if (text) {
+                    var introduce = document.createElement("div");
+                    introduce.className = "introduce";
+                    var textNode = document.createTextNode(text);
+                    introduce.appendChild(textNode);
+                    container.appendChild(introduce);
+                }
+                return container;
+            }
+
+            var text = "";
+            var container = appendContainer(text);
+
+            // 提取图片URL数组
+            var images = bannerData.map(function (item) {
+                return item.image;
+            });
+
+            var awesomeSlider = new AwesomeSlider(images, container, {
+                duration: 1000 * 3,
+                timing: "easeOutCubic"
+            });
+
+            // 添加点击事件处理链接跳转
+            setTimeout(function () {
+                var sliderItems = container.querySelectorAll('.awesome-slider-item');
+                sliderItems.forEach(function (item, index) {
+                    if (bannerData[index] && bannerData[index].url) {
+                        item.style.cursor = 'pointer';
+                        item.addEventListener('click', function () {
+                            window.location.href = bannerData[index].url;
+                        });
+                    }
+                });
+            }, 100);
+        }
+
+        function readyGo(func) {
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", func);
+            } else {
+                func();
+            }
+        }
+
+        readyGo(main);
+    </script>
 </head>
 
 <body class="body-bottom">
@@ -77,7 +159,40 @@
 
         <!--轮播图-->
         <div id="root">
-
+            <!-- 轮播图数据 -->
+            <script type="application/json" id="banner-data">
+            [
+                {notempty name='banner'}
+                {foreach $banner as $key=>$vo}
+                {
+                    "image": "{$vo.image}",
+                    "url": "{$vo.url|default=''}"
+                },
+                {/foreach}
+                {
+                    "image": "",
+                    "url": ""
+                }
+                {else}
+                {
+                    "image": "/static/banner/img/1.jpg",
+                    "url": ""
+                },
+                {
+                    "image": "/static/banner/img/2.jpg", 
+                    "url": ""
+                },
+                {
+                    "image": "/static/banner/img/3.jpg",
+                    "url": ""
+                },
+                {
+                    "image": "/static/banner/img/4.jpg",
+                    "url": ""
+                }
+                {/notempty}
+            ]
+            </script>
         </div>
         <ul class="ind-row4">
             <li>

@@ -36,7 +36,8 @@
             <div class="form-login">
                 <div class="inp-box">
                     <div class="tit tit1">手机号</div>
-                    <input class="inp" type="tel" name="username" placeholder="请输入手机号" value="">
+                    <input class="inp" type="tel" name="username" placeholder="请输入11位手机号" value="" maxlength="11"
+                        pattern="[0-9]*">
                 </div>
                 <div class="inp-box">
                     <div class="tit tit2">密码</div>
@@ -71,19 +72,57 @@
         $(function () {
             /*检查表单*/
             function check() {
-                if ($("input[name=username]").val() == '' || $("input[name=password]").val() == '') {
+                var username = $("input[name=username]").val();
+                var password = $("input[name=password]").val();
+
+                if (username == '' || password == '') {
                     $(document).dialog({ infoText: '请输入账号/密码' });
                     return false;
                 }
+
+                // 验证手机号格式
+                if (!isValidPhone(username)) {
+                    $(document).dialog({ infoText: '请输入正确的11位手机号' });
+                    return false;
+                }
+
                 return true;
+            }
+
+            /*验证手机号格式*/
+            function isValidPhone(phone) {
+                // 中国大陆手机号正则：11位数字，以1开头，第二位是3-9
+                var phoneRegex = /^1[3-9]\d{9}$/;
+                return phoneRegex.test(phone);
             }
 
             /*监听账号input*/
             $("input[name=username]").bind("input propertychange", function () {
+                // 只允许输入数字
+                var value = $(this).val().replace(/[^0-9]/g, '');
+                $(this).val(value);
+
                 if ($(this).val() !== '') {
                     $('.icon-delete').show();
                 } else {
                     $('.icon-delete').hide();
+                }
+            });
+
+            /*限制手机号只能输入数字*/
+            $("input[name=username]").on('keypress', function (e) {
+                // 允许退格键、删除键、Tab键、Escape、Enter
+                if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+                    // 允许 Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                    (e.keyCode === 65 && e.ctrlKey === true) ||
+                    (e.keyCode === 67 && e.ctrlKey === true) ||
+                    (e.keyCode === 86 && e.ctrlKey === true) ||
+                    (e.keyCode === 88 && e.ctrlKey === true)) {
+                    return;
+                }
+                // 确保输入的是数字
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
                 }
             });
 
