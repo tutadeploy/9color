@@ -3,7 +3,8 @@
 {block name="content"}
 
 
-<form onsubmit="return false;" id="GoodsForm" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+<form onsubmit="return false;" id="GoodsForm" data-auto="true" method="post" class='layui-form layui-card'
+    autocomplete="off">
 
     <div class="layui-card-body think-box-shadow padding-left-40">
 
@@ -20,43 +21,43 @@
 
             <label class="layui-col-xs9 relative">
                 <span class="color-green">日语标题</span>
-                <input name="jp_title" required class="layui-input" value="{$info.jp_title}"  placeholder="请输入公告日语标题">
+                <input name="jp_title" required class="layui-input" value="{$info.jp_title}" placeholder="请输入公告日语标题">
             </label>
         </div>
-         <div class="layui-form-item layui-row layui-col-space15">
+        <div class="layui-form-item layui-row layui-col-space15">
 
             <label class="layui-col-xs9 relative">
                 <span class="color-green">韩语标题</span>
-                <input name="kr_title" required class="layui-input" value="{$info.kr_title}"  placeholder="请输入公告韩语标题">
+                <input name="kr_title" required class="layui-input" value="{$info.kr_title}" placeholder="请输入公告韩语标题">
             </label>
         </div>
-         
- <div class="layui-form-item layui-row layui-col-space15">
+
+        <div class="layui-form-item layui-row layui-col-space15">
 
             <label class="layui-col-xs9 relative">
                 <span class="color-green">英文标题</span>
-                <input name="en_title" required class="layui-input" value="{$info.en_title}"  placeholder="请输入公告英文标题">
+                <input name="en_title" required class="layui-input" value="{$info.en_title}" placeholder="请输入公告英文标题">
             </label>
         </div>
- <div class="layui-form-item layui-row layui-col-space15">
+        <div class="layui-form-item layui-row layui-col-space15">
 
             <label class="layui-col-xs9 relative">
                 <span class="color-green">法文标题</span>
-                <input name="fr_title" required class="layui-input" value="{$info.fr_title}"  placeholder="请输入公告法文标题">
+                <input name="fr_title" required class="layui-input" value="{$info.fr_title}" placeholder="请输入公告法文标题">
             </label>
         </div>
-         <div class="layui-form-item layui-row layui-col-space15">
+        <div class="layui-form-item layui-row layui-col-space15">
 
             <label class="layui-col-xs9 relative">
                 <span class="color-green">西班牙标题</span>
-                <input name="es_title" required class="layui-input" value="{$info.es_title}"  placeholder="请输入公告西班牙标题">
+                <input name="es_title" required class="layui-input" value="{$info.es_title}" placeholder="请输入公告西班牙标题">
             </label>
         </div>
-         <div class="layui-form-item layui-row layui-col-space15">
+        <div class="layui-form-item layui-row layui-col-space15">
 
             <label class="layui-col-xs9 relative">
                 <span class="color-green">葡萄牙标题</span>
-                <input name="pt_title" required class="layui-input" value="{$info.pt_title}"  placeholder="请输入公告葡萄牙标题">
+                <input name="pt_title" required class="layui-input" value="{$info.pt_title}" placeholder="请输入公告葡萄牙标题">
             </label>
         </div>
 
@@ -64,32 +65,32 @@
             <span class="label-required-prev color-green">公告内容</span>
             <textarea name="content">{$info.content}</textarea>
         </div>
-        
-          <div class="layui-form-item block">
+
+        <div class="layui-form-item block">
             <span class="label-required-prev color-green">日语公告内容</span>
             <textarea name="jp_content">{$info.jp_content}</textarea>
         </div>
-          <div class="layui-form-item block">
+        <div class="layui-form-item block">
             <span class="label-required-prev color-green">韩语公告内容</span>
             <textarea name="kr_content">{$info.kr_content}</textarea>
         </div>
-  <div class="layui-form-item block">
+        <div class="layui-form-item block">
             <span class="label-required-prev color-green">英文公告内容</span>
             <textarea name="en_content">{$info.en_content}</textarea>
         </div>
-  <div class="layui-form-item block">
+        <div class="layui-form-item block">
             <span class="label-required-prev color-green">法文公告内容</span>
             <textarea name="fr_content">{$info.fr_content}</textarea>
         </div>
-          <div class="layui-form-item block">
+        <div class="layui-form-item block">
             <span class="label-required-prev color-green">西班牙公告内容</span>
             <textarea name="es_content">{$info.es_content}</textarea>
         </div>
-          <div class="layui-form-item block">
+        <div class="layui-form-item block">
             <span class="label-required-prev color-green">葡萄牙公告内容</span>
             <textarea name="pt_content">{$info.pt_content}</textarea>
         </div>
-        
+
         <div class="layui-form-item text-center">
             <button class="layui-btn" type="submit">确认编辑</button>
             <button class="layui-btn layui-btn-danger" ng-click="hsitoryBack()" type="button">取消编辑</button>
@@ -104,13 +105,13 @@
 <script>
     window.form.render();
     require(['ckeditor', 'angular'], function () {
-        window.createEditor('[name="content"]', {height: 500});
-        window.createEditor('[name="en_content"]', {height: 500});
-        window.createEditor('[name="fr_content"]', {height: 500});
-        window.createEditor('[name="es_content"]', {height: 500});
-        window.createEditor('[name="pt_content"]', {height: 500});
-        window.createEditor('[name="kr_content"]', {height: 500});
-        window.createEditor('[name="jp_content"]', {height: 500});
+        window.createEditor('[name="content"]', { height: 500 });
+        window.createEditor('[name="en_content"]', { height: 500 });
+        window.createEditor('[name="fr_content"]', { height: 500 });
+        window.createEditor('[name="es_content"]', { height: 500 });
+        window.createEditor('[name="pt_content"]', { height: 500 });
+        window.createEditor('[name="kr_content"]', { height: 500 });
+        window.createEditor('[name="jp_content"]', { height: 500 });
         var app = angular.module("GoodsForm", []).run(callback);
         angular.bootstrap(document.getElementById(app.name), [app.name]);
 
@@ -120,7 +121,7 @@
             $rootScope.specs = JSON.parse(angular.element('#goods-specs').val() || '[{"name":"默认分组","list":[{"name":"默认规格","check":true}]}]');
             // 批量设置数值
             $rootScope.batchSet = function (type, fixed) {
-                layer.prompt({title: '请输入数值', formType: 0}, function (value, index) {
+                layer.prompt({ title: '请输入数值', formType: 0 }, function (value, index) {
                     $rootScope.$apply(function () {
                         var val = (parseFloat(value) || 0).toFixed(fixed);
                         for (var i in $rootScope.specsTreeData) for (var j in $rootScope.specsTreeData[i]) {
@@ -210,7 +211,7 @@
             };
             // 增加整行规格分组
             $rootScope.addSpecRow = function (data) {
-                data.push({name: '规格分组', list: [{name: '规格属性', check: true}]})
+                data.push({ name: '规格分组', list: [{ name: '规格属性', check: true }] })
             };
             // 下移整行规格分组
             $rootScope.dnSpecRow = function (data, $index) {
@@ -240,7 +241,7 @@
             };
             // 增加分组的属性
             $rootScope.addSpecVal = function (list) {
-                list.push({name: '规格属性', check: true});
+                list.push({ name: '规格属性', check: true });
             };
             // 移除分组的属性
             $rootScope.delSpecVal = function (data, $index) {

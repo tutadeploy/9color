@@ -76,17 +76,40 @@
         layer.confirm("确认要删除吗，删除后不能恢复", { title: "删除确认" }, function (index) {
             $.ajax({
                 type: 'POST',
-                url: "{:admin_url('admin/help/del_banner')}",
+                url: "/sgcpj/help/del_banner.html",
+                dataType: 'json',
                 data: {
                     'id': id,
                     '_csrf_': "{:systoken('admin/help/del_banner')}"
                 },
                 success: function (res) {
-                    layer.msg(res.info, { time: 2500 });
-                    location.reload();
+                    if (res && res.code === 1) {
+                        layer.msg(res.info || '删除成功', { time: 2500 });
+                        setTimeout(function () {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        layer.msg(res.info || '删除失败', { time: 2500 });
+                    }
+                },
+                error: function (xhr) {
+                    var errorMsg = '删除失败';
+                    if (xhr.status === 403) {
+                        errorMsg = '权限不足，无法删除';
+                    } else if (xhr.status === 404) {
+                        errorMsg = '删除接口不存在';
+                    } else if (xhr.status === 500) {
+                        errorMsg = '服务器内部错误';
+                    }
+                    layer.msg(errorMsg, { time: 3000 });
+                },
+                complete: function () {
+                    layer.close(index);
                 }
             });
-        }, function () { });
+        }, function () {
+            // 取消删除时的回调
+        });
     }
 </script>
 

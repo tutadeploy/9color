@@ -3,7 +3,8 @@
 {block name="content"}
 
 
-<form onsubmit="return false;" id="GoodsForm" data-auto="true" method="post" class='layui-form layui-card' autocomplete="off">
+<form onsubmit="return false;" id="GoodsForm" data-auto="true" method="post" class='layui-form layui-card'
+    autocomplete="off">
 
     <div class="layui-card-body think-box-shadow padding-left-40">
 
@@ -11,7 +12,7 @@
 
             <label class="layui-col-xs9 relative">
                 <span class="color-green">公告标题</span>
-                <input name="title" required class="layui-input" value="{$info.title}" placeholder="请输入公告标题"">
+                <input name="title" required class="layui-input" value="{$info.title}" placeholder="请输入公告标题">
                 <input type="hidden" name="id" value="{$info.id}">
                 <input type="hidden" name="_csrf_" value="{:systoken('admin/help/edit_message')}">
             </label>
@@ -26,7 +27,7 @@
 
         <div class="layui-form-item text-center">
             <button class="layui-btn" type="submit">确认编辑</button>
-            <button class="layui-btn layui-btn-danger" ng-click="hsitoryBack()" type="button">取消编辑</button>
+            <button class="layui-btn layui-btn-danger" onclick="javascript:history.back(-1)" type="button">取消编辑</button>
         </div>
 
     </div>
@@ -38,7 +39,7 @@
 <script>
     window.form.render();
     require(['ckeditor', 'angular'], function () {
-        window.createEditor('[name="content"]', {height: 500});
+        window.createEditor('[name="content"]', { height: 500 });
         var app = angular.module("GoodsForm", []).run(callback);
         angular.bootstrap(document.getElementById(app.name), [app.name]);
 
@@ -48,7 +49,7 @@
             $rootScope.specs = JSON.parse(angular.element('#goods-specs').val() || '[{"name":"默认分组","list":[{"name":"默认规格","check":true}]}]');
             // 批量设置数值
             $rootScope.batchSet = function (type, fixed) {
-                layer.prompt({title: '请输入数值', formType: 0}, function (value, index) {
+                layer.prompt({ title: '请输入数值', formType: 0 }, function (value, index) {
                     $rootScope.$apply(function () {
                         var val = (parseFloat(value) || 0).toFixed(fixed);
                         for (var i in $rootScope.specsTreeData) for (var j in $rootScope.specsTreeData[i]) {
@@ -138,7 +139,7 @@
             };
             // 增加整行规格分组
             $rootScope.addSpecRow = function (data) {
-                data.push({name: '规格分组', list: [{name: '规格属性', check: true}]})
+                data.push({ name: '规格分组', list: [{ name: '规格属性', check: true }] })
             };
             // 下移整行规格分组
             $rootScope.dnSpecRow = function (data, $index) {
@@ -168,7 +169,7 @@
             };
             // 增加分组的属性
             $rootScope.addSpecVal = function (list) {
-                list.push({name: '规格属性', check: true});
+                list.push({ name: '规格属性', check: true });
             };
             // 移除分组的属性
             $rootScope.delSpecVal = function (data, $index) {
