@@ -70,7 +70,6 @@ CREATE TABLE `xy_goods_list` (
 ## 数据结构对比分析
 
 ### 关键发现
-
 1. **目标表定位**: JSON数据应录入到 `xy_goods_list` 表（商品表），而非分类表
 2. **缺失信息分析**:
    - `cate_id`: null - 无分类信息

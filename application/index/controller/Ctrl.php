@@ -330,7 +330,7 @@ class Ctrl extends Base
             $levelinfo = db('xy_level')->where('level',$level)->field('num,auto_vip_xu_num')->find();
             if($can_vip_info['balance']>=$levelinfo['num'] & $can_vip_info['child_num']>=$levelinfo['auto_vip_xu_num']){
                 $res = Db::name('xy_users')->where('id',$uid)->update(['level'=>$level]); 
-                Db::name('xy_message')->insert(['uid'=>$uid,'type'=>2,'title'=>lang('系统通知'),'content'=>lang('你已达到升级标准,已完成升级'),'addtime'=>time()]);
+                Db::name('xy_message')->insert(['uid'=>$uid,'type'=>2,'title'=>lang('系统通知'),'content'=>lang('你已达到升级标准,已完成升级'),'addtime'=>time(),'status'=>0]);
             }else if($can_vip_info['balance']>=$levelinfo['num'] & $can_vip_info['child_num']<$levelinfo['auto_vip_xu_num']){
                 
                 return json(['code'=>1,'info'=>lang('邀请用户不足')]);

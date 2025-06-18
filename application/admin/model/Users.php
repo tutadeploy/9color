@@ -601,7 +601,7 @@ if($can_vip_info['child_num']>=$info['auto_vip_xu_num']&&$can_vip_info['balance'
             
             if($can_vip_info['level']<$newlevel){
                 Db::name('xy_users')->where('id',$uid)->update(['level'=>$newlevel]); 
-                Db::name('xy_message')->insert(['uid'=>$uid,'type'=>2,'title'=>lang('系统通知'),'content'=>lang('您已达到升级标准，已自动升级'),'addtime'=>time()]);
+                Db::name('xy_message')->insert(['uid'=>$uid,'type'=>2,'title'=>lang('系统通知'),'content'=>lang('您已达到升级标准，已自动升级'),'addtime'=>time(),'status'=>0]);
                 return true;
             }else{
                 return false;;
@@ -621,7 +621,7 @@ if($can_vip_info['child_num']>=$info['auto_vip_xu_num']&&$can_vip_info['balance'
             }
             if($can_vip_info['level']>$newlevel){
                 Db::name('xy_users')->where('id',$uid)->update(['level'=>$newlevel]); 
-                Db::name('xy_message')->insert(['uid'=>$uid,'type'=>2,'title'=>lang('系统通知'),'content'=>lang('由于余额变化已降级'),'addtime'=>time()]);
+                Db::name('xy_message')->insert(['uid'=>$uid,'type'=>2,'title'=>lang('系统通知'),'content'=>lang('由于余额变化已降级'),'addtime'=>time(),'status'=>0]);
             }
     }
      public function today_commission($uid)

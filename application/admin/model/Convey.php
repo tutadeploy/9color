@@ -279,7 +279,7 @@ class Convey extends Model
                 'status'        => 2,
                 'addtime'       => time()
             ]);
-            if($status==3) Db::name('xy_message')->insert(['uid'=>$info['uid'],'type'=>2,'title'=>lang('系统通知'),'content'=>lang('交易订单').$oid.lang('已被系统强制付款，如有疑问请联系客服'),'addtime'=>time()]);
+            if($status==3) Db::name('xy_message')->insert(['uid'=>$info['uid'],'type'=>2,'title'=>lang('系统通知'),'content'=>lang('交易订单').$oid.lang('已被系统强制付款，如有疑问请联系客服'),'addtime'=>time(),'status'=>0]);
             //系统通知
             if($res && $res1 && $res2){
                 Db::commit();
@@ -293,7 +293,7 @@ class Convey extends Model
             }
         }elseif (in_array($status,[2,4])) {
             $res1 = Db::name('xy_users')->where('id',$info['uid'])->update(['deal_status'=>1]);
-            if($status==4) Db::name('xy_message')->insert(['uid'=>$info['uid'],'type'=>2,'title'=>lang('系统通知'),'content'=>lang('交易订单').$oid.lang('已被系统强制取消，如有疑问请联系客服'),'addtime'=>time()]);
+            if($status==4) Db::name('xy_message')->insert(['uid'=>$info['uid'],'type'=>2,'title'=>lang('系统通知'),'content'=>lang('交易订单').$oid.lang('已被系统强制取消，如有疑问请联系客服'),'addtime'=>time(),'status'=>0]);
             //系统通知
             if($res && $res1!==false){
                 Db::commit();

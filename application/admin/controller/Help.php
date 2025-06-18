@@ -42,7 +42,7 @@ class Help extends Controller
             if(mb_strlen($title) > 50)$this->error('标题长度限制为50个字符');
             if(!$content)$this->error('公告内容为必填项');
 
-            $res = Db::table('xy_message')->insert(['addtime'=>time(),'sid'=>0,'type'=>3,'title'=>$title,'content'=>$content]);
+            $res = Db::table('xy_message')->insert(['addtime'=>time(),'sid'=>0,'type'=>3,'title'=>$title,'content'=>$content,'status'=>0]);
             if($res){
                 $this->success('发送公告成功','/admin.html#/admin/help/message_ctrl.html');
             }else

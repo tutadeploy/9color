@@ -268,7 +268,7 @@ class Users extends Controller
             if(!$uid)$this->error('uid为必填项');
             if(!$title)$this->error('标题为必填项');
             if(!$content)$this->error('内容为必填项');
-            $res =Db::name('xy_message')->insert(['uid'=>$uid,'type'=>2,'title'=>$title,'content'=>$content,'addtime'=>time()]);
+            $res =Db::name('xy_message')->insert(['uid'=>$uid,'type'=>2,'title'=>$title,'content'=>$content,'addtime'=>time(),'status'=>0]);
             if($res){
                 
             return $this->success("添加成功");
