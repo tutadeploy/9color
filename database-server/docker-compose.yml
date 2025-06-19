@@ -59,6 +59,28 @@ services:
       "
     restart: unless-stopped
 
+  # phpMyAdmin 数据库管理面板
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2
+    container_name: 9color_phpmyadmin
+    ports:
+      - "8090:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123456}
+      UPLOAD_LIMIT: 100M
+      MEMORY_LIMIT: 512M
+      MAX_EXECUTION_TIME: 300
+    volumes:
+      - ./phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+    depends_on:
+      - mysql
+    networks:
+      - db-network
+    restart: unless-stopped
+
 
 volumes:
   mysql_data:
