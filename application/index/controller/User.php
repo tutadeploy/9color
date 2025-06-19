@@ -44,7 +44,10 @@ class User extends Base
         // $this->applyCsrfToken();//验证令牌
         $username = input('post.tel/s','');
         
-        $num = Db::table($this->table)->where(['username'=>$username])->count();
+        // 修复：支持手机号和用户名登录
+        $num = Db::table($this->table)->where(function($query) use ($username) {
+            $query->where('username', $username)->whereOr('tel', $username);
+        })->count();
         if(!$num){
             return json(['code'=>1,'info'=>lang('账号不存在')]);
         }
@@ -53,8 +56,10 @@ class User extends Base
         $keep        = input('post.keep/b', false);    
         $jizhu        = input('post.jizhu/s', 0);
 
-
-        $userinfo = Db::table($this->table)->field('id,pwd,salt,pwd_error_num,allow_login_time,status,login_status,headpic')->where('username',$username)->find();
+        // 修复：支持手机号和用户名登录
+        $userinfo = Db::table($this->table)->field('id,pwd,salt,pwd_error_num,allow_login_time,status,login_status,headpic')->where(function($query) use ($username) {
+            $query->where('username', $username)->whereOr('tel', $username);
+        })->find();
         if(!$userinfo)return json(['code'=>1,'info'=>lang('用户不存在')]);
         if($userinfo['status'] != 1)return json(['code'=>1,'info'=>lang('用户已被禁用')]);
         //if($userinfo['login_status'])return ['code'=>1,'info'=>lang('此账号已在别处登录状态')];
