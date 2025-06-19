@@ -81,8 +81,9 @@
                     <a data-dbclick class="layui-btn layui-btn-xs layui-btn-danger" data-title="收货地址信息"
                         data-modal='{:admin_url("admin/users/edit_users_address")}?id={$vo.id}'>地址信息</a>
 
-                    <a class="layui-btn layui-btn-xs layui-btn" onClick="del_user({$vo.id})"
-                        style='background:red;'>删除</a>
+                    <a class="layui-btn layui-btn-xs layui-btn-danger" data-confirm="确认要删除吗，删除后不能恢复"
+                        data-action="{:admin_url('admin/users/delete_user')}" data-value="id#{$vo.id}"
+                        data-csrf="{:systoken('admin/users/delete_user')}" style='background:red;'>删除</a>
 
                     {/if}
                     <a class="layui-btn layui-btn-xs layui-btn"
@@ -111,24 +112,7 @@
             {/foreach}
         </tbody>
     </table>
-    <script>
-        function del_user(id) {
-            layer.confirm("确认要删除吗，删除后不能恢复", { title: "删除确认" }, function (index) {
-                $.ajax({
-                    type: 'POST',
-                    url: "{:admin_url('delete_user')}",
-                    data: {
-                        'id': id,
-                        '_csrf_': "{:systoken('admin/users/delete_user')}"
-                    },
-                    success: function (res) {
-                        layer.msg(res.info, { time: 2500 });
-                        location.reload();
-                    }
-                });
-            }, function () { });
-        }
-    </script>
+
     <script>
         var table = layui.table;
         //转换静态表格
