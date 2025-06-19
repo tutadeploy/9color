@@ -1,0 +1,68 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:1.24-alpine
+    container_name: 9color_nginx_prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../:/var/www/html
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./logs/nginx:/var/log/nginx
+      - ./ssl:/etc/nginx/ssl  # SSL证书目录
+    depends_on:
+      - php-fpm
+    networks:
+      - app-network
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+
+  php-fpm:
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    container_name: 9color_php73_prod
+    volumes:
+      - ../:/var/www/html
+      - ./logs/php-fpm:/var/log/php-fpm
+    networks:
+      - app-network
+    restart: unless-stopped
+    environment:
+      - PHP_FPM_USER=www-data
+      - PHP_FPM_GROUP=www-data
+      - TZ=Asia/Shanghai
+      # 数据库连接配置
+      - DB_HOST=${DB_HOST:-192.168.1.200}
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_NAME=${DB_NAME:-6ui}
+      - DB_USER=${DB_USER:-app}
+      - DB_PASS=${DB_PASS:-app123456}
+      # Redis配置
+      - REDIS_HOST=${REDIS_HOST:-192.168.1.200}
+      - REDIS_PORT=${REDIS_PORT:-6379}
+
+  # 可选：本地Redis缓存
+  redis-local:
+    image: redis:6.2-alpine
+    container_name: 9color_redis_local
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_local_data:/data
+    networks:
+      - app-network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  redis_local_data:
+    driver: local 

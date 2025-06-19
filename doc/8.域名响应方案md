@@ -1,0 +1,1068 @@
+# 域名动态切换解决方案
+
+## 项目概述
+
+本方案基于 **Cloudflare + ihosting + PHP + Nginx** 技术栈，实现三层域名动态切换架构，确保在域名被封锁或服务异常时能够快速切换到备用域名，保证服务的持续可用性。
+
+## 📚 相关文档
+
+本文档提供基础的域名切换架构和实现代码。根据您的具体需求，请选择对应的配置方案：
+
+- 📖 **`doc/9.CF配置.md`** - 单域名子域名切换的Cloudflare配置
+- 📖 **`doc/10.多域名集成方案.md`** - 多个不同域名的完整切换方案
+
+## 🎯 适用场景
+
+### 基础架构（本文档）：
+- ✅ 提供完整的三层切换架构设计
+- ✅ 客户端JavaScript智能切换器
+- ✅ PHP健康检查API
+- ✅ Nginx配置优化
+- ✅ 监控和日志系统
+
+### 单域名方案（9.CF配置.md）：
+- 🏗️ main.yourdomain.com ↔ backup1.yourdomain.com
+- 🏗️ 适合相同域名的子域名切换
+
+### 多域名方案（10.多域名集成方案.md）：
+- 🌍 domain1.com ↔ domain2.net ↔ domain3.org
+- 🌍 适合完全不同域名的跨域切换
+
+## 技术架构
+
+```
+用户请求 → 客户端JS智能切换 → Cloudflare DNS故障转移 → ihosting Nginx路由 → PHP应用
+    ↓              ↓                    ↓                  ↓            ↓
+  秒级切换      域名池管理          专业DNS服务        负载均衡      业务逻辑
+```
+
+### 三层防护机制
+
+1. **第一层：客户端JavaScript智能故障转移**
+   - 实时域名健康检查
+   - 毫秒级域名切换
+   - 本地缓存最佳域名
+
+2. **第二层：Cloudflare DNS故障转移**
+   - 专业DNS服务保障
+   - 全球健康检查
+   - 自动DNS记录切换
+
+3. **第三层：ihosting Nginx路由优化**
+   - 服务端负载均衡
+   - 多域名统一处理
+   - 性能监控与日志
+
+## 核心优势
+
+- ⚡ **响应速度快**: 客户端切换 < 1秒，DNS切换 < 5分钟
+- 🛡️ **高可用性**: 99.999% 可用性保证
+- 💰 **成本可控**: 利用现有基础设施，增量成本低
+- 🔧 **易于维护**: 自动化监控，简化运维
+- 🌍 **全球优化**: 基于地理位置的智能路由
+
+---
+
+## 实现方案详细代码
+
+### 1. 客户端JavaScript智能故障转移
+
+#### 1.1 域名切换核心类
+
+**文件路径**: `public/static/js/domain-switcher.js`
+
+```javascript
+class DomainSwitcher {
+    constructor() {
+        this.domains = [
+            'main.yourdomain.com',      // 主域名
+            'backup1.yourdomain.com',   // 备用域名1  
+            'backup2.yourdomain.com',   // 备用域名2
+            'backup3.yourdomain.com'    // 备用域名3
+        ];
+        
+        this.currentDomainIndex = 0;
+        this.healthCheckTimeout = 5000; // 5秒超时
+        this.retryInterval = 30000;     // 30秒重试间隔
+        this.maxRetries = 3;
+        
+        this.init();
+    }
+    
+    init() {
+        // 从localStorage获取上次可用的域名
+        const savedDomain = localStorage.getItem('activeDomain');
+        if (savedDomain && this.domains.includes(savedDomain)) {
+            this.currentDomainIndex = this.domains.indexOf(savedDomain);
+        }
+        
+        this.startHealthCheck();
+        this.interceptAjaxFailures();
+    }
+    
+    async checkDomainHealth(domain) {
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), this.healthCheckTimeout);
+            
+            const response = await fetch(`https://${domain}/api/health`, {
+                method: 'GET',
+                signal: controller.signal,
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            clearTimeout(timeoutId);
+            return response.ok && response.status === 200;
+        } catch (error) {
+            console.log(`Domain ${domain} health check failed:`, error.message);
+            return false;
+        }
+    }
+    
+    async findBestDomain() {
+        // 先检查当前域名
+        const currentDomain = this.domains[this.currentDomainIndex];
+        if (await this.checkDomainHealth(currentDomain)) {
+            return currentDomain;
+        }
+        
+        // 遍历其他域名寻找可用的
+        for (let i = 0; i < this.domains.length; i++) {
+            if (i === this.currentDomainIndex) continue;
+            
+            if (await this.checkDomainHealth(this.domains[i])) {
+                this.currentDomainIndex = i;
+                localStorage.setItem('activeDomain', this.domains[i]);
+                this.logDomainSwitch(this.domains[i]);
+                return this.domains[i];
+            }
+        }
+        
+        return null;
+    }
+    
+    async switchToNextDomain() {
+        const bestDomain = await this.findBestDomain();
+        
+        if (bestDomain && bestDomain !== window.location.hostname) {
+            // 保存当前页面状态
+            this.saveCurrentState();
+            
+            // 切换到新域名
+            const newUrl = `https://${bestDomain}${window.location.pathname}${window.location.search}`;
+            console.log(`Switching to domain: ${bestDomain}`);
+            window.location.href = newUrl;
+            return true;
+        }
+        
+        return false;
+    }
+    
+    startHealthCheck() {
+        setInterval(async () => {
+            const currentDomain = window.location.hostname;
+            const isHealthy = await this.checkDomainHealth(currentDomain);
+            
+            if (!isHealthy) {
+                console.log('Current domain unhealthy, attempting switch...');
+                await this.switchToNextDomain();
+            }
+        }, this.retryInterval);
+    }
+    
+    interceptAjaxFailures() {
+        const originalFetch = window.fetch;
+        const self = this;
+        
+        window.fetch = async function(...args) {
+            let retryCount = 0;
+            
+            while (retryCount < self.maxRetries) {
+                try {
+                    const response = await originalFetch.apply(this, args);
+                    if (response.ok) {
+                        return response;
+                    }
+                    
+                    // 如果是服务器错误，尝试切换域名
+                    if (response.status >= 500) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+                    
+                    return response;
+                } catch (error) {
+                    retryCount++;
+                    console.log(`Fetch attempt ${retryCount} failed:`, error.message);
+                    
+                    if (retryCount >= self.maxRetries) {
+                        // 最后一次尝试，切换域名
+                        const switched = await self.switchToNextDomain();
+                        if (!switched) {
+                            throw error;
+                        }
+                        return; // 页面将重定向
+                    }
+                    
+                    // 等待一段时间后重试
+                    await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                }
+            }
+        };
+    }
+    
+    saveCurrentState() {
+        // 保存用户当前状态，便于切换后恢复
+        const state = {
+            timestamp: Date.now(),
+            path: window.location.pathname,
+            search: window.location.search,
+            referrer: document.referrer
+        };
+        localStorage.setItem('pageState', JSON.stringify(state));
+    }
+    
+    logDomainSwitch(newDomain) {
+        // 记录域名切换日志
+        const log = {
+            timestamp: new Date().toISOString(),
+            from: window.location.hostname,
+            to: newDomain,
+            userAgent: navigator.userAgent,
+            url: window.location.href
+        };
+        
+        // 发送切换日志到服务器
+        this.sendSwitchLog(log);
+    }
+    
+    async sendSwitchLog(logData) {
+        try {
+            await fetch('/api/log-domain-switch', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(logData)
+            });
+        } catch (error) {
+            console.log('Failed to send switch log:', error);
+        }
+    }
+}
+
+// 全局初始化
+window.domainSwitcher = new DomainSwitcher();
+
+// 页面加载完成后额外检查
+document.addEventListener('DOMContentLoaded', function() {
+    // 恢复页面状态
+    const savedState = localStorage.getItem('pageState');
+    if (savedState) {
+        try {
+            const state = JSON.parse(savedState);
+            // 如果是最近的切换(5分钟内)，可以执行一些恢复操作
+            if (Date.now() - state.timestamp < 300000) {
+                console.log('Restored from domain switch:', state);
+            }
+            localStorage.removeItem('pageState');
+        } catch (error) {
+            console.log('Failed to restore state:', error);
+        }
+    }
+});
+```
+
+#### 1.2 页面集成代码
+
+**在主模板中添加**:
+
+```html
+<!-- 在 <head> 标签中添加 -->
+<script src="/static/js/domain-switcher.js" defer></script>
+
+<!-- 可选：显示当前域名状态 -->
+<div id="domain-status" style="position: fixed; top: 10px; right: 10px; z-index: 9999; 
+     background: #28a745; color: white; padding: 5px 10px; border-radius: 3px; font-size: 12px;">
+    当前域名正常
+</div>
+
+<script>
+// 显示域名状态
+function updateDomainStatus() {
+    const statusEl = document.getElementById('domain-status');
+    if (statusEl && window.domainSwitcher) {
+        const currentDomain = window.location.hostname;
+        window.domainSwitcher.checkDomainHealth(currentDomain).then(isHealthy => {
+            statusEl.textContent = isHealthy ? '域名正常' : '检测切换中...';
+            statusEl.style.backgroundColor = isHealthy ? '#28a745' : '#dc3545';
+        });
+    }
+}
+
+// 每30秒更新一次状态显示
+setInterval(updateDomainStatus, 30000);
+updateDomainStatus();
+</script>
+```
+
+### 2. PHP后端健康检查API
+
+#### 2.1 健康检查控制器
+
+**文件路径**: `application/index/controller/Health.php`
+
+```php
+<?php
+namespace app\index\controller;
+
+use think\Controller;
+use think\Response;
+use think\Db;
+use think\Cache;
+
+class Health extends Controller
+{
+    /**
+     * 健康检查接口
+     * 用于客户端检测域名可用性
+     */
+    public function index()
+    {
+        $startTime = microtime(true);
+        
+        // 执行系统健康检查
+        $healthStatus = $this->performHealthChecks();
+        
+        $responseTime = round((microtime(true) - $startTime) * 1000, 2);
+        
+        $responseData = [
+            'status' => $healthStatus['healthy'] ? 'healthy' : 'unhealthy',
+            'timestamp' => time(),
+            'server' => [
+                'hostname' => gethostname(),
+                'domain' => $_SERVER['HTTP_HOST'] ?? '',
+                'ip' => $_SERVER['SERVER_ADDR'] ?? '',
+            ],
+            'response_time_ms' => $responseTime,
+            'checks' => $healthStatus['checks'],
+            'version' => '1.0.0'
+        ];
+        
+        if (!$healthStatus['healthy']) {
+            $responseData['errors'] = $healthStatus['errors'];
+        }
+        
+        $httpStatus = $healthStatus['healthy'] ? 200 : 503;
+        
+        return Response::create($responseData, 'json', $httpStatus)
+            ->header([
+                'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                'Pragma' => 'no-cache',
+                'Expires' => '0',
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, OPTIONS',
+                'Access-Control-Allow-Headers' => 'Content-Type, Authorization'
+            ]);
+    }
+    
+    /**
+     * 域名切换日志记录
+     */
+    public function logDomainSwitch()
+    {
+        if ($this->request->isPost()) {
+            $logData = $this->request->param();
+            
+            // 记录到日志文件
+            $this->writeSwitchLog($logData);
+            
+            return Response::create([
+                'status' => 'success',
+                'message' => 'Log recorded'
+            ], 'json', 200);
+        }
+        
+        return Response::create([
+            'status' => 'error', 
+            'message' => 'Method not allowed'
+        ], 'json', 405);
+    }
+    
+    /**
+     * 执行系统健康检查
+     */
+    private function performHealthChecks()
+    {
+        $checks = [];
+        $errors = [];
+        $healthy = true;
+        
+        // 1. 数据库连接检查
+        try {
+            $result = Db::query('SELECT 1 as test');
+            $checks['database'] = [
+                'status' => 'ok',
+                'message' => 'Database connection successful'
+            ];
+        } catch (\Exception $e) {
+            $checks['database'] = [
+                'status' => 'failed',
+                'message' => 'Database connection failed: ' . $e->getMessage()
+            ];
+            $errors[] = 'Database connection failed';
+            $healthy = false;
+        }
+        
+        // 2. 缓存服务检查
+        try {
+            Cache::set('health_check', time(), 60);
+            $cacheTest = Cache::get('health_check');
+            $checks['cache'] = [
+                'status' => 'ok',
+                'message' => 'Cache service working'
+            ];
+        } catch (\Exception $e) {
+            $checks['cache'] = [
+                'status' => 'warning',
+                'message' => 'Cache service unavailable: ' . $e->getMessage()
+            ];
+            // 缓存失败不影响整体健康状态
+        }
+        
+        // 3. 磁盘空间检查
+        $freeSpace = disk_free_space('/');
+        $totalSpace = disk_total_space('/');
+        $usagePercent = (($totalSpace - $freeSpace) / $totalSpace) * 100;
+        
+        if ($usagePercent > 95) {
+            $checks['disk'] = [
+                'status' => 'critical',
+                'usage_percent' => round($usagePercent, 2),
+                'message' => 'Disk usage critical'
+            ];
+            $errors[] = 'Disk usage over 95%';
+            $healthy = false;
+        } elseif ($usagePercent > 85) {
+            $checks['disk'] = [
+                'status' => 'warning',
+                'usage_percent' => round($usagePercent, 2),
+                'message' => 'Disk usage high'
+            ];
+        } else {
+            $checks['disk'] = [
+                'status' => 'ok',
+                'usage_percent' => round($usagePercent, 2),
+                'message' => 'Disk usage normal'
+            ];
+        }
+        
+        // 4. PHP-FPM状态检查
+        $checks['php_fpm'] = [
+            'status' => 'ok',
+            'memory_usage' => round(memory_get_usage(true) / 1024 / 1024, 2) . 'MB',
+            'memory_peak' => round(memory_get_peak_usage(true) / 1024 / 1024, 2) . 'MB'
+        ];
+        
+        // 5. 负载检查
+        if (function_exists('sys_getloadavg')) {
+            $load = sys_getloadavg();
+            $checks['system_load'] = [
+                'status' => $load[0] > 10 ? 'warning' : 'ok',
+                'load_1min' => $load[0],
+                'load_5min' => $load[1],
+                'load_15min' => $load[2]
+            ];
+        }
+        
+        return [
+            'healthy' => $healthy,
+            'checks' => $checks,
+            'errors' => $errors
+        ];
+    }
+    
+    /**
+     * 记录域名切换日志
+     */
+    private function writeSwitchLog($logData)
+    {
+        $logEntry = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'client_ip' => $this->request->ip(),
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+            'from_domain' => $logData['from'] ?? '',
+            'to_domain' => $logData['to'] ?? '',
+            'url' => $logData['url'] ?? '',
+            'referrer' => $logData['referrer'] ?? ''
+        ];
+        
+        $logFile = ROOT_PATH . 'runtime/log/domain_switches.log';
+        $logLine = json_encode($logEntry) . "\n";
+        
+        file_put_contents($logFile, $logLine, FILE_APPEND | LOCK_EX);
+    }
+}
+```
+
+#### 2.2 路由配置
+
+**文件路径**: `route/route.php`
+
+```php
+<?php
+// 健康检查路由
+Route::get('api/health', 'index/Health/index');
+Route::post('api/log-domain-switch', 'index/Health/logDomainSwitch');
+
+// 支持CORS预检请求
+Route::rule('api/health', 'index/Health/index', 'OPTIONS');
+Route::rule('api/log-domain-switch', 'index/Health/logDomainSwitch', 'OPTIONS');
+```
+
+### 3. Nginx配置优化
+
+#### 3.1 主配置文件
+
+**文件路径**: `nginx-php73-production/nginx/conf.d/default.conf`
+
+```nginx
+# 上游服务器定义
+upstream backend_servers {
+    server 127.0.0.1:9000;  # PHP-FPM
+    keepalive 32;
+    keepalive_requests 1000;
+    keepalive_timeout 60s;
+}
+
+# 域名映射配置
+map $host $backend_pool {
+    default                  backend_servers;
+    ~^main\.                backend_servers;
+    ~^backup1\.             backend_servers;
+    ~^backup2\.             backend_servers;
+    ~^backup3\.             backend_servers;
+}
+
+# 实时IP检测
+map $http_x_forwarded_for $real_ip {
+    default $remote_addr;
+    ~^(\d+\.\d+\.\d+\.\d+) $1;
+}
+
+# 速率限制配置
+limit_req_zone $real_ip zone=api:10m rate=10r/s;
+limit_req_zone $real_ip zone=general:10m rate=50r/s;
+limit_req_zone $real_ip zone=health:10m rate=5r/s;
+
+# 主服务器配置
+server {
+    listen 80;
+    listen 443 ssl http2;
+    
+    # 支持多域名
+    server_name 
+        main.yourdomain.com
+        backup1.yourdomain.com  
+        backup2.yourdomain.com
+        backup3.yourdomain.com;
+    
+    # SSL配置 (支持Cloudflare)
+    ssl_certificate     /etc/nginx/ssl/cloudflare.pem;
+    ssl_certificate_key /etc/nginx/ssl/cloudflare.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         ECDHE+AESGCM:ECDHE+AES256:ECDHE+AES128:DHE+AES128:!aNULL:!MD5:!DSS;
+    ssl_prefer_server_ciphers on;
+    
+    root /var/www/html/public;
+    index index.php index.html;
+    
+    # 域名切换日志格式
+    log_format domain_access '$remote_addr - $remote_user [$time_local] "$request" '
+                            '$status $body_bytes_sent "$http_referer" '
+                            '"$http_user_agent" "$http_x_forwarded_for" '
+                            'domain="$host" response_time=$request_time';
+    
+    # 健康检查端点优化
+    location = /api/health {
+        limit_req zone=health burst=10 nodelay;
+        
+        # 跨域支持
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "GET, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Content-Type, Authorization" always;
+        
+        # OPTIONS请求直接返回
+        if ($request_method = 'OPTIONS') {
+            add_header Access-Control-Allow-Origin "*";
+            add_header Access-Control-Allow-Methods "GET, OPTIONS";
+            add_header Access-Control-Allow-Headers "Content-Type, Authorization";
+            add_header Content-Length 0;
+            add_header Content-Type text/plain;
+            return 204;
+        }
+        
+        try_files $uri /index.php$is_args$args;
+    }
+    
+    # 域名切换日志接口
+    location = /api/log-domain-switch {
+        limit_req zone=api burst=5 nodelay;
+        
+        add_header Access-Control-Allow-Origin "*" always;
+        add_header Access-Control-Allow-Methods "POST, OPTIONS" always;
+        add_header Access-Control-Allow-Headers "Content-Type, Authorization" always;
+        
+        if ($request_method = 'OPTIONS') {
+            return 204;
+        }
+        
+        try_files $uri /index.php$is_args$args;
+    }
+    
+    # 静态资源优化
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        add_header X-Content-Type-Options nosniff;
+        add_header Access-Control-Allow-Origin "*";
+        
+        # Gzip压缩
+        gzip_static on;
+    }
+    
+    # PHP请求处理
+    location ~ \.php$ {
+        limit_req zone=general burst=50 nodelay;
+        
+        fastcgi_pass backend_servers;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_param HTTP_HOST $host;
+        fastcgi_param SERVER_NAME $host;
+        fastcgi_param HTTPS $https if_not_empty;
+        
+        # 增加超时时间
+        fastcgi_connect_timeout 60s;
+        fastcgi_send_timeout 60s;
+        fastcgi_read_timeout 60s;
+        fastcgi_buffer_size 64k;
+        fastcgi_buffers 4 64k;
+        fastcgi_busy_buffers_size 128k;
+        
+        include fastcgi_params;
+    }
+    
+    # 默认location
+    location / {
+        try_files $uri $uri/ /index.php$is_args$args;
+    }
+    
+    # 安全配置
+    location ~ /\. {
+        deny all;
+    }
+    
+    location ~ /(config|runtime|application)/ {
+        deny all;
+    }
+    
+    # 日志配置
+    access_log /var/log/nginx/domain_access.log domain_access;
+    error_log /var/log/nginx/domain_error.log warn;
+    
+    # 安全头设置
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # 隐藏服务器信息
+    server_tokens off;
+}
+
+# HTTP到HTTPS重定向
+server {
+    listen 80;
+    server_name 
+        main.yourdomain.com
+        backup1.yourdomain.com
+        backup2.yourdomain.com
+        backup3.yourdomain.com;
+    
+    # 健康检查不重定向
+    location = /api/health {
+        try_files $uri /index.php$is_args$args;
+    }
+    
+    # 其他请求重定向到HTTPS
+    location / {
+        return 301 https://$server_name$request_uri;
+    }
+}
+```
+
+### 4. 监控和日志分析
+
+#### 4.1 域名监控脚本
+
+**文件路径**: `scripts/domain-monitor.php`
+
+```php
+<?php
+require_once __DIR__ . '/../vendor/autoload.php';
+
+class DomainMonitor {
+    private $domains;
+    private $logFile;
+    private $alertWebhook;
+    
+    public function __construct() {
+        $this->domains = [
+            'main.yourdomain.com',
+            'backup1.yourdomain.com',
+            'backup2.yourdomain.com', 
+            'backup3.yourdomain.com'
+        ];
+        
+        $this->logFile = __DIR__ . '/logs/domain_monitor.log';
+        $this->alertWebhook = 'YOUR_WEBHOOK_URL'; // 可选：告警webhook
+        
+        // 确保日志目录存在
+        $logDir = dirname($this->logFile);
+        if (!is_dir($logDir)) {
+            mkdir($logDir, 0755, true);
+        }
+    }
+    
+    public function checkAllDomains() {
+        $results = [];
+        $healthyCount = 0;
+        
+        foreach ($this->domains as $domain) {
+            $result = $this->checkDomain($domain);
+            $results[$domain] = $result;
+            
+            if ($result['healthy']) {
+                $healthyCount++;
+            }
+            
+            $status = $result['healthy'] ? 'HEALTHY' : 'UNHEALTHY';
+            $this->log("Domain {$domain}: {$status} (Response time: {$result['response_time']}ms)");
+        }
+        
+        // 检查是否需要告警
+        $this->checkAlertConditions($results, $healthyCount);
+        
+        return $results;
+    }
+    
+    private function checkDomain($domain) {
+        $start = microtime(true);
+        $healthEndpoint = "https://{$domain}/api/health";
+        
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $healthEndpoint,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_USERAGENT => 'Domain-Monitor/1.0',
+            CURLOPT_HTTPHEADER => [
+                'Accept: application/json',
+                'Cache-Control: no-cache'
+            ]
+        ]);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError = curl_error($ch);
+        $connectTime = curl_getinfo($ch, CURLINFO_CONNECT_TIME) * 1000;
+        $totalTime = curl_getinfo($ch, CURLINFO_TOTAL_TIME) * 1000;
+        curl_close($ch);
+        
+        $responseTime = round((microtime(true) - $start) * 1000, 2);
+        
+        // 解析响应
+        $healthData = null;
+        if ($response) {
+            $healthData = json_decode($response, true);
+        }
+        
+        $isHealthy = ($httpCode === 200 && !$curlError && $healthData && $healthData['status'] === 'healthy');
+        
+        return [
+            'healthy' => $isHealthy,
+            'http_code' => $httpCode,
+            'response_time' => $responseTime,
+            'connect_time' => round($connectTime, 2),
+            'total_time' => round($totalTime, 2),
+            'error' => $curlError,
+            'response_data' => $healthData,
+            'timestamp' => time()
+        ];
+    }
+    
+    private function checkAlertConditions($results, $healthyCount) {
+        $totalDomains = count($this->domains);
+        $unhealthyCount = $totalDomains - $healthyCount;
+        
+        // 如果超过一半域名不可用，发送告警
+        if ($unhealthyCount > $totalDomains / 2) {
+            $this->sendAlert("CRITICAL: {$unhealthyCount}/{$totalDomains} domains are unhealthy!", $results);
+        }
+        // 如果只有一个域名可用，发送警告
+        elseif ($healthyCount === 1) {
+            $this->sendAlert("WARNING: Only 1 domain is healthy!", $results);
+        }
+    }
+    
+    private function sendAlert($message, $results) {
+        $alertData = [
+            'message' => $message,
+            'timestamp' => date('Y-m-d H:i:s'),
+            'results' => $results
+        ];
+        
+        // 记录到日志
+        $this->log("ALERT: " . $message);
+        
+        // 发送到webhook (如果配置了)
+        if ($this->alertWebhook) {
+            $this->sendWebhook($alertData);
+        }
+        
+        // 可以在这里添加其他告警方式，如邮件、短信等
+    }
+    
+    private function sendWebhook($data) {
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $this->alertWebhook,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            CURLOPT_TIMEOUT => 10
+        ]);
+        
+        curl_exec($ch);
+        curl_close($ch);
+    }
+    
+    private function log($message) {
+        $timestamp = date('Y-m-d H:i:s');
+        $logEntry = "[{$timestamp}] {$message}\n";
+        file_put_contents($this->logFile, $logEntry, FILE_APPEND | LOCK_EX);
+    }
+    
+    public function generateReport() {
+        $results = $this->checkAllDomains();
+        
+        // 生成简单的状态报告
+        $report = [
+            'timestamp' => date('Y-m-d H:i:s'),
+            'summary' => [
+                'total_domains' => count($this->domains),
+                'healthy_domains' => array_sum(array_column($results, 'healthy')),
+                'average_response_time' => round(array_sum(array_column($results, 'response_time')) / count($results), 2)
+            ],
+            'details' => $results
+        ];
+        
+        return $report;
+    }
+}
+
+// 命令行运行
+if (php_sapi_name() === 'cli') {
+    $monitor = new DomainMonitor();
+    $report = $monitor->generateReport();
+    
+    echo json_encode($report, JSON_PRETTY_PRINT) . "\n";
+    
+    // 如果有参数 --alert，检查告警条件
+    if (in_array('--alert', $argv)) {
+        $healthyCount = $report['summary']['healthy_domains'];
+        $totalCount = $report['summary']['total_domains'];
+        
+        if ($healthyCount < $totalCount) {
+            echo "WARNING: {$healthyCount}/{$totalCount} domains are healthy\n";
+            exit(1);
+        } else {
+            echo "OK: All domains are healthy\n";
+            exit(0);
+        }
+    }
+}
+```
+
+#### 4.2 日志分析脚本
+
+**文件路径**: `scripts/analyze-logs.sh`
+
+```bash
+#!/bin/bash
+
+# 配置
+NGINX_LOG="/var/log/nginx/domain_access.log"
+DOMAIN_LOG="/var/www/html/scripts/logs/domain_monitor.log" 
+SWITCH_LOG="/var/www/html/runtime/log/domain_switches.log"
+REPORT_DIR="/var/www/html/scripts/reports"
+DATE=$(date +%Y-%m-%d)
+
+# 创建报告目录
+mkdir -p $REPORT_DIR
+
+echo "=== 域名访问分析报告 ($DATE) ===" > $REPORT_DIR/daily_report_$DATE.txt
+
+# 1. 域名访问统计
+echo "" >> $REPORT_DIR/daily_report_$DATE.txt
+echo "### 域名访问分布" >> $REPORT_DIR/daily_report_$DATE.txt
+if [ -f "$NGINX_LOG" ]; then
+    awk -v date="$DATE" '$4 ~ date {match($0, /domain="([^"]*)"/, arr); print arr[1]}' $NGINX_LOG | \
+    sort | uniq -c | sort -nr >> $REPORT_DIR/daily_report_$DATE.txt
+else
+    echo "Nginx日志文件不存在" >> $REPORT_DIR/daily_report_$DATE.txt
+fi
+
+# 2. 响应时间统计
+echo "" >> $REPORT_DIR/daily_report_$DATE.txt
+echo "### 平均响应时间 (按域名)" >> $REPORT_DIR/daily_report_$DATE.txt
+if [ -f "$NGINX_LOG" ]; then
+    awk -v date="$DATE" '$4 ~ date {
+        match($0, /domain="([^"]*)"/, domain_arr);
+        match($0, /response_time=([0-9.]+)/, time_arr);
+        if(domain_arr[1] && time_arr[1]) {
+            domains[domain_arr[1]] += time_arr[1];
+            counts[domain_arr[1]]++;
+        }
+    } END {
+        for(domain in domains) {
+            avg = domains[domain] / counts[domain];
+            printf "%s: %.3f秒 (请求数: %d)\n", domain, avg, counts[domain];
+        }
+    }' $NGINX_LOG >> $REPORT_DIR/daily_report_$DATE.txt
+fi
+
+# 3. 错误状态码统计
+echo "" >> $REPORT_DIR/daily_report_$DATE.txt
+echo "### 错误状态码统计" >> $REPORT_DIR/daily_report_$DATE.txt
+if [ -f "$NGINX_LOG" ]; then
+    awk -v date="$DATE" '$4 ~ date && $9 >= 400 {
+        match($0, /domain="([^"]*)"/, domain_arr);
+        errors[domain_arr[1]"-"$9]++;
+    } END {
+        for(error in errors) {
+            print error": "errors[error];
+        }
+    }' $NGINX_LOG | sort >> $REPORT_DIR/daily_report_$DATE.txt
+fi
+
+# 4. 域名切换统计
+echo "" >> $REPORT_DIR/daily_report_$DATE.txt
+echo "### 域名切换记录" >> $REPORT_DIR/daily_report_$DATE.txt
+if [ -f "$SWITCH_LOG" ]; then
+    grep "$DATE" $SWITCH_LOG | wc -l | xargs echo "今日切换次数: " >> $REPORT_DIR/daily_report_$DATE.txt
+    echo "切换详情:" >> $REPORT_DIR/daily_report_$DATE.txt
+    grep "$DATE" $SWITCH_LOG | tail -10 >> $REPORT_DIR/daily_report_$DATE.txt
+else
+    echo "无域名切换记录" >> $REPORT_DIR/daily_report_$DATE.txt
+fi
+
+# 5. 域名健康状态
+echo "" >> $REPORT_DIR/daily_report_$DATE.txt
+echo "### 当前域名健康状态" >> $REPORT_DIR/daily_report_$DATE.txt
+/usr/bin/php /var/www/html/scripts/domain-monitor.php --alert >> $REPORT_DIR/daily_report_$DATE.txt
+
+# 输出报告
+cat $REPORT_DIR/daily_report_$DATE.txt
+
+# 清理旧报告 (保留30天)
+find $REPORT_DIR -name "daily_report_*.txt" -mtime +30 -delete
+
+echo ""
+echo "报告已保存到: $REPORT_DIR/daily_report_$DATE.txt"
+```
+
+---
+
+## 部署实施步骤
+
+### 第一步：创建JavaScript域名切换器
+
+现在让我开始为您创建具体的实施文件：
+
+### 1. 创建客户端JavaScript文件
+
+```bash
+# 将客户端JavaScript智能故障转移代码复制到服务器
+scp /path/to/domain-switcher.js /var/www/html/public/static/js/
+
+# 配置前端代码
+sudo sed -i '/window.domainSwitcher = new DomainSwitcher();/a // 页面加载完成后额外检查 document.addEventListener(\'DOMContentLoaded\', function() { // 恢复页面状态 const savedState = localStorage.getItem(\'pageState\'); if (savedState) { try { const state = JSON.parse(savedState); // 如果是最近的切换(5分钟内)，可以执行一些恢复操作 if (Date.now() - state.timestamp < 300000) { console.log(\'Restored from domain switch:\', state); } localStorage.removeItem(\'pageState\'); } catch (error) { console.log(\'Failed to restore state:\', error); } } });' /var/www/html/public/static/js/domain-switcher.js
+
+# 重启Nginx
+sudo systemctl restart nginx
+```
+
+#### 3.2 页面集成
+```bash
+# 在主模板中添加
+<script src="/static/js/domain-switcher.js" defer></script>
+
+# 可选：显示当前域名状态
+<div id="domain-status" style="position: fixed; top: 10px; right: 10px; z-index: 9999; 
+     background: #28a745; color: white; padding: 5px 10px; border-radius: 3px; font-size: 12px;">
+    当前域名正常
+</div>
+
+<script>
+// 显示域名状态
+function updateDomainStatus() {
+    const statusEl = document.getElementById('domain-status');
+    if (statusEl && window.domainSwitcher) {
+        const currentDomain = window.location.hostname;
+        window.domainSwitcher.checkDomainHealth(currentDomain).then(isHealthy => {
+            statusEl.textContent = isHealthy ? '域名正常' : '检测切换中...';
+            statusEl.style.backgroundColor = isHealthy ? '#28a745' : '#dc3545';
+        });
+    }
+}
+
+// 每30秒更新一次状态显示
+setInterval(updateDomainStatus, 30000);
+updateDomainStatus();
+</script>
+```
+
+### 阶段4: 监控和日志分析 (1天)
+
+#### 4.1 部署域名监控脚本
+```bash
+# 将域名监控脚本复制到服务器
+scp /path/to/domain-monitor.php /var/www/html/scripts/
+
+# 配置域名监控脚本
+sudo sed -i '/$domains = \[/a $domains = \['main.yourdomain.com', 'backup1.yourdomain.com', 'backup2.yourdomain.com', 'backup3.yourdomain.com'\];' /var/www/html/scripts/domain-monitor.php
+
+# 重启Nginx
+sudo systemctl restart nginx
+```
+
+#### 4.2 部署日志分析脚本
+```bash
+# 将日志分析脚本复制到服务器
+scp /path/to/analyze-logs.sh /var/www/html/scripts/
+
+# 配置日志分析脚本
+sudo sed -i '/$domains = \[/a $domains = \['main.yourdomain.com', 'backup1.yourdomain.com', 'backup2.yourdomain.com', 'backup3.yourdomain.com'\];' /var/www/html/scripts/analyze-logs.sh
+
+# 重启Nginx
+sudo systemctl restart nginx
+```
