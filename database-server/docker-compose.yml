@@ -16,7 +16,6 @@ services:
       - mysql_backup:/var/backups
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./mysql/00-create-database.sql:/docker-entrypoint-initdb.d/00-create-database.sql
-      - ./mysql/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql
       - ./logs/mysql:/var/log/mysql
       - ./backup:/backup
     networks:
@@ -29,8 +28,8 @@ services:
       --log-bin=mysql-bin
       --binlog-format=ROW
       --expire-logs-days=7
-      --max-connections=500
-      --innodb-buffer-pool-size=1G
+      --max-connections=300
+      --innodb-buffer-pool-size=768M
 
   # 数据库备份服务
   mysql-backup:
@@ -60,26 +59,11 @@ services:
       "
     restart: unless-stopped
 
-  # Redis缓存服务（可选，提升性能）
-  redis:
-    image: redis:6.2-alpine
-    container_name: 9color_redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-    networks:
-      - db-network
-    restart: unless-stopped
-    command: redis-server /usr/local/etc/redis/redis.conf
 
 volumes:
   mysql_data:
     driver: local
   mysql_backup:
-    driver: local
-  redis_data:
     driver: local
 
 networks:

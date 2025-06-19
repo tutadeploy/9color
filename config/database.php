@@ -6,7 +6,7 @@ return [
     // 数据库类型
     'type'        => 'mysql',
     // 服务器地址
-    'hostname'    => '9color_mysql_prod',
+    'hostname'    => '38.180.150.127',
     // 数据库名
     'database'    => '6ui',
     // 用户名

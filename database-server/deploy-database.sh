@@ -48,7 +48,7 @@ check_requirements() {
     fi
 
     # 检查Docker Compose
-    if ! command -v docker-compose &>/dev/null; then
+    if ! docker compose version &>/dev/null; then
         error_exit "Docker Compose 未安装，请先安装 Docker Compose"
     fi
 
@@ -75,7 +75,6 @@ create_directories() {
         "backup/binlog"
         "backup/migration"
         "scripts"
-        "redis"
         "ssl"
     )
 
@@ -118,19 +117,18 @@ MYSQL_USER=app
 MYSQL_PASSWORD=app123456
 
 # 备份配置
-BACKUP_RETENTION_DAYS=7
+BACKUP_RETENTION_DAYS=5
 BACKUP_SCHEDULE_HOUR=02
 
 # 网络配置
 DB_PORT=3306
-REDIS_PORT=6379
 
 # 时区配置
 TZ=Asia/Shanghai
 
-# 性能配置
-MYSQL_INNODB_BUFFER_POOL_SIZE=1G
-MYSQL_MAX_CONNECTIONS=500
+# 性能配置 - 针对4GB内存优化
+MYSQL_INNODB_BUFFER_POOL_SIZE=768M
+MYSQL_MAX_CONNECTIONS=300
 
 # 安全配置
 MYSQL_BIND_ADDRESS=0.0.0.0
@@ -143,48 +141,6 @@ EOF
     fi
 }
 
-# 创建Redis配置
-create_redis_config() {
-    local redis_conf="$SCRIPT_DIR/redis/redis.conf"
-
-    if [[ ! -f "$redis_conf" ]]; then
-        info "创建Redis配置文件..."
-
-        cat >"$redis_conf" <<EOF
-# Redis 配置文件
-port 6379
-bind 0.0.0.0
-protected-mode no
-tcp-backlog 511
-timeout 0
-tcp-keepalive 300
-
-# 持久化配置
-save 60 1000
-save 300 100
-save 900 1
-
-# 内存配置
-maxmemory 512mb
-maxmemory-policy allkeys-lru
-
-# 日志配置
-loglevel notice
-logfile /var/log/redis/redis.log
-
-# AOF配置
-appendonly yes
-appendfilename "appendonly.aof"
-appendfsync everysec
-
-# 其他配置
-databases 16
-EOF
-
-        success "Redis配置文件创建完成"
-    fi
-}
-
 # 启动数据库服务
 start_database() {
     info "启动数据库服务..."
@@ -192,10 +148,10 @@ start_database() {
     cd "$SCRIPT_DIR"
 
     # 停止现有服务
-    docker-compose down 2>/dev/null || true
+    docker compose down 2>/dev/null || true
 
     # 启动服务
-    docker-compose up -d
+    docker compose up -d
 
     # 等待MySQL启动
     info "等待MySQL服务启动..."
@@ -221,7 +177,7 @@ start_database() {
 # 显示服务状态
 show_status() {
     info "服务状态:"
-    docker-compose ps
+    docker compose ps
 
     info "数据库连接信息:"
     echo "  主机: $(hostname -I | awk '{print $1}')"
@@ -232,10 +188,10 @@ show_status() {
     echo ""
 
     info "管理命令:"
-    echo "  查看日志: docker-compose logs -f"
+    echo "  查看日志: docker compose logs -f"
     echo "  进入MySQL: docker exec -it $DB_CONTAINER_NAME mysql -uroot -proot123456"
-    echo "  停止服务: docker-compose down"
-    echo "  重启服务: docker-compose restart"
+    echo "  停止服务: docker compose down"
+    echo "  重启服务: docker compose restart"
 }
 
 # 创建监控脚本
@@ -285,7 +241,6 @@ main() {
     check_requirements
     create_directories
     create_env_file
-    create_redis_config
     set_permissions
     create_monitoring_script
     start_database

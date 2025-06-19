@@ -45,9 +45,9 @@ full_backup() {
     gzip "$backup_file"
     log "完整备份完成并压缩: ${backup_file}.gz"
 
-    # 删除7天前的完整备份
-    find "$BACKUP_DIR/daily" -name "*.gz" -mtime +7 -delete
-    log "清理7天前的完整备份"
+    # 删除5天前的完整备份（适配40GB磁盘空间）
+    find "$BACKUP_DIR/daily" -name "*.gz" -mtime +5 -delete
+    log "清理5天前的完整备份"
 }
 
 # 增量备份函数（二进制日志）
@@ -61,8 +61,8 @@ incremental_backup() {
     # 复制二进制日志文件
     docker cp 9color_mysql_standalone:/var/lib/mysql/mysql-bin.* "$binlog_dir/" 2>/dev/null || true
 
-    # 删除3天前的二进制日志备份
-    find "$binlog_dir" -name "mysql-bin.*" -mtime +3 -delete
+    # 删除2天前的二进制日志备份（适配40GB磁盘空间）
+    find "$binlog_dir" -name "mysql-bin.*" -mtime +2 -delete
     log "增量备份完成"
 }
 
@@ -87,6 +87,10 @@ health_check() {
     # 检查慢查询
     local slow_queries=$(mysql -h "$DB_HOST" -P "$DB_PORT" -u root -p"$DB_PASS" -e "SHOW GLOBAL STATUS LIKE 'Slow_queries';" -N | awk '{print $2}')
     log "慢查询总数: $slow_queries"
+
+    # 检查连接数
+    local connections=$(mysql -h "$DB_HOST" -P "$DB_PORT" -u root -p"$DB_PASS" -e "SHOW GLOBAL STATUS LIKE 'Threads_connected';" -N | awk '{print $2}')
+    log "当前连接数: $connections"
 }
 
 # 主循环
