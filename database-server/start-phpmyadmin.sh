@@ -43,7 +43,11 @@ docker run -d \
     -e UPLOAD_LIMIT=100M \
     -e MEMORY_LIMIT=512M \
     -e MAX_EXECUTION_TIME=300 \
+    -e PMA_ABSOLUTE_URI=http://38.180.150.127:8090/ \
+    -e SESSION_COOKIE_SAMESITE=Lax \
+    -e SESSION_COOKIE_SECURE=0 \
     -v /root/database-server/phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php \
+    -v /root/database-server/phpmyadmin/php-init.php:/usr/local/etc/php/conf.d/99-phpmyadmin-init.php \
     --restart unless-stopped \
     phpmyadmin/phpmyadmin:5.2
 
