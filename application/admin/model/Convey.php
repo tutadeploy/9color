@@ -418,7 +418,7 @@ class Convey extends Model
         
         if($pipeiinfo['type']==1){
             if($data['num']>$grouping_size){
-            $data['cancontinue']=0;
+            $data['cancontinue']=1;
             }
             $data['pipei_dan_run']=$pipei_run[$data['order_xu']];
             $data['pipei_max']=$pipei_max[$data['order_xu']];

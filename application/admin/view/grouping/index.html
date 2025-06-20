@@ -48,7 +48,7 @@
                 <th lay-data="{field:'id'}" class='text-left nowrap'>ID</th>
                 <th lay-data="{field:'title'}" class='text-left nowrap'>名称</th>
                 <th lay-data="{field:'type'}" class='text-left nowrap'>类型</th>
-                <th lay-data="{field:'add'}" class='text-left nowrap'>分组用户</th>
+                <!-- <th lay-data="{field:'add'}" class='text-left nowrap'>分组用户</th> -->
                 <th lay-data="{field:'content'}" class='text-left nowrap'>配置</th>
                 <th lay-data="{field:'edit',width:130,fixed: 'right'}" class='text-left nowrap'>操作</th>
             </tr>
@@ -62,11 +62,11 @@
                 <td class='text-left nowrap'>{$vo.title}</td>
                 <td class='text-left nowrap'>{if $vo['type']==1}<a class="layui-btn layui-btn-xs">绝对值</a>{else}<a
                         class="layui-btn layui-btn-xs" style="background:red;">百分比</a>{/if}</td>
-                <td class='text-left nowrap'>
+                <!-- <td class='text-left nowrap'>
                     <a data-dbclick class="layui-btn layui-btn-xs" data-title="【{$vo.title}】 编辑用户"
                         data-modal='{:admin_url("admin/grouping/add_user")}?id={$vo.id}'>编 辑</a>
                     {:model('admin/Users')->get_grouping_user($vo['id']);}
-                </td>
+                </td> -->
                 <td class='text-left nowrap'>{$vo.content}</td>
                 <td class='text-left nowrap'>
                     {if auth("edit_grouping")}
