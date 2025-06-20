@@ -594,23 +594,24 @@
             });
 
             $('#submit').click(function () {
-                var payment_type = $('#payment_type').val();
-                var level = $('#level').val();
+                // var payment_type = $('#payment_type').val();
+                // var level = $('#level').val();
 
-                if (level == '') {
-                    sp_tip('请选择要升级的级别.');
-                    return false;
-                }
-                if (payment_type == '') {
-                    sp_tip('请选择支付渠道.');
-                    return false;
-                }
-                //            layer.open({
-                //                type: 2
-                //                ,content: '支付中...'
-                //                ,time: 3
-                //            });
-                submitPay(payment_type)
+                // if (level == '') {
+                //     sp_tip('请选择要升级的级别.');
+                //     return false;
+                // }
+                // if (payment_type == '') {
+                //     sp_tip('请选择支付渠道.');
+                //     return false;
+                // }
+                // //            layer.open({
+                // //                type: 2
+                // //                ,content: '支付中...'
+                // //                ,time: 3
+                // //            });
+                // submitPay(payment_type)
+                window.location.href = '/support';
             })
             //$('#form1').submit();
 
