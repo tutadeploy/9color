@@ -240,11 +240,10 @@ class Users extends Model
 
     //生成邀请码
     public static function create_invite_code(){
-        $str = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
-        $rand_str = substr(str_shuffle($str),0,6);
+        // 生成6位数字邀请码 (100000-999999)
+        $rand_str = sprintf('%06d', mt_rand(100000, 999999));
         $num = Db::table('xy_users')->where('invite_code',$rand_str)->count();
         if($num)
-            // return $this->create_invite_code();
             return self::create_invite_code();
         else
             return $rand_str;
@@ -281,7 +280,7 @@ class Users extends Model
         $bgimg1 = \Env::get('root_path').'public/public/img/userqr1.png';
 
         $image = \think\Image::open($bgimg1);  
-        $image->water($qr,[255,743])->text($invite_code,\Env::get('root_path').'public/public/fz.TTF',22,'#ffffff',[(678-(24*strlen($user_id)))/2,685])->save(\Env::get('root_path').'public/upload/qrcode/user/'.$n.'/'.$user_id.'-1.png');
+        $image->water($qr,[255,743])->text($invite_code,\Env::get('root_path').'public/public/fz.TTF',22,'#ffffff',[(678-(24*strlen($invite_code)))/2,685])->save(\Env::get('root_path').'public/upload/qrcode/user/'.$n.'/'.$user_id.'-1.png');
     }
 
     /**
