@@ -22,10 +22,11 @@
             <tr>
                 <th class='text-left nowrap'>订单号</th>
                 <th class='text-left nowrap'>真实姓名</th>
+                <th class='text-left nowrap'>手机号码</th>
                 <th class='text-left nowrap'>会员等级</th>
                 <th class='text-left nowrap'>余额</th>
                 <th class='text-left nowrap'>今日单数</th>
-                <th class='text-left nowrap'>单价数量</th>
+                <th class='text-left nowrap'>单价</th>
                 <th class='text-left nowrap'>总价佣金</th>
                 <th class='text-left nowrap'>下单时间 解冻时间</th>
                 <th class='text-left nowrap'>交易状态</th>
@@ -40,11 +41,12 @@
 
                 <td class='text-left nowrap J_id'>{$vo.id}</td>
                 <td class='text-left nowrap'>{$vo.username}</td>
+                <td class='text-left nowrap'>{$vo.tel}</td>
                 <td class='text-left nowrap'>{:model('Users')->getLevel($vo.level,'name');}</td>
                 <td class='text-left nowrap'>{$vo.ubalance}</td>
                 <td class='text-left nowrap '> {$vo.addtime|format_datetime='m-d'} <p class="J_today_num">排序</p>
                 </td>
-                <td class='text-left nowrap'>单价&yen;&nbsp; {$vo.goods_price}<p>数量:&nbsp; {$vo.goods_count}</td>
+                <td class='text-left nowrap'>{$vo.goods_price}</td>
                 <td class='text-left nowrap'>
                     <font color="red">总价&yen;{$vo.num}</font>
                     <p>佣金&yen;{$vo.commission}

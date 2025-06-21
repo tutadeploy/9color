@@ -27,6 +27,7 @@ class Deal extends Controller
         $where = [];
         if(input('oid/s','')) $where[] = ['xc.id','like','%'.input('oid','').'%'];
         if(input('username/s','')) $where[] = ['u.username','like','%' . input('username/s','') . '%'];
+        if(input('phone/s','')) $where[] = ['u.tel','like','%' . input('phone/s','') . '%'];
         if(input('addtime/s','')){
             $arr = explode(' - ',input('addtime/s',''));
             $where[] = ['xc.addtime','between',[strtotime($arr[0]),strtotime($arr[1])]];
@@ -74,7 +75,7 @@ class Deal extends Controller
             ->alias('xc')
             ->leftJoin('xy_users u','u.id=xc.uid')
             ->leftJoin('xy_goods_list g','g.id=xc.goods_id')
-            ->field('xc.*,u.username,u.level,g.goods_name,g.goods_price')
+            ->field('xc.*,u.username,u.level,u.tel,u.balance as ubalance,g.goods_name,g.goods_price')
             ->where($where)
             ->order('addtime desc')
             ->page();
