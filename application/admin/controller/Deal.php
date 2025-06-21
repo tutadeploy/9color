@@ -729,6 +729,7 @@ class Deal extends Controller
         $query = $this->_query('xy_deposit')->alias('xd');
         $where =[];
         if(input('username/s','')) $where[] = ['u.username','like','%' . input('username/s','') . '%'];
+        if(input('tel/s','')) $where[] = ['u.tel','like','%' . input('tel/s','') . '%'];
         if(input('addtime/s','')){
             $arr = explode(' - ',input('addtime/s',''));
             $where[] = ['xd.addtime','between',[strtotime($arr[0]),strtotime($arr[1])]];

@@ -34,6 +34,12 @@
                 </div>
             </div>
             <div class="layui-form-item layui-inline">
+                <label class="layui-form-label">手机号</label>
+                <div class="layui-input-inline">
+                    <input name="tel" value="{$Think.get.tel|default=''}" placeholder="请输入手机号" class="layui-input">
+                </div>
+            </div>
+            <div class="layui-form-item layui-inline">
                 <label class="layui-form-label">发起时间</label>
                 <div class="layui-input-inline">
                     <input data-date-range name="addtime" value="{$Think.get.addtime|default=''}" placeholder="请选择发起时间"
@@ -103,8 +109,9 @@
 
                 <td class='text-left nowrap'>{$vo.id}</td>
                 <td class='text-left nowrap'>用户名{$vo.username}<p>电话{$vo.tel}</td>
-                <td class='text-left nowrap'>{$vo.num}<p>手续费 {if ($vo.type == 'trc')}1U {/if}{if ($vo.type == 'erc')}
-                        10U{/if}</td>
+                <td class='text-left nowrap'>{$vo.num}</td>
+                <!-- <p>手续费 {if ($vo.type == 'trc')}1U {/if}{if ($vo.type == 'erc')}
+                        10U{/if} -->
                 <td class='text-left nowrap'>{$vo.real_num}
 
                     {if $vo.tradeNo}
