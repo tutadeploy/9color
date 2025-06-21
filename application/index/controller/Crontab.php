@@ -33,7 +33,7 @@ class Crontab extends Controller
                 Db::name('xy_convey')->where('id',$v['id'])->update(['status'=>5,'endtime'=>time()]);
             }
         }
-        $this->cancel_order();
+      //  $this->cancel_order();
         $this->reset_deal();
     }
 
