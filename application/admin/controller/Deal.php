@@ -1028,8 +1028,18 @@ class Deal extends Controller
         $oinfo = Db::name('xy_deposit')->where('id',input('post.id',0))->find();
 
         if($status==3){
-            //驳回订单的业务逻辑
-            Db::name('xy_users')->where('id',$oinfo['uid'])->setInc('balance',input('num/f',0));
+            //驳回订单的业务逻辑 - 退还用户余额
+            Db::name('xy_users')->where('id',$oinfo['uid'])->setInc('balance',$oinfo['num']);
+            
+            // 记录提现失败日志
+            Db::name('xy_balance_log')->insert([
+                'uid'       => $oinfo['uid'],
+                'oid'       => $oinfo['id'],
+                'num'       => $oinfo['num'],
+                'type'      => 8, // 提现失败
+                'status'    => 1,
+                'addtime'   => time()
+            ]);
         }
         if($status==2) {
             $oid = input('post.id',0);
@@ -1214,8 +1224,18 @@ class Deal extends Controller
                 if ($t['status'] == 1) {
                     //通过
                     Db::name('xy_deposit')->where('id',$id)->update(['status'=>3,'endtime'=>time()]);
-                    //驳回订单的业务逻辑
-                    Db::name('xy_users')->where('id',$t['uid'])->setInc('balance',input('num/f',0));
+                    //驳回订单的业务逻辑 - 退还用户余额
+                    Db::name('xy_users')->where('id',$t['uid'])->setInc('balance',$t['num']);
+                    
+                    // 记录提现失败日志
+                    Db::name('xy_balance_log')->insert([
+                        'uid'       => $t['uid'],
+                        'oid'       => $t['id'],
+                        'num'       => $t['num'],
+                        'type'      => 8, // 提现失败
+                        'status'    => 1,
+                        'addtime'   => time()
+                    ]);
                 }
             }
 

@@ -11,10 +11,12 @@
             method="get" autocomplete="off">
             {if auth("do_deposit") }
             <div class="layui-form-item layui-inline" style="margin-right: 10px">
-                <button data-action='{:admin_url("do_deposit2")}' data-csrf="{:systoken('do_deposit2')}"
-                    data-rule="id#{key}" class='layui-btn layui-btn-sm layui-btn-danger'>批量通过</button>
-                <button data-action='{:admin_url("do_deposit3")}' data-csrf="{:systoken('do_deposit3')}"
-                    data-rule="id#{key}" class='layui-btn layui-btn-sm layui-btn-warning'>批量拒绝</button>
+                <button data-action='{:admin_url("admin/deal/do_deposit2")}'
+                    data-csrf="{:systoken('admin/deal/do_deposit2')}" data-rule="id#{key}"
+                    class='layui-btn layui-btn-sm layui-btn-danger'>批量通过</button>
+                <button data-action='{:admin_url("admin/deal/do_deposit3")}'
+                    data-csrf="{:systoken('admin/deal/do_deposit3')}" data-rule="id#{key}"
+                    class='layui-btn layui-btn-sm layui-btn-warning'>批量拒绝</button>
             </div>
             {/if}
 

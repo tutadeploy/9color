@@ -11,7 +11,7 @@
 		content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no" />
 	<meta name="format-detection" content="telephone=no" />
 	<link rel="stylesheet" href="/static/home/css/style.css" />
-<link href="/static_new6/css/app.red.css" rel="stylesheet">
+	<link href="/static_new6/css/app.red.css" rel="stylesheet">
 	<script src="/static/home/js/jquery.js"></script>
 	<script src="/static/home/js/lib.js"></script>
 	<style>
@@ -19,60 +19,73 @@
 			display: flex;
 
 		}
-         .circle-color-8 > div::before {
-            background-color: #ccc;
-        }
-        /* 通用分页 */
-        .pagination-container {
+
+		.circle-color-8>div::before {
+			background-color: #ccc;
+		}
+
+		/* 通用分页 */
+		.pagination-container {
 			padding: .2rem;
-            line-height: 40px;
-            text-align: left;
-        }
-        .pagination-container > span {
-            color: #666;
-            font-size: 9pt;
-        }
-        .pagination-container > ul {
-            float: right;
-            display: inline-block;
-            margin: 0;
-            padding: 0;
-        }
-        .pagination-container > ul > li {
-            z-index: 1;
-            display: inline-block;
-        }
-        .pagination-container > ul > li > a, .pagination-container > ul > li > span {
-            color: #333;
-            width: 33px;
-            height: 30px;
-            border: 1px solid #dcdcdc;
-            display: inline-block;
-            margin-left: -1px;
-            text-align: center;
-            line-height: 28px;
-        }
-        .pagination-container > ul > li > span {
-            background: #dcdcdc;
-            cursor: default;
-        }
-        .van-tab--active span{
-            color: #ff9a2c;
-        }
-        .circle-color-23 > div::before {
-            background-color: #ccc;
-        }
-        .notdata{
-            display: block;
-            text-align: center;
-            padding: 30px;
-        }
-        .nav .btn[data-v-5a05e720]{
-            width:25%;
-        }
-          .header{
-            background: linear-gradient(313deg, #D5030B 0%, #FF6766 100%);
-        }
+			line-height: 40px;
+			text-align: left;
+		}
+
+		.pagination-container>span {
+			color: #666;
+			font-size: 9pt;
+		}
+
+		.pagination-container>ul {
+			float: right;
+			display: inline-block;
+			margin: 0;
+			padding: 0;
+		}
+
+		.pagination-container>ul>li {
+			z-index: 1;
+			display: inline-block;
+		}
+
+		.pagination-container>ul>li>a,
+		.pagination-container>ul>li>span {
+			color: #333;
+			width: 33px;
+			height: 30px;
+			border: 1px solid #dcdcdc;
+			display: inline-block;
+			margin-left: -1px;
+			text-align: center;
+			line-height: 28px;
+		}
+
+		.pagination-container>ul>li>span {
+			background: #dcdcdc;
+			cursor: default;
+		}
+
+		.van-tab--active span {
+			color: #ff9a2c;
+		}
+
+		.circle-color-23>div::before {
+			background-color: #ccc;
+		}
+
+		.notdata {
+			display: block;
+			text-align: center;
+			padding: 30px;
+		}
+
+		.nav .btn[data-v-5a05e720] {
+			width: 25%;
+		}
+
+		.header {
+			background: linear-gradient(313deg, #D5030B 0%, #FF6766 100%);
+		}
 	</style>
 </head>
 
@@ -116,6 +129,7 @@
 										{case 3}<font color="red">{:lang('接单返佣')}</font>{/case}
 										{case 6}<font color="#ffaa00">{:lang('下级返佣')}</font>{/case}
 										{case 7}<font color="#d814c9">{:lang('用户提现')}</font>{/case}
+										{case 8}<font color="#ff0000">{:lang('提现失败')}</font>{/case}
 										{case 11}<font color="#d814c9">{:lang('充值彩金')}</font>{/case}
 										{case 21}<font color="green">{:lang('余额宝转入')}</font>{/case}
 										{case 22}<font color="red">{:lang('余额宝转出')}</font>{/case}
@@ -272,6 +286,9 @@
 					case 7:
 						statusHtml = '<font color="#d814c9">用户提现</font>';
 						break;
+					case 8:
+						statusHtml = '<font color="#ff0000">提现失败</font>';
+						break;
 					case 21:
 						statusHtml = '<font color="red">余额宝转入</font>';
 						break;
@@ -324,42 +341,42 @@
 
 
 	</script>
-    <script>
-    $('.pagination li').click(function () {
-        var class2= $(this).attr('class');
-        if( class2 == 'active' || class2 == 'disabled' ) {
+	<script>
+		$('.pagination li').click(function () {
+			var class2 = $(this).attr('class');
+			if (class2 == 'active' || class2 == 'disabled') {
 
-        }else{
-            var url = $(this).find('a').attr('href');
-            window.location.href = url;
-        }
-    })
-    $(function () {
-        $('.pagination-container select').attr('disabled','disabled');
+			} else {
+				var url = $(this).find('a').attr('href');
+				window.location.href = url;
+			}
+		})
+		$(function () {
+			$('.pagination-container select').attr('disabled', 'disabled');
 
-        ///
-        // 主题
-        new rolldate.Date({
-            el:'#start',
-            format:'YYYY-MM-DD',
-            beginYear:2000,
-            endYear:2100,
-            theme:'blue'
-        })
-
-
-        // 主题
-        new rolldate.Date({
-            el:'#end',
-            format:'YYYY-MM-DD',
-            beginYear:2000,
-            endYear:2100,
-            theme:'blue'
-        })
-    });
+			///
+			// 主题
+			new rolldate.Date({
+				el: '#start',
+				format: 'YYYY-MM-DD',
+				beginYear: 2000,
+				endYear: 2100,
+				theme: 'blue'
+			})
 
 
-</script>
+			// 主题
+			new rolldate.Date({
+				el: '#end',
+				format: 'YYYY-MM-DD',
+				beginYear: 2000,
+				endYear: 2100,
+				theme: 'blue'
+			})
+		});
+
+
+	</script>
 
 </body>
 
