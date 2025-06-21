@@ -1410,6 +1410,58 @@ class Deal extends Controller
 	}
 
     /**
+     * 删除充值记录
+     * @auth true
+     */
+    public function del_recharge()
+    {
+        $this->applyCsrfToken();
+        $id = input('post.id/s', '');
+        if (!$id) {
+            return $this->error('参数错误');
+        }
+        
+        // 查询充值记录
+        $recharge = Db::name('xy_recharge')->where('id', $id)->find();
+        if (!$recharge) {
+            return $this->error('充值记录不存在');
+        }
+        
+        Db::startTrans();
+        
+        // 根据订单状态处理退款逻辑
+        if ($recharge['status'] == 2) {
+            // 审核通过的记录：需要退款
+            $refundAmount = $recharge['num'];
+            $res_refund = Db::name('xy_users')->where('id', $recharge['uid'])->setDec('balance', $refundAmount);
+            if (!$res_refund) {
+                Db::rollback();
+                return $this->error('退款失败，用户ID：' . $recharge['uid']);
+            }
+        }
+        // 待审核记录（status == 1）和审核驳回记录（status == 3）：不需要退款
+        
+        // 删除相关的余额日志记录
+        Db::name('xy_balance_log')->where('oid', $id)->delete();
+        
+        // 删除充值记录
+        $res1 = Db::name('xy_recharge')->where('id', $id)->delete();
+        
+        // delete()方法返回受影响的行数，正常情况下应该删除1条记录
+        if ($res1 === 1) {
+            Db::commit();
+            $message = '删除成功';
+            if ($recharge['status'] == 2) {
+                $message .= '，已扣除用户余额 ' . $recharge['num'] . ' 元';
+            }
+            return $this->success($message);
+        } else {
+            Db::rollback();
+            return $this->error('删除充值记录失败，影响行数：' . $res1);
+        }
+    }
+
+    /**
      * 删除提现记录
      * @auth true
      */

@@ -21,6 +21,7 @@
                 <th class='text-left nowrap'>类型</th>
                 <th class='text-left nowrap'>处理时间</th>
                 <th class='text-left nowrap'>操作</th>
+                <th class='text-left nowrap'>订单状态</th>
                 <th class='text-left nowrap'>　</th>
             </tr>
         </thead>
@@ -73,6 +74,13 @@
                 </td>
                 <td class='text-left nowrap'>
                     {switch $vo.status}
+                    {case 1}待审核{/case}
+                    {case 2}审核通过{/case}
+                    {case 3}审核驳回{/case}
+                    {/switch}
+                </td>
+                <td class='text-left nowrap'>
+                    {switch $vo.status}
                     {case 0}待付款{/case}
                     {case 1}
                     {if auth("edit_recharge")}
@@ -88,9 +96,15 @@
                         data-modal='{:admin_url("admin/deal/add_user_cj")}?id={$vo.uid}'>赠送彩金</a>
                     {/if}
                     {/case}
-                    {case 2}审核通过{/case}
-                    {case 3}审核驳回{/case}
+
                     {/switch}
+
+                    {if auth("del_recharge")}
+                    <a class="layui-btn layui-btn-xs layui-btn-danger"
+                        data-csrf="{:systoken('admin/deal/del_recharge')}"
+                        data-action="{:admin_url('admin/deal/del_recharge')}" data-value="id#{$vo.id}"
+                        onclick="return confirm('确定要删除这条充值记录吗？\n已审核通过的记录将自动扣除用户余额！\n删除后不可恢复！')">删除</a>
+                    {/if}
                 </td>
             </tr>
             {/foreach}
