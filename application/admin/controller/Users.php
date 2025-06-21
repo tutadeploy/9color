@@ -216,7 +216,9 @@ class Users extends Controller
                         case 6:
                             $text = '<span class="layui-btn layui-btn-sm layui-btn-normal">下级交易返佣</span>';break;
                         case 7:
-                            $text = '<span class="layui-btn layui-btn-sm layui-btn-danger">利息宝收益</span>';break;
+                            $text = '<span class="layui-btn layui-btn-sm layui-btn-danger">用户提现</span>';break;
+                        case 8:
+                            $text = '<span class="layui-btn layui-btn-sm layui-btn-danger">提现失败</span>';break;
                         case 11:
                             $text = '<span class="layui-btn layui-btn-sm layui-btn-danger">充值彩金</span>';break;
                         default:
