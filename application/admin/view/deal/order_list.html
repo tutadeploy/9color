@@ -5,6 +5,14 @@
     ::-webkit-scrollbar {
         height: 8px;
     }
+
+    .goods-name-cell {
+        width: 120px;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
 </style>
 <div class="think-box-shadow">
     {include file='deal/order_list_search'}
@@ -31,7 +39,7 @@
                 <th class='text-left nowrap'>下单时间 解冻时间</th>
                 <th class='text-left nowrap'>交易状态</th>
                 <th class='text-left nowrap'>操作</th>
-                <th class='text-left nowrap'>商品名称</th>
+                <!-- <th class='text-left nowrap goods-name-cell'>商品名称</th> -->
             </tr>
         </thead>
         {/notempty}
@@ -87,7 +95,7 @@
 
                 </td>
 
-                <td class='text-left nowrap'>{$vo.goods_name} </td>
+                <!-- <td class='text-left nowrap goods-name-cell'>{$vo.goods_name}</td> -->
             </tr>
             {/foreach}
         </tbody>
