@@ -188,6 +188,12 @@
                         data-action="{:admin_url('admin/deal/disbursement')}"
                         data-value="id#{$vo.id};uid#{$vo.uid};num#{$vo.num}">发起代付</a>
                     {/if}
+
+                    {if auth("do_deposit")}
+                    <a class="layui-btn layui-btn-xs layui-btn-danger" data-csrf="{:systoken('admin/deal/del_deposit')}"
+                        data-action="{:admin_url('admin/deal/del_deposit')}" data-value="id#{$vo.id}"
+                        onclick="return confirm('确定要删除这条提现记录吗？\n待审核和已通过的记录将自动退款给用户！\n删除后不可恢复！')">删除</a>
+                    {/if}
                 </td>
             </tr>
             {/foreach}

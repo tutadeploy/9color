@@ -1408,4 +1408,60 @@ class Deal extends Controller
 		
 			
 	}
+
+    /**
+     * 删除提现记录
+     * @auth true
+     */
+    public function del_deposit()
+    {
+        $this->applyCsrfToken();
+        $id = input('post.id/s', '');
+        if (!$id) {
+            return $this->error('参数错误');
+        }
+        
+        // 查询提现记录
+        $deposit = Db::name('xy_deposit')->where('id', $id)->find();
+        if (!$deposit) {
+            return $this->error('提现记录不存在');
+        }
+        
+      
+            Db::startTrans();
+            
+            // 根据订单状态处理退款逻辑
+            if ($deposit['status'] == 1 || $deposit['status'] == 2) {
+                // 待审核记录或审核通过记录：需要退款
+                $refundAmount = $deposit['num'];
+                $res_refund = Db::name('xy_users')->where('id', $deposit['uid'])->setInc('balance', $refundAmount);
+                if (!$res_refund) {
+                    Db::rollback();
+                    return $this->error('退款失败，用户ID：' . $deposit['uid']);
+                }
+            }
+            // 审核驳回记录（status == 3）：不需要退款，钱已经在驳回时退回
+            
+            // 删除相关的余额日志记录
+            Db::name('xy_balance_log')->where('oid', $id)->delete();
+            
+            // 删除提现记录
+            $res1 = Db::name('xy_deposit')->where('id', $id)->delete();
+            
+            // delete()方法返回受影响的行数，正常情况下应该删除1条记录
+            if ($res1 === 1) {
+                Db::commit();
+                $message = '删除成功';
+                if ($deposit['status'] == 1 || $deposit['status'] == 2) {
+                    $message .= '，已退款 ' . $deposit['num'] . ' 元';
+                }
+                return $this->success($message);
+            } else {
+                Db::rollback();
+                return $this->error('删除提现记录失败，影响行数：' . $res1);
+            }
+       
+    }
+
+
 }
