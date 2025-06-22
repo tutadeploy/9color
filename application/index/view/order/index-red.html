@@ -243,8 +243,8 @@
     </div>
     {empty name='list'}<span class="notdata">{:lang('没有记录')}</span>{/empty}
 
-    <div class="loadmore" style="margin-top: 30px" id="moreNews" onclick="moreNews()">{:lang('查看更多')}
-    </div>
+    <!-- <div class="loadmore" style="margin-top: 30px" id="moreNews" onclick="moreNews()">{:lang('查看更多')}
+    </div> -->
 
     <ul class="footer">
         <li class="" onclick="window.location.href='/'">
@@ -375,7 +375,7 @@
             // 检查服务端渲染的数据数量来决定是否显示查看更多按钮
             var serverRenderedCount = $("#newsList li").length;
             console.log('服务端渲染的订单数量:', serverRenderedCount);
-            
+
             // 如果服务端渲染的数据少于20条，说明没有更多数据了
             // 考虑到分页可能不是20条，这里改为检查是否有数据
             if (serverRenderedCount == 0) {
@@ -424,7 +424,7 @@
                         $("#moreNews").hide();
                     }
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
                     console.log('请求失败:', error);
                     $("#moreNews").hide();
                 }
@@ -444,14 +444,14 @@
 
             for (var i = 0; i < newsList.length; i++) {
                 var obj = newsList[i];
-                
+
                 // 根据订单状态设置图片
                 var img = '/static_new6/img/succ.png';
                 if (obj.status == 0) img = '/static_new6/img/en_dai.png';
                 if (obj.status == 1) img = '/static_new6/img/en_succ.png';
                 if (obj.status == 4) img = '/static_new6/img/en_dongjie.png';
                 if (obj.status == 5) img = '/static_new6/img/en_dongjie.png';
-                
+
                 html += '<li>' +
                     '<div data-v-35ad745e="">' +
                     '<div data-v-35ad745e="" class="records_tabs">' +

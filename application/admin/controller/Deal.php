@@ -1381,10 +1381,10 @@ class Deal extends Controller
         
         $id = input('post.id',0);
         
-		$order = Db::name('xy_convey')->field('id,addtime')->find($id);
+		$order = Db::name('xy_convey')->field('id,addtime,uid')->find($id);
 		$start = strtotime(date("Y-m-d",$order['addtime']));
 		$end = $start+24*60*60-1;
-	/****/	$orderlist = Db::name('xy_convey')->where('addtime','between',[$start,$end])->field('id,addtime')->select();
+	/****/	$orderlist = Db::name('xy_convey')->where('uid', $order['uid'])->where('addtime','between',[$start,$end])->field('id,addtime')->order('addtime asc')->select();
 		for ($x=0; $x<=count($orderlist); $x++) {
 		    if($id==$orderlist[$x]['id']){
 		        $data['today_num']=$x+1;
