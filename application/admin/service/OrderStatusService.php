@@ -31,7 +31,7 @@ class OrderStatusService
             if ($order['dispatch_status'] == 0) {
                 return '等待匹配订单';
             } elseif ($order['dispatch_status'] == 2) {
-                return $order['status'] == 0 ? '等待手动结算' : '已完成（手动）';
+                return $order['status'] == 0 ? '已派单，等待结算' : '已完成（手动）';
             }
         }
         

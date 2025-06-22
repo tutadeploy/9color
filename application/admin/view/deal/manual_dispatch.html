@@ -24,11 +24,7 @@
                     <div class="info-item"><label>订单佣金:</label> ¥{$order.commission|default='待设置'}</div>
                     <div class="info-item"><label>创建时间:</label> {$order.addtime|format_datetime='Y-m-d H:i:s'}</div>
                     <div class="info-item"><label>派单状态:</label> 
-                        {if $order.dispatch_status == 2}
-                            <span class="status-ready">已分配默认商品，等待手动结算</span>
-                        {else}
-                            <span class="status-waiting">等待匹配商品</span>
-                        {/if}
+                        <span class="status-waiting">等待匹配商品</span>
                     </div>
                 </div>
             </div>
@@ -39,6 +35,7 @@
     
     <!-- 商品搜索区域 -->
     <div class="search-section" style="flex-shrink: 0;">
+        <div class="section-title">商品搜索</div>
         <form class="layui-form" id="searchForm">
             <!-- 第一行：商品标题 -->
             <div class="layui-form-item search-row">
@@ -72,6 +69,7 @@
     
     <!-- 商品列表区域 -->
     <div class="goods-section" style="flex: 1; display: flex; flex-direction: column; min-height: 200px;">
+        <div class="section-title">选择商品</div>
         <div id="goodsList" class="goods-list-container">
             <!-- 商品列表通过Ajax加载 -->
         </div>
@@ -79,15 +77,9 @@
     
     <!-- 确认派单按钮 -->
     <div class="action-buttons" style="flex-shrink: 0;">
-        {if $currentGoods}
-             <button type="button" class="layui-btn" id="confirmDispatch" disabled>
-                确定派单
-            </button>
-        {else}
-            <button type="button" class="layui-btn" id="confirmDispatch" disabled>
-                确定派单
-            </button>
-        {/if}
+        <button type="button" class="layui-btn" id="confirmDispatch" disabled>
+            确定派单
+        </button>
         <button type="button" class="layui-btn layui-btn-primary" data-close>
             取消返回
         </button>
@@ -99,7 +91,6 @@
 <input type="hidden" id="selectedGoodsPrice" value="">
 <input type="hidden" id="selectedGoodsName" value="">
 <input type="hidden" id="orderId" value="{$order.id}">
-<input type="hidden" id="hasCurrentGoods" value="{if $currentGoods}1{else}0{/if}">
 {/block}
 
 {block name='script'}
@@ -147,40 +138,14 @@ function selectGoods(id, name, price) {
     layer.msg('已选择商品: ' + name, {icon: 1});
 }
 
-// 手动结算当前订单
-$('#manualSettle').click(function() {
-    layer.confirm('确定要手动结算此订单吗？', {
-        btn: ['确定结算', '取消']
-    }, function(index) {
-        $.post('/sgcpj/deal/manual_settlement.html', {
-            id: $('#orderId').val(),
-            _csrf_: '{:systoken("admin/deal/manual_settlement")}'
-        }, function(res) {
-            if (res.code == 0) {
-                layer.msg('结算成功！', {icon: 1}, function() {
-                    parent.location.reload(); // 刷新父页面
-                });
-            } else {
-                layer.msg(res.info, {icon: 2});
-            }
-        });
-        layer.close(index);
-    });
-});
-
-// 确认派单（更换商品）
+// 确认派单
 $('#confirmDispatch').click(function() {
     if (!selectedGoods) {
-        layer.msg('请先选择新商品', {icon: 2});
+        layer.msg('请先选择商品', {icon: 2});
         return;
     }
     
-    var hasCurrentGoods = $('#hasCurrentGoods').val() == '1';
-    var confirmText = hasCurrentGoods ? 
-        '确定要更换为此商品吗？这将替换当前商品并重新计算订单金额！' : 
-        '确定要派发此商品吗？这将立即扣除用户余额！';
-    
-    layer.confirm(confirmText, {
+    layer.confirm('确定要派发此商品吗？这将立即扣除用户余额！', {
         btn: ['确定派单', '取消']
     }, function(index) {
         $.post('/sgcpj/deal/confirm_manual_dispatch.html', {
