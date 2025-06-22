@@ -1,15 +1,15 @@
 <form class="layui-form layui-card" action="{:request()->url()}" data-auto="true" method="post" autocomplete="off">
    <div class="layui-card-body">
     <div class="layui-form-item">
-     <label class="layui-form-label">站内信标题</label>
+     <label class="layui-form-label">弹幕标题</label>
      <div class="layui-input-block">
-      <input name="title" placeholder="请输入站内信标题" value="系统通知" class="layui-input" />
+      <input name="title" placeholder="请输入弹幕标题" value="消息通知" class="layui-input" />
      </div>
     </div>
     <div class="layui-form-item">
-     <label class="layui-form-label label-required label-required-next">站内信内容</label>
+     <label class="layui-form-label label-required label-required-next">弹幕内容</label>
      <div class="layui-input-block">
-      <input name="content" required="" placeholder="请输入站内信内容" class="layui-input" />
+      <input name="content" required="" placeholder="请输入弹幕内容" class="layui-input" />
      </div>
     </div>
    </div>
@@ -17,7 +17,7 @@
     <input name="id" type="hidden" value="{$uid}">
    <div class="hr-line-dashed"></div>
    <div class="layui-form-item text-center">
-    <button class="layui-btn" type="submit">提交</button>
+    <button class="layui-btn" type="submit">发送弹幕</button>
     <button class="layui-btn layui-btn-danger" type="button" data-close="">取消</button>
    </div>
    <script>window.form.render();</script>

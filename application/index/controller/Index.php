@@ -152,8 +152,9 @@ class Index extends Base
         
         $uid = session('user_id');
         $data['uid']=$uid;
-        $data['num']=Db::table('xy_message')->where('uid',$uid)->where('status',0)->count('id');
-        $data['info']=Db::table('xy_message')->where('uid',$uid)->where('status',0)->find();
+        // 只获取弹幕消息（type=4）
+        $data['num']=Db::table('xy_message')->where('uid',$uid)->where('status',0)->where('type',4)->count('id');
+        $data['info']=Db::table('xy_message')->where('uid',$uid)->where('status',0)->where('type',4)->find();
         
             return json(['code'=>1,'uid'=>$uid,'num'=>$data['num'],'info'=>$data['info']]);
     }
@@ -187,12 +188,11 @@ class Index extends Base
 
         $page = input('get.page/d', 1);
         $limit = input('get.limit/d', 20);
-        $type = input('get.type/d', 0); // 0=全部，1=公告，2=通知
+        $type = input('get.type/d', 0); // 0=全部，1=公告，2=通知，4=弹幕
 
         $where = ['uid' => $uid];
-        if ($type > 0) {
-            $where['type'] = $type;
-        }
+        // 只显示弹幕消息（type=4）
+        $where['type'] = 4;
 
         // 获取总数
         $total = Db::table('xy_message')->where($where)->count();
@@ -207,7 +207,7 @@ class Index extends Base
         // 处理时间格式
         foreach ($list as &$item) {
             $item['addtime_format'] = date('Y-m-d H:i:s', $item['addtime']);
-            $item['type_text'] = $item['type'] == 1 ? '公告' : '通知';
+            $item['type_text'] = '弹幕消息';
             $item['status_text'] = $item['status'] == 0 ? '未读' : '已读';
         }
 

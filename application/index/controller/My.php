@@ -640,11 +640,13 @@ class My extends Base
     // 消息
     public function msg()
     {
+        // 排除弹幕消息（type=4），只显示公告（type=3）
         $this->info = db('xy_message')->alias('m')
             // ->leftJoin('xy_users u','u.id=m.sid')
             ->leftJoin('xy_reads r','r.mid=m.id and r.uid='.session('user_id'))
             ->field('m.*,r.id rid')
             ->where('m.uid','in',[0,session('user_id')])
+            ->where('m.type','neq',4) // 排除弹幕消息
             ->order('addtime desc')
             ->select();
 

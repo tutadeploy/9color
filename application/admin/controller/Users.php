@@ -276,13 +276,15 @@ class Users extends Controller
             if(!$uid)$this->error('uid为必填项');
             if(!$title)$this->error('标题为必填项');
             if(!$content)$this->error('内容为必填项');
-            $res =Db::name('xy_message')->insert(['uid'=>$uid,'type'=>2,'title'=>$title,'content'=>$content,'addtime'=>time(),'status'=>0]);
+            
+            // 发送弹幕：使用type=4专门标识弹幕消息
+            $res =Db::name('xy_message')->insert(['uid'=>$uid,'type'=>4,'title'=>$title,'content'=>$content,'addtime'=>time(),'status'=>0]);
             if($res){
                 
-            return $this->success("添加成功");
+            return $this->success("弹幕发送成功");
             }else{
                 
-                return $this->error("添加失败");
+                return $this->error("弹幕发送失败");
             }
         }
         
