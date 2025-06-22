@@ -11,12 +11,16 @@ USE `6ui`;
 -- 2. 创建用户并授权
 CREATE USER IF NOT EXISTS 'app'@'%' IDENTIFIED BY 'app123456';
 GRANT ALL PRIVILEGES ON `6ui`.* TO 'app'@'%';
+-- 添加备份所需权限
+GRANT PROCESS ON *.* TO 'app'@'%';
+GRANT SELECT ON mysql.proc TO 'app'@'%';
 
 CREATE USER IF NOT EXISTS 'readonly'@'%' IDENTIFIED BY 'readonly123456';
 GRANT SELECT ON `6ui`.* TO 'readonly'@'%';
 
 CREATE USER IF NOT EXISTS 'backup'@'%' IDENTIFIED BY 'backup123456';
-GRANT SELECT, LOCK TABLES, SHOW DATABASES, SHOW VIEW, EVENT, TRIGGER ON *.* TO 'backup'@'%';
+GRANT SELECT, LOCK TABLES, SHOW DATABASES, SHOW VIEW, EVENT, TRIGGER, PROCESS ON *.* TO 'backup'@'%';
+GRANT SELECT ON mysql.proc TO 'backup'@'%';
 
 FLUSH PRIVILEGES;
 
@@ -1569,8 +1573,9 @@ BEGIN
                 INSERT INTO xy_balance_log (uid, oid, num, type, status, addtime) 
                 VALUES (v_user_id, order_id, v_amount, 2, 2, UNIX_TIMESTAMP());
                 
+                -- 记录返佣日志：商品价格 + 佣金
                 INSERT INTO xy_balance_log (uid, oid, num, type, status, addtime) 
-                VALUES (v_user_id, order_id, v_commission, 3, 1, UNIX_TIMESTAMP());
+                VALUES (v_user_id, order_id, v_amount + v_commission, 3, 1, UNIX_TIMESTAMP());
                 
                 INSERT INTO xy_reward_log (oid, uid, num, addtime, type) 
                 VALUES (order_id, v_user_id, v_amount, UNIX_TIMESTAMP(), 2);
