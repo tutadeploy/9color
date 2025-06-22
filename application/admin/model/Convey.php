@@ -944,7 +944,7 @@ class Convey extends Model
     }
 
     /**
-     * 删除订单并退回余额
+     * 删除订单并退回余额（支持所有状态）
      * @param string $orderId 订单ID
      * @param int $adminId 管理员ID
      * @return array
@@ -957,23 +957,87 @@ class Convey extends Model
             return ['code' => 1, 'info' => '订单不存在'];
         }
 
-        // 只能删除待付款状态的订单
-        if ($order['status'] != 0) {
-            return ['code' => 1, 'info' => '只能删除待付款状态的订单'];
-        }
-
         Db::startTrans();
         
         try {
+            $refundAmount = 0;
+            $refundMessage = '';
+            
+            // 根据订单状态和派单状态进行不同的余额处理
+            if ($order['status'] == 0) {
+                // 待付款状态：无需退款，只需恢复用户状态
+                $refundMessage = '订单删除成功（待付款状态，无需退款）';
+            } elseif ($order['status'] == 1) {
+                // 已完成状态：需要退回本金，扣除佣金（如果有）
+                $refundAmount = $order['num']; // 退回本金
+                
+                // 如果订单已发放佣金，需要扣除佣金
+                if ($order['c_status'] == 1 && $order['commission'] > 0) {
+                    $refundAmount -= $order['commission']; // 扣除已发放的佣金
+                    $refundMessage = "订单删除成功，退回本金 ¥{$order['num']}，扣除佣金 ¥{$order['commission']}";
+                } else {
+                    $refundMessage = "订单删除成功，退回本金 ¥{$order['num']}";
+                }
+            } elseif (in_array($order['status'], [2, 4])) {
+                // 用户取消或系统取消：通常已经处理过退款，但为安全起见检查一下
+                $refundMessage = '订单删除成功（取消状态）';
+            } elseif ($order['status'] == 3) {
+                // 强制付款状态：退回本金
+                $refundAmount = $order['num'];
+                $refundMessage = "订单删除成功，退回强制付款金额 ¥{$order['num']}";
+            } elseif ($order['status'] == 5) {
+                // 订单冻结：退回本金
+                $refundAmount = $order['num'];
+                $refundMessage = "订单删除成功，退回冻结金额 ¥{$order['num']}";
+            }
+            
+            // 执行余额退款
+            if ($refundAmount > 0) {
+                $updateBalanceResult = Db::name('xy_users')
+                    ->where('id', $order['uid'])
+                    ->update([
+                        'balance' => Db::raw('balance + ' . $refundAmount),
+                        'deal_status' => 1 // 恢复为可交易状态
+                    ]);
+                
+                if (!$updateBalanceResult) {
+                    throw new \Exception('退款失败');
+                }
+                
+                // 记录退款日志
+                $logResult = Db::name('xy_balance_log')->insert([
+                    'uid' => $order['uid'],
+                    'oid' => $orderId,
+                    'num' => $refundAmount,
+                    'type' => 5, // 订单删除退款
+                    'status' => 1,
+                    'addtime' => time()
+                ]);
+                
+                if (!$logResult) {
+                    throw new \Exception('记录退款日志失败');
+                }
+            } else {
+                // 无需退款，只恢复用户状态
+                $userUpdateResult = Db::name('xy_users')
+                    ->where('id', $order['uid'])
+                    ->update(['deal_status' => 1]); // 恢复为可交易状态
+                
+                if (!$userUpdateResult) {
+                    throw new \Exception('恢复用户状态失败');
+                }
+            }
+            
+            // 删除相关的余额日志记录
+            Db::name('xy_balance_log')->where('oid', $orderId)->delete();
+            
+            // 删除相关的奖励日志记录
+            Db::name('xy_reward_log')->where('oid', $orderId)->delete();
+            
             // 删除订单
             $deleteResult = Db::name('xy_convey')->where('id', $orderId)->delete();
             
-            // 恢复用户状态
-            $userUpdateResult = Db::name('xy_users')
-                ->where('id', $order['uid'])
-                ->update(['deal_status' => 1]); // 恢复为可交易状态
-            
-            if ($deleteResult && $userUpdateResult !== false) {
+            if ($deleteResult) {
                 Db::commit();
                 
                 // 记录删除日志
@@ -982,13 +1046,13 @@ class Convey extends Model
                         'uid' => $order['uid'],
                         'type' => 2,
                         'title' => '系统通知',
-                        'content' => "订单 {$orderId} 已被管理员删除",
+                        'content' => "订单 {$orderId} 已被管理员删除" . ($refundAmount > 0 ? "，退款 ¥{$refundAmount}" : ''),
                         'addtime' => time(),
                         'status' => 0
                     ]);
                 }
                 
-                return ['code' => 0, 'info' => '订单删除成功'];
+                return ['code' => 0, 'info' => $refundMessage];
             } else {
                 Db::rollback();
                 return ['code' => 1, 'info' => '订单删除失败'];

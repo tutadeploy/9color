@@ -1699,7 +1699,10 @@ class Deal extends Controller
         // 生成HTML（移除选择按钮，保留我们对话中的优化版本）
         $html = '';
         foreach ($goodsList as $goods) {
-            $html .= '<div class="goods-item" id="goods-' . $goods['id'] . '" onclick="selectGoods(' . $goods['id'] . ', \'' . htmlspecialchars($goods['goods_name']) . '\', ' . $goods['goods_price'] . ')">';
+            // 正确转义JavaScript字符串，避免特殊字符导致语法错误
+            $safeGoodsName = addslashes(htmlspecialchars($goods['goods_name']));
+            
+            $html .= '<div class="goods-item" id="goods-' . $goods['id'] . '" onclick="selectGoods(' . $goods['id'] . ', \'' . $safeGoodsName . '\', ' . $goods['goods_price'] . ')">';
             $html .= '<div class="layui-row">';
             $html .= '<div class="layui-col-md2">';
             if ($goods['goods_pic']) {

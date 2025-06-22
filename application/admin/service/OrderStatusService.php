@@ -65,10 +65,43 @@ class OrderStatusService
                 $actions[] = ['type' => 'force_pay', 'text' => '强制付款', 'class' => 'layui-btn'];
                 $actions[] = ['type' => 'cancel', 'text' => '取消订单', 'class' => 'layui-btn-warm'];
             }
-            
-            // 所有待付款订单都可以删除
-            $actions[] = ['type' => 'delete', 'text' => '删除订单', 'class' => 'layui-btn-danger'];
+        } elseif ($order['status'] == 1) { // 已完成状态
+            // 已完成的订单可以重新结算（如有需要）
+            // $actions[] = ['type' => 'reprocess', 'text' => '重新处理', 'class' => 'layui-btn-primary'];
+        } elseif (in_array($order['status'], [2, 3, 4, 5])) { // 取消、强制付款、系统取消、冻结状态
+            // 这些状态的订单通常不需要额外操作，只保留删除功能
         }
+        
+        // 所有状态的订单都可以删除（管理员权限）
+        $deleteText = '删除订单';
+        $deleteConfirm = '确定删除此订单吗？';
+        
+        // 根据订单状态调整删除按钮的提示文字
+        switch ($order['status']) {
+            case 0:
+                $deleteConfirm = '确定删除此订单吗？（待付款状态，无需退款）';
+                break;
+            case 1:
+                $deleteConfirm = '确定删除此订单吗？将退回本金并扣除已发放的佣金！';
+                break;
+            case 2:
+            case 4:
+                $deleteConfirm = '确定删除此订单吗？（取消状态）';
+                break;
+            case 3:
+                $deleteConfirm = '确定删除此订单吗？将退回强制付款金额！';
+                break;
+            case 5:
+                $deleteConfirm = '确定删除此订单吗？将退回冻结金额！';
+                break;
+        }
+        
+        $actions[] = [
+            'type' => 'delete', 
+            'text' => $deleteText, 
+            'class' => 'layui-btn-danger',
+            'confirm' => $deleteConfirm
+        ];
         
         return $actions;
     }
@@ -184,7 +217,8 @@ class OrderStatusService
                     break;
                     
                 case 'delete':
-                    $html .= '<a data-confirm="确定删除此订单吗？余额将自动回退！" ';
+                    $confirmText = isset($action['confirm']) ? $action['confirm'] : '确定删除此订单吗？余额将自动回退！';
+                    $html .= '<a data-confirm="' . htmlspecialchars($confirmText) . '" ';
                     $html .= 'data-action="' . admin_url('admin/deal/delete_order_with_refund') . '" ';
                     $html .= 'data-value="id#' . $order['id'] . '" ';
                     $html .= 'class="layui-btn layui-btn-xs ' . $action['class'] . '">' . $action['text'] . '</a>';
