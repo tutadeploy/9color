@@ -21,14 +21,10 @@ GRANT SELECT, LOCK TABLES, SHOW DATABASES, SHOW VIEW, EVENT, TRIGGER ON *.* TO '
 -- 刷新权限
 FLUSH PRIVILEGES;
 
-<<<<<<< Updated upstream:database-server/mysql/00-create-users.sql
-SELECT '✅ 数据库和用户创建完成' as status; 
-=======
 -- 显示用户权限
 SHOW GRANTS FOR 'app'@'%';
 SHOW GRANTS FOR 'readonly'@'%';
 SHOW GRANTS FOR 'backup'@'%'; 
 
 -- 初始化完成提示
-SELECT '=== 9Color数据库初始化完成 ===' as status; 
->>>>>>> Stashed changes:database-server/mysql/00-create-database.sql
+SELECT '=== 9Color数据库初始化完成 ===' as status;

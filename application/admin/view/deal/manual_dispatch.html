@@ -1,95 +1,86 @@
 {extend name='main'}
 
 {block name="content"}
-<<<<<<< Updated upstream
-<div class="manual-dispatch-container">
-        <!-- 用户信息区域 -->
-        <div class="layui-row layui-col-space10 user-info-section">
-=======
-<div style="padding: 20px; max-height: 80vh; overflow-y: auto; max-width: 100%; box-sizing: border-box;">
-        <!-- 用户信息区域 -->
-        <div class="layui-row layui-col-space10" style="margin-bottom: 15px;">
->>>>>>> Stashed changes
-            <div class="layui-col-md6">
-                <div class="info-box">
-                    <div class="info-title">用户信息</div>
-                    <div class="info-content">
-                        <div class="info-item"><label>手机号:</label> {$user.tel}</div>
-                        <div class="info-item"><label>用户名:</label> {$user.username}</div>
-                        <div class="info-item"><label>当前余额:</label> <span class="balance">¥{$user.balance}</span></div>
-                        <div class="info-item"><label>用户等级:</label> {:model('Users')->getLevel($user.level,'name');}</div>
-                    </div>
+<div style="padding: 20px; max-height: 85vh; overflow-y: auto; max-width: 100%; box-sizing: border-box; display: flex; flex-direction: column;">
+    <!-- 用户信息区域 -->
+    <div class="layui-row layui-col-space10" style="margin-bottom: 15px; flex-shrink: 0;">
+        <div class="layui-col-md6">
+            <div class="info-box">
+                <div class="info-title">用户信息</div>
+                <div class="info-content">
+                    <div class="info-item"><label>手机号:</label> {$user.tel}</div>
+                    <div class="info-item"><label>用户名:</label> {$user.username}</div>
+                    <div class="info-item"><label>当前余额:</label> <span class="balance">¥{$user.balance}</span></div>
+                    <div class="info-item"><label>用户等级:</label> {:model('Users')->getLevel($user.level,'name');}</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="layui-col-md6">
+            <div class="info-box">
+                <div class="info-title">当前订单信息</div>
+                <div class="info-content">
+                    <div class="info-item"><label>订单金额:</label> ¥{$order.num|default='待设置'}</div>
+                    <div class="info-item"><label>订单佣金:</label> ¥{$order.commission|default='待设置'}</div>
+                    <div class="info-item"><label>创建时间:</label> {$order.addtime|format_datetime='Y-m-d H:i:s'}</div>
+                    <div class="info-item"><label>派单状态:</label> <span class="status-waiting">等待匹配商品</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 商品搜索区域 -->
+    <div class="search-section" style="flex-shrink: 0;">
+        <div class="section-title">商品搜索</div>
+        <form class="layui-form" id="searchForm">
+            <!-- 第一行：商品标题 -->
+            <div class="layui-form-item search-row">
+                <label class="search-label">商品标题</label>
+                <div class="search-input">
+                    <input type="text" name="title" placeholder="请输入商品标题关键词" class="layui-input">
                 </div>
             </div>
             
-            <div class="layui-col-md6">
-                <div class="info-box">
-                    <div class="info-title">当前订单信息</div>
-                    <div class="info-content">
-                        <div class="info-item"><label>订单金额:</label> ¥{$order.num|default='待设置'}</div>
-                        <div class="info-item"><label>订单佣金:</label> ¥{$order.commission|default='待设置'}</div>
-                        <div class="info-item"><label>创建时间:</label> {$order.addtime|format_datetime='Y-m-d H:i:s'}</div>
-                        <div class="info-item"><label>派单状态:</label> <span class="status-waiting">等待匹配商品</span></div>
+            <!-- 第二行：价格区间和搜索按钮 -->
+            <div class="layui-form-item search-row">
+                <div class="price-range">
+                    <label class="search-label">价格区间</label>
+                    <div class="price-inputs">
+                        <input type="number" name="min_price" placeholder="最低价" class="layui-input price-input">
+                        <span class="price-separator">-</span>
+                        <input type="number" name="max_price" placeholder="最高价" class="layui-input price-input">
                     </div>
+                </div>
+                <div class="search-button">
+                    <button type="button" class="layui-btn layui-btn-normal" id="searchBtn">
+                        <i class="layui-icon layui-icon-search"></i> 搜索
+                    </button>
+                    <button type="button" class="layui-btn layui-btn-primary" id="resetBtn">
+                        <i class="layui-icon layui-icon-refresh"></i> 重置
+                    </button>
                 </div>
             </div>
-        </div>
-        
-        <!-- 商品搜索区域 -->
-        <div class="search-section">
-<<<<<<< Updated upstream
-=======
-            <div class="section-title">商品搜索</div>
->>>>>>> Stashed changes
-            <form class="layui-form" id="searchForm">
-                <!-- 第一行：商品标题 -->
-                <div class="layui-form-item search-row">
-                    <label class="search-label">商品标题</label>
-                    <div class="search-input">
-                        <input type="text" name="title" placeholder="请输入商品标题关键词" class="layui-input">
-                    </div>
-                </div>
-                
-                <!-- 第二行：价格区间和搜索按钮 -->
-                <div class="layui-form-item search-row">
-                    <div class="price-range">
-                        <label class="search-label">价格区间</label>
-                        <div class="price-inputs">
-                            <input type="number" name="min_price" placeholder="最低价" class="layui-input price-input">
-                            <span class="price-separator">-</span>
-                            <input type="number" name="max_price" placeholder="最高价" class="layui-input price-input">
-                        </div>
-                    </div>
-                    <div class="search-button">
-                        <button type="button" class="layui-btn layui-btn-normal" id="searchBtn">
-                            <i class="layui-icon layui-icon-search"></i> 搜索
-                        </button>
-                        <button type="button" class="layui-btn layui-btn-primary" id="resetBtn">
-                            <i class="layui-icon layui-icon-refresh"></i> 重置
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
-        
-        <!-- 商品列表区域 -->
-        <div class="goods-section">
-            <div class="section-title">选择商品</div>
-            <div id="goodsList" class="goods-list-container">
-                <!-- 商品列表通过Ajax加载 -->
-            </div>
-        </div>
-        
-        <!-- 确认派单按钮 -->
-        <div class="action-buttons">
-            <button type="button" class="layui-btn" id="confirmDispatch" disabled>
-                确定派单
-            </button>
-            <button type="button" class="layui-btn layui-btn-primary" data-close>
-                取消返回
-            </button>
+        </form>
+    </div>
+    
+    <!-- 商品列表区域 -->
+    <div class="goods-section" style="flex: 1; display: flex; flex-direction: column; min-height: 200px;">
+        <div class="section-title">选择商品</div>
+        <div id="goodsList" class="goods-list-container">
+            <!-- 商品列表通过Ajax加载 -->
         </div>
     </div>
+    
+    <!-- 确认派单按钮 -->
+    <div class="action-buttons" style="flex-shrink: 0;">
+        <button type="button" class="layui-btn" id="confirmDispatch" disabled>
+            确定派单
+        </button>
+        <button type="button" class="layui-btn layui-btn-primary" data-close>
+            取消返回
+        </button>
+    </div>
+</div>
 
 <!-- 选中的商品信息 -->
 <input type="hidden" id="selectedGoodsId" value="">
@@ -179,54 +170,6 @@ $(document).ready(function() {
 </script>
 
 <style>
-<<<<<<< Updated upstream
-/* 弹窗整体容器样式 - 自适应浏览器高度 */
-.manual-dispatch-container {
-    padding: 20px;
-    max-height: 85vh;
-    overflow-y: auto;
-    max-width: 100%;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-}
-
-/* 用户信息区域样式 */
-.user-info-section {
-    flex-shrink: 0;
-    margin-bottom: 15px;
-}
-
-/* 搜索区域样式 */
-.search-section {
-    flex-shrink: 0;
-    margin-bottom: 15px;
-    background: #fff;
-    border: 1px solid #e9ecef;
-    border-radius: 4px;
-    padding: 15px;
-}
-
-/* 商品区域样式 - 自适应高度 */
-.goods-section {
-    flex: 1;
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
-    min-height: 200px;
-}
-
-/* 操作按钮区域样式 */
-.action-buttons {
-    flex-shrink: 0;
-    text-align: center;
-    padding-top: 15px;
-    border-top: 1px solid #e9ecef;
-    margin-top: 15px;
-}
-
-=======
->>>>>>> Stashed changes
 /* 弹窗整体样式 */
 .info-box {
     background: #f8f9fa;
@@ -271,9 +214,6 @@ $(document).ready(function() {
     font-weight: bold;
 }
 
-<<<<<<< Updated upstream
-/* 搜索区域详细样式 */
-=======
 /* 搜索区域样式 */
 .search-section {
     margin-bottom: 15px;
@@ -282,7 +222,6 @@ $(document).ready(function() {
     border-radius: 4px;
     padding: 15px;
 }
->>>>>>> Stashed changes
 
 .search-row {
     margin-bottom: 12px;
@@ -354,14 +293,6 @@ $(document).ready(function() {
 
 /* 响应式处理 */
 @media (max-width: 768px) {
-<<<<<<< Updated upstream
-    .manual-dispatch-container {
-        padding: 15px;
-        max-height: 90vh;
-    }
-    
-=======
->>>>>>> Stashed changes
     .search-row {
         flex-direction: column;
         align-items: stretch;
@@ -390,43 +321,6 @@ $(document).ready(function() {
     .info-box {
         margin-bottom: 15px;
     }
-<<<<<<< Updated upstream
-    
-    .goods-section {
-        min-height: 150px;
-    }
-    
-    .goods-list-container {
-        min-height: 120px;
-    }
-}
-
-/* 小屏幕优化 */
-@media (max-height: 600px) {
-    .manual-dispatch-container {
-        max-height: 95vh;
-        padding: 10px;
-    }
-    
-    .user-info-section {
-        margin-bottom: 10px;
-    }
-    
-    .search-section {
-        padding: 10px;
-        margin-bottom: 10px;
-    }
-    
-    .goods-section {
-        min-height: 120px;
-    }
-    
-    .action-buttons {
-        padding-top: 10px;
-        margin-top: 10px;
-    }
-=======
->>>>>>> Stashed changes
 }
 
 .section-title {
@@ -438,29 +332,15 @@ $(document).ready(function() {
     border-bottom: 1px solid #e9ecef;
 }
 
-<<<<<<< Updated upstream
-/* 商品区域详细样式 */
-
+/* 商品区域样式 */
 .goods-list-container {
     flex: 1;
-=======
-/* 商品区域样式 */
-.goods-section {
-    margin-bottom: 15px;
-}
-
-.goods-list-container {
-    max-height: 300px;
->>>>>>> Stashed changes
     overflow-y: auto;
     border: 1px solid #e9ecef;
     border-radius: 4px;
     padding: 10px;
     background: #fff;
-<<<<<<< Updated upstream
     min-height: 150px;
-=======
->>>>>>> Stashed changes
 }
 
 .goods-item {
@@ -495,9 +375,6 @@ $(document).ready(function() {
     font-weight: bold;
 }
 
-<<<<<<< Updated upstream
-/* 操作按钮详细样式 */
-=======
 /* 操作按钮样式 */
 .action-buttons {
     text-align: center;
@@ -506,7 +383,6 @@ $(document).ready(function() {
     margin-top: 15px;
 }
 
->>>>>>> Stashed changes
 .action-buttons .layui-btn {
     margin: 0 5px;
 }
