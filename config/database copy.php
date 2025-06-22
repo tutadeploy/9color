@@ -5,14 +5,14 @@ return [
     'debug'       => true,
     // 数据库类型
     'type'        => 'mysql',
-    // 服务器地址
-    'hostname'    => '192.168.50.197',
+    // 服务器地址 - Docker容器内通过容器名连接
+    'hostname'    => 'mysql',
     // 数据库名
     'database'    => '6ui',
     // 用户名
-    'username'    => 'root',
+    'username'    => 'app',
     // 密码
-    'password'    => 'root123456',
+    'password'    => 'app123456',
     // 编码
     'charset'     => 'utf8mb4',
     // 端口

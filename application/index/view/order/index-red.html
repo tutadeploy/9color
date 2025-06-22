@@ -174,7 +174,7 @@
                 <li class="<?php echo !$status ? 'on' : ''?>"><a href="/order">{:lang('全部')}</a></li>
                 <li class="<?php echo $status == -1 ? 'on' : ''?>"><a href="/order?status=-1">{:lang('待处理')}</a></li>
                 <li class="<?php echo $status == 1 ? 'on' : ''?>"><a href="/order?status=1">{:lang('已完成')}</a></li>
-                <li class="<?php echo $status == 5 ? 'on' : ''?>"><a href="/order?status=5">{:lang('冻结中')}</a></li>
+                <!-- <li class="<?php echo $status == 5 ? 'on' : ''?>"><a href="/order?status=5">{:lang('冻结中')}</a></li> -->
             </ul>
             <ul class="qd-list" id="newsList">
                 {if $list}
@@ -194,8 +194,8 @@
                             <div data-v-35ad745e="" class="records_tabs_box">
                                 <div data-v-35ad745e="" class="records_tabs_box_top">
                                     {if $v['order_num']!=0}<span class="circle">{$v.order_num}</span>{/if}
-                                    {:lang('抢单时间')}：{$v.addtime|format_datetime='Y-m-d H:i:s'}
-                                    {:lang('抢单编号')}：{$v.id}
+                                    <div>{:lang('抢单的时间')}：{$v.addtime|format_datetime='Y-m-d H:i:s'}</div>
+                                    <div>{:lang('抢单编号')}：{$v.id}</div>
                                 </div>
                                 <img data-v-35ad745e="" src="{$img}" class="records_tabs_box_img">
                                 <div data-v-35ad745e="" class="records_tabs_box_des">
@@ -224,13 +224,14 @@
                                         $v['status']==4||$v['status']==5}0{else}{:lang('￥')}{$v.commission+$v.num}{/if}
                                     </p>
                                 </div>
-                                <div data-v-35ad745e="" class="tabs_box_des_r_pic">
+                                <!-- 提交订单按钮已移除 -->
+                                <!-- <div data-v-35ad745e="" class="tabs_box_des_r_pic">
                                     <button data-v-35ad745e="" onclick="tijiao('{$v.id}')" class="redb"
                                         style="display: <?php echo $v['status']==0 ? 'block':'none'; ?>;padding: 3px 10px;border-radius: 5px;width: 40%;float:left;">{:lang('提交订单')}</button>
                                     {if $balance<$v.num} <p data-v-35ad745e="" class="txt"
                                         style="display: <?php echo $v['status']==0 ? 'block':'none'; ?>;width:50%;float:right;color:red"
                                         onclick="jump('{$v.num-$balance}')">{:lang('账户可用余额不足')}</p>{/if}
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>
@@ -240,9 +241,9 @@
             </ul>
         </div>
     </div>
-    {empty name='list'}<span class="notdata">{:lang('没有记录')}</span>{else}{$pagehtml|raw|default=''}{/empty}
+    {empty name='list'}<span class="notdata">{:lang('没有记录')}</span>{/empty}
 
-    <div class="loadmore" style="display: none;margin-top: 30px" id="moreNews" onclick="moreNews()">{:lang('查看更多')}
+    <div class="loadmore" style="margin-top: 30px" id="moreNews" onclick="moreNews()">{:lang('查看更多')}
     </div>
 
     <ul class="footer">
@@ -371,47 +372,71 @@
         shopTime = shopTime * 1000;
 
         $(function () {
-            ajaxHonor(pageNo, 20);
+            // 检查服务端渲染的数据数量来决定是否显示查看更多按钮
+            var serverRenderedCount = $("#newsList li").length;
+            console.log('服务端渲染的订单数量:', serverRenderedCount);
+            
+            // 如果服务端渲染的数据少于20条，说明没有更多数据了
+            // 考虑到分页可能不是20条，这里改为检查是否有数据
+            if (serverRenderedCount == 0) {
+                $("#moreNews").hide();
+            } else {
+                // 默认显示查看更多按钮，让用户可以尝试加载下一页
+                $("#moreNews").show();
+            }
         })
 
         function moreNews() {
             pageNo++;
+            console.log('点击查看更多，加载第', pageNo, '页');
             ajaxHonor(pageNo, 20);
         }
 
         function ajaxHonor(page, limit) {
+            // 根据当前页面的status参数转换为type参数
+            var type = 1; // 默认待处理
+            var currentStatus = '{$status}';
+            if (currentStatus == '' || currentStatus == '0' || currentStatus == '-1') {
+                type = 1; // 待处理
+            } else if (currentStatus == '1') {
+                type = 3; // 已完成
+            }
+            // 冻结中选项卡已移除，不再处理status=5的情况
+
             $.ajax({
-                url: '/convey/page',
-                method: 'get',
+                url: '/order/order_list',
+                method: 'post',
                 data: {
-                    pageNo: page,
-                    pageSize: limit,
-                    status: status
+                    page: page,
+                    num: limit,
+                    type: type
                 },
                 dataType: "json",
                 success: function (res) {
-                    console.log(res);
-                    if (res.success) {
-                        initHtml(res.data.records, res.data.current < res.data.pages);
+                    console.log('AJAX响应:', res);
+                    if (res.code == 0 && res.data) {
+                        // 只有当返回的数据数量等于请求的数量时，才认为可能还有更多数据
+                        var hasMore = res.data.length == limit;
+                        console.log('返回数据数量:', res.data.length, '请求数量:', limit, '是否有更多:', hasMore);
+                        initHtml(res.data, hasMore);
+                    } else {
+                        console.log('没有数据或请求失败');
+                        $("#moreNews").hide();
                     }
+                },
+                error: function(xhr, status, error) {
+                    console.log('请求失败:', error);
+                    $("#moreNews").hide();
                 }
             });
         }
 
-        function timestampToTime(timestamp) {
-            var date = new Date(timestamp);
-            var Y = date.getFullYear() + '年';
-            var M = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '月';
-            var D = (date.getDate() < 10 ? '0' + date.getDate() : date.getDate()) + '日 ';
-            var h = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
-            var m = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
-            var s = date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds();
-            return Y + M + D + h + m + s;
-        }
+        // timestampToTime 函数已移除，后端直接返回格式化时间
 
-        function initHtml(newsList, hideBtn) {
+        function initHtml(newsList, hasMore) {
+            console.log('initHtml被调用，数据数量:', newsList.length, '是否有更多:', hasMore);
             var html = "";
-            if (hideBtn) {
+            if (hasMore) {
                 $("#moreNews").show();
             } else {
                 $("#moreNews").hide();
@@ -419,58 +444,50 @@
 
             for (var i = 0; i < newsList.length; i++) {
                 var obj = newsList[i];
-                var statusHtml = '';
-                switch (obj.status) {
-                    case 1:
-                        statusHtml = '<span class="status status1">{:lang("待审核")}</span>';
-                        break;
-                    case 2:
-                        statusHtml = '<span class="status status2">{:lang("审核通过")}</span>';
-                        break;
-                    case 3:
-                        statusHtml = '<span class="status status3">{:lang("审核拒绝")}</span>';
-                        break;
-                    case 4:
-                        statusHtml = '<span class="status status4">{:lang("冻结中")}</span>';
-                        break;
-                    case 5:
-                        statusHtml = '<span class="status status5">{:lang("派单中")}</span>';
-                        break;
-                }
+                
+                // 根据订单状态设置图片
+                var img = '/static_new6/img/succ.png';
+                if (obj.status == 0) img = '/static_new6/img/en_dai.png';
+                if (obj.status == 1) img = '/static_new6/img/en_succ.png';
+                if (obj.status == 4) img = '/static_new6/img/en_dongjie.png';
+                if (obj.status == 5) img = '/static_new6/img/en_dongjie.png';
+                
                 html += '<li>' +
-                    '<div class="records_tabs_box">' +
-                    '<div class="records_tabs_box_top">' +
-                    (obj.order_num != 0 ? '<span class="circle">' + obj.order_num + '</span>' : '') +
-                    '{:lang("抢单时间")}：' + timestampToTime(obj.addtime) + ' {:lang("抢单编号")}：' + obj.id +
+                    '<div data-v-35ad745e="">' +
+                    '<div data-v-35ad745e="" class="records_tabs">' +
+                    '<div data-v-35ad745e="" class="records_tabs_box">' +
+                    '<div data-v-35ad745e="" class="records_tabs_box_top">' +
+                    (obj.order_num && obj.order_num != 0 ? '<span class="circle">' + obj.order_num + '</span>' : '') +
+                    '<div>{:lang("抢单的时间")}：' + obj.addtime + '</div>' +
+                    '<div>{:lang("抢单编号")}：' + obj.id + '</div>' +
                     '</div>' +
-                    '<img src="' + obj.img + '" class="records_tabs_box_img">' +
-                    '<div class="records_tabs_box_des">' +
-                    '<div class="tabs_box_des_img">' +
-                    '<img src="' + obj.goods_pic + '">' +
+                    '<img data-v-35ad745e="" src="' + img + '" class="records_tabs_box_img">' +
+                    '<div data-v-35ad745e="" class="records_tabs_box_des">' +
+                    '<div data-v-35ad745e="" class="tabs_box_des_img">' +
+                    '<img data-v-35ad745e="" src="' + obj.goods_pic + '">' +
                     '</div>' +
-                    '<div class="tabs_box_des_r">' +
-                    '<p class="tabs_box_des_r_tit">' + obj.goods_name + '</p>' +
-                    '<div class="tabs_box_des_r_pic">' +
-                    '<p>{:lang("￥")} ' + obj.goods_price + '</p>' +
-                    '<p>x ' + obj.goods_count + '</p>' +
+                    '<div data-v-35ad745e="" class="tabs_box_des_r">' +
+                    '<p data-v-35ad745e="" class="tabs_box_des_r_tit">' + obj.goods_name + '</p>' +
+                    '<div data-v-35ad745e="" class="tabs_box_des_r_pic">' +
+                    '<p data-v-35ad745e="">{:lang("￥")} ' + obj.goods_price + '</p>' +
+                    '<p data-v-35ad745e="">x ' + obj.goods_count + '</p>' +
                     '</div>' +
                     '</div>' +
                     '</div>' +
-                    '<div class="tabs_box_des_r_pic">' +
-                    '<p class="gray">{:lang("订单总额")}</p>' +
-                    '<p>{:lang("￥")} ' + obj.num + '</p>' +
+                    '<div data-v-35ad745e="" class="tabs_box_des_r_pic">' +
+                    '<p data-v-35ad745e="" class="gray">{:lang("订单总额")}</p>' +
+                    '<p data-v-35ad745e="">{:lang("￥")} ' + obj.num + '</p>' +
                     '</div>' +
-                    '<div class="tabs_box_des_r_pic">' +
-                    '<p class="gray">{:lang("佣金")}</p>' +
-                    '<p>{:lang("￥")}' + obj.commission + '</p>' +
+                    '<div data-v-35ad745e="" class="tabs_box_des_r_pic">' +
+                    '<p data-v-35ad745e="" class="gray">{:lang("佣金")}</p>' +
+                    '<p data-v-35ad745e="">{:lang("￥")}' + obj.commission + '</p>' +
                     '</div>' +
-                    '<div class="tabs_box_des_r_pic">' +
-                    '<p class="txt">{:lang("预计返还")}</p>' +
-                    '<p class="txt1">' + (obj.status == 4 || obj.status == 5 ? '0' : '{:lang("￥")}' + (parseFloat(obj.commission) + parseFloat(obj.num))) + '</p>' +
+                    '<div data-v-35ad745e="" class="tabs_box_des_r_pic">' +
+                    '<p data-v-35ad745e="" class="txt">{:lang("预计返还")}</p>' +
+                    '<p data-v-35ad745e="" class="txt1">' + (obj.status == 4 || obj.status == 5 ? '0' : '{:lang("￥")}' + (parseFloat(obj.commission) + parseFloat(obj.num))) + '</p>' +
                     '</div>' +
-                    '<div class="tabs_box_des_r_pic">' +
-                    (obj.status == 0 ? '<button onclick="tijiao(\'' + obj.id + '\')" class="redb" style="padding: 3px 10px;border-radius: 5px;width: 40%;float:left;">{:lang("提交订单")}</button>' : '') +
-                    (obj.status == 0 && parseFloat(obj.num) > parseFloat({ $balance }) ? '<p class="txt" style="width:50%;float:right;color:red" onclick="jump(\'' + (parseFloat(obj.num) - parseFloat({ $balance })) + '\')">{:lang("账户可用余额不足")}</p>' : '') +
+                    // 提交订单按钮已移除
+                    '</div>' +
                     '</div>' +
                     '</div>' +
                     '</li>';

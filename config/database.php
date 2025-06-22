@@ -5,18 +5,18 @@ return [
     'debug'       => true,
     // 数据库类型
     'type'        => 'mysql',
-    // 服务器地址
-    'hostname'    => '38.180.150.127',
+    // 服务器地址 - 连接到独立的database-server
+    'hostname'    => getenv('DB_HOST') ?: 'host.docker.internal',
     // 数据库名
-    'database'    => '6ui',
+    'database'    => getenv('DB_NAME') ?: '6ui',
     // 用户名
-    'username'    => 'app',
+    'username'    => getenv('DB_USER') ?: 'app',
     // 密码
-    'password'    => 'app123456',
+    'password'    => getenv('DB_PASS') ?: 'app123456',
     // 编码
     'charset'     => 'utf8mb4',
     // 端口
-    'hostport'    => '3306',
+    'hostport'    => getenv('DB_PORT') ?: '3306',
     // 主从
     'deploy'      => 0,
     // 分离

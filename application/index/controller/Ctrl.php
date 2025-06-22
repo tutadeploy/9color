@@ -372,9 +372,10 @@ class Ctrl extends Base
     public function recharge_do_before()
     {
         $num = input('post.price/f',0);
-        $type = input('post.type/s','card');
+        $type = input('post.type/s','9'); // 默认设为9（客服处理）
 
         $uid = session('user_id');
+        if(!$uid) return json(['code'=>1,'info'=>lang('请先登录')]);
         if(!$num ) return json(['code'=>1,'info'=>lang('参数错误')]);
 
         //时间限制 //TODO
@@ -382,15 +383,42 @@ class Ctrl extends Base
         $str = config('chongzhi_time_1').":00  - ".config('chongzhi_time_2').":00";
         if($res) return json(['code'=>1,'info'=>lang('禁止在').$str.lang('以外的时间段执行当前操作')]);
 
+        // 获取用户信息
+        $uinfo = db('xy_users')->field('tel,username')->find($uid);
+        if(!$uinfo) return json(['code'=>1,'info'=>lang('用户信息不存在')]);
 
-        //
-        $pay = db('xy_pay')->where('name2',$type)->find();
-        if ($num < $pay['min']) return json(['code'=>1,'info'=>lang('充值不能小于').$pay['min']]);
-        if ($num > $pay['max']) return json(['code'=>1,'info'=>lang('充值不能大于').$pay['max']]);
+        // 创建充值记录
+        $id = getSn('CZ'); // 生成充值订单号
+        $res = db('xy_recharge')->insert([
+            'id'        => $id,
+            'uid'       => $uid,
+            'tel'       => $uinfo['tel'],
+            'real_name' => $uinfo['username'],
+            'pic'       => '',
+            'num'       => $num,
+            'addtime'   => time(),
+            'pay_name'  => 'manual_service', // 标记为客服处理
+            'status'    => 1, // 待处理状态
+            'type'      => 1,
+            'charge'    => 0,
+            'payInfo'   => '',
+            'orderNo'   => '',
+            'orderDate' => '',
+            'notifyDate'=> date('Y-m-d H:i:s')
+        ]);
 
-        $info = [];
-        $info['num'] = $num;
-        return json(['code'=>0,'info'=>$info]);
+        if($res){
+            return json([
+                'code' => 0,
+                'info' => '充值请求已提交，订单号：' . $id,
+                'data' => [
+                    'order_id' => $id,
+                    'amount' => $num
+                ]
+            ]);
+        } else {
+            return json(['code'=>1,'info'=>lang('充值请求提交失败，请稍后重试')]);
+        }
     }
 
 

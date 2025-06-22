@@ -243,48 +243,41 @@
                     $(document).dialog({ infoText: '选择支付方式' });
                     return false;
                 }
-                if (typeof (type) == 'undefined' || type == '9') {
-                    window.location.href = '/support';
-                    return false;
-                }
-                // 查询是否是京东E卡（10000）或者是苏宁（10001）
+                
+                // 无论选择哪种支付方式，都先向后台发送充值请求
                 var loading = null;
                 var price = $("input[name=price]").val();
                 $.ajax({
-                    url: '/pay/recharge',
-                    data: { price: price, payId: type, kahao: 1, kami: 1 },
+                    url: '/ctrl/recharge_do_before',
+                    data: { price: price, type: type },
                     type: 'POST',
                     beforeSend: function () {
                         loading = $(document).dialog({
                             type: 'notice',
                             infoIcon: '/static_new/img/loading.gif',
-                            infoText: '正在加载中',
+                            infoText: '正在提交充值请求...',
                             autoClose: 0
                         });
                     },
                     success: function (data) {
-                        if (data.success) {
-                            $(document).dialog({ infoText: '提交成功, 即将跳转' });
+                        if (loading) loading.close();
+                        
+                        if (data.code == 0) {
+                            // 充值请求提交成功，跳转到客服
+                            $(document).dialog({ infoText: '充值请求已提交，即将跳转客服' });
                             setTimeout(function () {
-                                window.location.href = data.data;
+                                window.location.href = '/support';
                             }, 1500);
                         } else {
-                            if (data.msg === '10000') {
-
-                                window.location.href = "/pay/recharge_jd_10000?price=" + price + "&payId=" + type
-
-                            } else if (data.msg === '10001') {
-                                window.location.href = "/pay/recharge_sn_10001?price=" + price + "&payId=" + type
-                            } else {
-
-                                loading.close();
-                                $(document).dialog({ infoText: data.msg });
-                            }
-
+                            // 充值请求失败，显示错误信息
+                            $(document).dialog({ infoText: data.info || '充值请求提交失败' });
                         }
+                    },
+                    error: function() {
+                        if (loading) loading.close();
+                        $(document).dialog({ infoText: '网络错误，请稍后重试' });
                     }
                 });
-
             }
 
 

@@ -1,0 +1,97 @@
+{extend name='admin@layouts/content'}
+
+{block name='content'}
+<div class="layui-card">
+    <div class="layui-card-header">订单状态一致性检查和修复</div>
+    <div class="layui-card-body">
+        <div class="layui-form">
+            <div class="layui-form-item">
+                <div class="layui-form-text">
+                    <p>此功能用于检查和修复订单状态不一致的问题：</p>
+                    <ul>
+                        <li>检查已完成派单但订单状态仍为"待付款"的数据</li>
+                        <li>自动修复这些不一致的状态</li>
+                        <li>确保前端显示与后台状态保持一致</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="layui-form-item">
+                <button type="button" class="layui-btn layui-btn-normal" id="checkBtn">
+                    <i class="layui-icon layui-icon-search"></i> 检查并修复状态不一致
+                </button>
+            </div>
+            
+            <div class="layui-form-item">
+                <div class="layui-form-text">
+                    <div id="result" style="display:none;">
+                        <div class="layui-bg-gray" style="padding: 15px; margin-top: 10px;">
+                            <h4>检查结果：</h4>
+                            <div id="resultContent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+layui.use(['jquery', 'layer'], function(){
+    var $ = layui.jquery;
+    var layer = layui.layer;
+    
+    $('#checkBtn').click(function(){
+        var btn = $(this);
+        var originalText = btn.html();
+        
+        btn.html('<i class="layui-icon layui-icon-loading layui-anim layui-anim-rotate layui-anim-loop"></i> 检查中...');
+        btn.prop('disabled', true);
+        
+        $.ajax({
+            url: '{:admin_url("fix_order_status_consistency")}',
+            type: 'POST',
+            data: {
+                '_token': '{:systoken()}'
+            },
+            success: function(res) {
+                if (res.code === 0) {
+                    var html = '<p><strong>检查完成！</strong></p>';
+                    html += '<p>发现不一致订单：' + res.total_found + ' 个</p>';
+                    html += '<p>成功修复：' + res.fixed_count + ' 个</p>';
+                    
+                    if (res.errors && res.errors.length > 0) {
+                        html += '<p style="color: red;">错误信息：</p>';
+                        html += '<ul>';
+                        res.errors.forEach(function(error) {
+                            html += '<li style="color: red;">' + error + '</li>';
+                        });
+                        html += '</ul>';
+                    }
+                    
+                    if (res.fixed_count > 0) {
+                        html += '<p style="color: green;">✓ 状态修复成功，前端显示将恢复正常</p>';
+                    } else if (res.total_found === 0) {
+                        html += '<p style="color: green;">✓ 所有订单状态一致，无需修复</p>';
+                    }
+                    
+                    $('#resultContent').html(html);
+                    $('#result').show();
+                    
+                    layer.msg(res.message || '检查完成', {icon: 1});
+                } else {
+                    layer.msg(res.info || '检查失败', {icon: 2});
+                }
+            },
+            error: function() {
+                layer.msg('网络错误，请重试', {icon: 2});
+            },
+            complete: function() {
+                btn.html(originalText);
+                btn.prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+{/block} 

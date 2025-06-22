@@ -19,24 +19,29 @@
         <thead>
             <tr>
                 <th class='text-left nowrap' style="width: 60px;">ID</th>
-                <th class='text-left nowrap' style="width: 65px;">用户名
+                <th class='text-left nowrap' style="width: 80px;">用户信息
                     <hr>会员等级
                 </th>
-                <th class='text-left nowrap' style="width: 65px;">电话
+                <th class='text-left nowrap' style="width: 80px;">电话
                     <hr>状态
                 </th>
-                <th class='text-left nowrap' style="width: 55px;">账户
-                    <hr>利息宝金额
+                <th class='text-left nowrap' style="width: 70px;">余额
+                    <!-- <hr>利息宝 -->
                 </th>
-                <th class='text-left nowrap' style="width: 90px;">订单控制
+                <!-- <th class='text-left nowrap' style="width: 90px;">订单控制
+                </th> -->
+                <th class='text-left nowrap' style="width: 80px;">派单模式
+                    <hr>今日佣金
                 </th>
-                <th class='text-left nowrap' style="width: 45px;">今日佣金</th>
-                <th class='text-left nowrap' style="width: 70px;">邀请码
+                <th class='text-left nowrap' style="width: 80px;">邀请信息
                     <hr>上级用户
                 </th>
-                <th class='text-left nowrap' style="width: 120px;">注册时间</th>
-                <th class='text-left nowrap' style="width: 80px;">最后登录ip</th>
-                <th class='text-left nowrap' style="width: 80px;">最后在线时间</th>
+                <th class='text-left nowrap' style="width: 100px;">注册时间
+                    <hr>最后在线
+                </th>
+                <th class='text-left nowrap' style="width: 80px;">登录IP
+                    <hr>地区
+                </th>
                 <th class='text-left nowrap'>操作</th>
             </tr>
         </thead>
@@ -46,10 +51,10 @@
             <tr>
 
                 <td class='text-left nowrap' style="width: 60px;">{$vo.id}</td>
-                <td class='text-left nowrap' style="width: 65px;">{$vo.username}
+                <td class='text-left nowrap' style="width: 80px;">{$vo.username}
                     <hr>{:model('Users')->getLevel($vo.level,'name');}
                 </td>
-                <td class='text-left nowrap' style="width: 65px;">{$vo.tel}
+                <td class='text-left nowrap' style="width: 80px;">{$vo.tel}
                     <hr>
                     {if $vo.is_jia>0}
                     <a class="layui-btn layui-btn-danger layui-btn-xs">假人</a>
@@ -57,10 +62,10 @@
                     <a class="layui-btn layui-btn-normal layui-btn-xs">真人</a>
                     {/if}
                 </td>
-                <td class='text-left nowrap' style="width: 55px;">{$vo.balance}
-                    <hr>{$vo.lixibao_balance}
+                <td class='text-left nowrap' style="width: 70px;">{$vo.balance}
+                    <!-- <hr>{$vo.lixibao_balance} -->
                 </td>
-                <td class='text-left nowrap' style="width: 90px;">
+                <!-- <td class='text-left nowrap' style="width: 90px;">
                     {if $vo['pipei_type']==2}
                     <a class="layui-btn layui-btn-xs " data-modal="/sgcpj/users/edit_pipei.html?id={$vo.id}">分组模式</a>
                     <hr>
@@ -73,14 +78,38 @@
                     <a data-dbclick="" class="layui-btn layui-btn-xs layui-btn-danger">{$vo.deal_min_num}% -
                         >{$vo.deal_max_num}%</a>
                     {/if}
-
-
+                </td> -->
+                <td class='text-left nowrap' style="width: 80px;">
+                    {if isset($vo.default_auto_dispatch) && $vo.default_auto_dispatch == 1}
+                    <a class="layui-btn layui-btn-xs layui-btn-normal" 
+                       data-action="{:admin_url('admin/users/toggle_user_dispatch')}" 
+                       data-value="id#{$vo.id};mode#0" 
+                       data-csrf="{:systoken('admin/users/toggle_user_dispatch')}"
+                       title="点击切换为手动派单">自动派单</a>
+                    {else}
+                    <a class="layui-btn layui-btn-xs layui-btn-warm" 
+                       data-action="{:admin_url('admin/users/toggle_user_dispatch')}" 
+                       data-value="id#{$vo.id};mode#1" 
+                       data-csrf="{:systoken('admin/users/toggle_user_dispatch')}"
+                       title="点击切换为自动派单">手动派单</a>
+                    {/if}
+                    <hr>{:model('Users')->today_commission($vo.id);}
                 </td>
-                <td class='text-left nowrap' style="width: 45px;">{:model('Users')->today_commission($vo.id);}</td>
-                <td class='text-left nowrap' style="width: 70px;">{$vo.invite_code}
+                <td class='text-left nowrap' style="width: 80px;">{$vo.invite_code}
                     <hr>{$vo.parent_name}
                 </td>
-                <td class='text-left nowrap' style="width: 120px;">{$vo.addtime|format_datetime='Y-m-d H:i:s'}</td>
+                <td class='text-left nowrap' style="width: 100px;">{$vo.addtime|format_datetime='Y-m-d H:i:s'}
+                    <hr>
+                    {if empty($vo.activetime)}
+                    <span style="color:#999;">从未登录</span>
+                    {else}
+                        {if $vo.activetime>(time()-5*60)}
+                        <span style="color:green">{:date('m-d H:i', $vo['activetime']);}</span>
+                        {else}
+                        <span style="color:red">{:date('m-d H:i', $vo['activetime']);}</span>
+                        {/if}
+                    {/if}
+                </td>
                 <td class='text-left nowrap' style="width: 80px;overflow:hidden">
                     {$vo.ip}
                     <hr>
@@ -89,22 +118,6 @@
                     $area = $Ip->getlocation($vo["ip"]); echo mb_convert_encoding($area['country'], "UTF-8", "GBK").mb_convert_encoding($area['area'], "UTF-8", "GBK");
                 }
                 ?>
-                </td>
-                <td class='text-left nowrap' style="width: 80px;">
-                    {if empty($vo.activetime)}
-                    从未登陆
-                    {else}
-
-                    {if $vo.activetime>(time()-5*60)}
-                    <fonr style="color:green">{:date('m-d H:i:s', $vo['activetime']);}</font>
-                        <hr>
-                        <a class="layui-btn layui-btn-xs" style="background:green;">在线</a>
-                        {else}
-                        <fonr style="color:red">{:date('m-d H:i:s', $vo['activetime']);}</font>
-                            <hr>
-                            <a class="layui-btn layui-btn-xs" style="background:red;">离线</a>
-                            {/if}
-                            {/if}
                 </td>
 
                 <td class='text-left nowrap'>
@@ -167,20 +180,26 @@
                         data-open='{:admin_url("admin/users/caiwu")}?id={$vo.id}'>账 变</a>
                     {/if}
 
-
-
                 </td>
             </tr>
             {/foreach}
         </tbody>
     </table>
 
-
-
-
-
-
     {empty name='list'}<span class="notdata">没有记录哦</span>{else}{$pagehtml|raw|default=''}{/empty}
 
 </div>
+
+<style>
+.dispatch-auto {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+}
+
+.dispatch-manual {
+    background-color: #ffc107 !important;
+    border-color: #ffc107 !important;
+    color: #212529 !important;
+}
+</style>
 {/block}

@@ -184,5 +184,92 @@ function admin_url($url = '', $vars = [], $suffix = true, $domain = false)
     return '/sgcpj#' . $fullUrl;
 }
 
+/**
+ * 获取派单配置
+ * @param string $key 配置键名
+ * @param mixed $default 默认值
+ * @return mixed
+ */
+function get_dispatch_config($key, $default = null)
+{
+    static $dispatchConfig = null;
+    
+    if ($dispatchConfig === null) {
+        $dispatchConfig = [
+            'cooling_period_minutes' => 1,  // 冷却期分钟数
+            'auto_dispatch_enabled' => true,  // 是否启用自动派单
+            'manual_dispatch_enabled' => true,  // 是否启用手动派单
+            'force_payment_enabled' => true,  // 是否允许强制付款
+            'balance_can_negative' => true,  // 是否允许余额为负
+            'max_cooling_time' => 60,  // 最大冷却时间（分钟）
+            'min_cooling_time' => 1,   // 最小冷却时间（分钟）
+        ];
+        
+        // 尝试从数据库读取配置（如果有配置表）
+        try {
+            $dbConfig = \think\Db::name('xy_dispatch_config')->column('value', 'key');
+            if ($dbConfig) {
+                $dispatchConfig = array_merge($dispatchConfig, $dbConfig);
+            }
+        } catch (\Exception $e) {
+            // 配置表不存在时使用默认配置
+        }
+    }
+    
+    return isset($dispatchConfig[$key]) ? $dispatchConfig[$key] : $default;
+}
+
+/**
+ * 设置派单配置
+ * @param string $key 配置键名
+ * @param mixed $value 配置值
+ * @return bool
+ */
+function set_dispatch_config($key, $value)
+{
+    try {
+        $result = \think\Db::name('xy_dispatch_config')->where('key', $key)->update(['value' => $value]);
+        if ($result === 0) {
+            // 不存在则插入
+            \think\Db::name('xy_dispatch_config')->insert(['key' => $key, 'value' => $value]);
+        }
+        return true;
+    } catch (\Exception $e) {
+        return false;
+    }
+}
+
+/**
+ * 检查用户是否可以抢单
+ * @param int $uid 用户ID
+ * @return array
+ */
+function check_user_can_grab_order($uid)
+{
+    $user = \think\Db::name('xy_users')->find($uid);
+    
+    if (!$user) {
+        return ['code' => 1, 'info' => '用户不存在'];
+    }
+    
+    if ($user['status'] != 1) {
+        return ['code' => 1, 'info' => '用户状态异常'];
+    }
+    
+    if ($user['deal_status'] == 0) {
+        return ['code' => 1, 'info' => '账户已冻结'];
+    }
+    
+    if ($user['deal_status'] == 2) {
+        return ['code' => 1, 'info' => '正在等待派单，请勿重复抢单'];
+    }
+    
+    if ($user['deal_status'] == 3) {
+        return ['code' => 1, 'info' => '正在交易中，请完成当前订单后再抢单'];
+    }
+    
+    return ['code' => 0, 'info' => '可以抢单'];
+}
+
 
 

@@ -43,6 +43,16 @@
             </div>
         </div>
         <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">派单模式</label>
+            <div class="layui-input-inline">
+                <select name="dispatch_mode" id="dispatchMode">
+                    <option value="">所有模式</option>
+                    <option value="1">自动派单</option>
+                    <option value="0">手动派单</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item layui-inline">
             <button class="layui-btn layui-btn-primary"><i class="layui-icon">&#xe615;</i> 搜 索</button>
             {if auth("edit_users") }
             <a href="/sgcpj/users/daochu.html" class="layui-btn layui-btn-danger"><i class="layui-icon">&#xe615;</i> 导
@@ -61,5 +71,11 @@
 <script>
     var test = "{$Think.get.is_jia|default='0'}";
     $("#selectList").find("option[value=" + test + "]").prop("selected", true);
+    
+    var dispatchTest = "{$Think.get.dispatch_mode|default=''}";
+    if (dispatchTest !== '') {
+        $("#dispatchMode").find("option[value=" + dispatchTest + "]").prop("selected", true);
+    }
+    
     form.render()
 </script>

@@ -22,22 +22,59 @@ class Order extends Base
             }
             if(!$uid) $this->redirect('User/login'); 
         
-        $this->status = $status= input('get.status/d',0);
-        $where =[];
-        if ($status) {
-            $status == -1 ? $status = 0:'';
-            $where['xc.status'] = $status;
-        }
+        $this->status = $status = input('get.status/d', null);
         $this->balance = Db::name('xy_users')->where('id',$uid)->value('balance');//获取用户今日已充值金额
 
-        $_query =  $this->_query('xy_convey')
+        $query = $this->_query('xy_convey')
             ->where('xc.uid',session('user_id'))
             ->alias('xc')
             ->leftJoin('xy_goods_list xg','xc.goods_id=xg.id')
             ->field('xc.*,xg.goods_name,xg.shop_name,xg.goods_price,xg.goods_pic')
-            ->order('xc.addtime desc')
-            ->where($where)
-            ->page(true,false);
+            ->order('xc.addtime desc');
+            
+        // 应用状态筛选逻辑
+        if ($status !== null) {
+            if ($status == -1 || $status == 0) { // 待处理订单 (status=-1 或 status=0)
+                $query->where(function($q) {
+                    $q->where(function($subq) {
+                        // 手动派单：已派单等待结算的订单
+                        $subq->where('xc.manual_dispatch', 1)
+                            ->where('xc.dispatch_status', 2)
+                            ->where('xc.status', 0);
+                    })->whereOr(function($subq) {
+                        // 传统模式：待付款订单
+                        $subq->where('xc.auto_dispatch', 0)
+                            ->where('xc.manual_dispatch', 0)
+                            ->where('xc.status', 0);
+                    });
+                    // 注意：自动派单冷却期内的订单不显示给用户
+                });
+            } else {
+                $query->where('xc.status', $status);
+            }
+        } else {
+            // 全部订单：排除自动派单冷却期的订单
+            $query->where(function($q) {
+                $q->whereOr(function($subq) {
+                    // 显示已完成的订单
+                    $subq->where('xc.status', 1);
+                })->whereOr(function($subq) {
+                    // 显示手动派单等待结算的订单
+                    $subq->where('xc.manual_dispatch', 1)
+                        ->where('xc.dispatch_status', 2)
+                        ->where('xc.status', 0);
+                })->whereOr(function($subq) {
+                    // 显示传统模式待付款的订单
+                    $subq->where('xc.auto_dispatch', 0)
+                        ->where('xc.manual_dispatch', 0)
+                        ->where('xc.status', 0);
+                });
+                // 不显示：自动派单冷却期订单 (auto_dispatch=1 AND dispatch_status=0)
+                // 不显示：手动派单等待匹配订单 (manual_dispatch=1 AND dispatch_status=0)
+            });
+        }
+        
+        $_query = $query->page(true,false);
         $this->list = $_query['list'];
         $color = sysconf('app_color');
         if($color){
@@ -71,7 +108,7 @@ class Order extends Base
     }
 
     /**
-     * 获取订单列表
+     * 获取订单列表 - 优化派单模式显示逻辑
      */
     public function order_list()
     {
@@ -79,34 +116,79 @@ class Order extends Base
         $num = input('post.num/d',10);
         $limit = ( (($page - 1) * $num) . ',' . $num );
         $type = input('post.type/d',1);
-        switch($type){
-            case 1: //获取待处理订单
-                $type = 0;
-                break;
-            case 2: //获取冻结中订单
-                $type = 5;
-                break;
-            case 3: //获取已完成订单
-                $type = 1;
-                break;
-        }
-        $data = db('xy_convey')
+        
+        $query = db('xy_convey')
                 ->where('xc.uid',session('user_id'))
-                ->where('xc.status',$type)
                 ->alias('xc')
                 ->leftJoin('xy_goods_list xg','xc.goods_id=xg.id')
                 ->field('xc.*,xg.goods_name,xg.shop_name,xg.goods_price,xg.goods_pic')
                 ->order('xc.addtime desc')
-                ->limit($limit)
-                ->select();
+                ->limit($limit);
+        
+        switch($type){
+            case 1: //获取待处理订单
+                $query->where(function($q) {
+                    $q->where(function($subq) {
+                        // 手动派单：已派单等待结算的订单
+                        $subq->where('xc.manual_dispatch', 1)
+                            ->where('xc.dispatch_status', 2)
+                            ->where('xc.status', 0);
+                    })->whereOr(function($subq) {
+                        // 传统模式：待付款订单
+                        $subq->where('xc.auto_dispatch', 0)
+                            ->where('xc.manual_dispatch', 0)
+                            ->where('xc.status', 0);
+                    });
+                    // 注意：自动派单冷却期内的订单不显示给用户
+                });
+                break;
+            case 2: //获取冻结中订单
+                $query->where('xc.status', 5);
+                break;
+            case 3: //获取已完成订单
+                $query->where('xc.status', 1);
+                break;
+        }
+        
+        $data = $query->select();
         
         foreach ($data as &$datum) {
             $datum['endtime'] = date('Y/m/d H:i:s',$datum['endtime']);
             $datum['addtime'] = date('Y/m/d H:i:s',$datum['addtime']);
+            
+            // 添加订单状态描述，便于前端显示
+            if ($datum['auto_dispatch'] == 1) {
+                if ($datum['dispatch_status'] == 0) {
+                    $timeLeft = $datum['cooling_end_time'] - time();
+                    if ($timeLeft > 0) {
+                        $datum['status_desc'] = '冷却中 (' . ceil($timeLeft/60) . '分钟)';
+                    } else {
+                        $datum['status_desc'] = '冷却结束，待自动结算';
+                    }
+                } elseif ($datum['dispatch_status'] == 1) {
+                    $datum['status_desc'] = '已完成（自动）';
+                }
+            } elseif ($datum['manual_dispatch'] == 1) {
+                if ($datum['dispatch_status'] == 0) {
+                    $datum['status_desc'] = '等待匹配订单';
+                } elseif ($datum['dispatch_status'] == 2) {
+                    $datum['status_desc'] = $datum['status'] == 0 ? '等待手动结算' : '已完成（手动）';
+                }
+            } else {
+                // 传统模式
+                switch ($datum['status']) {
+                    case 0: $datum['status_desc'] = '等待付款'; break;
+                    case 1: $datum['status_desc'] = '完成付款'; break;
+                    case 2: $datum['status_desc'] = '用户取消'; break;
+                    case 3: $datum['status_desc'] = '强制付款'; break;
+                    case 4: $datum['status_desc'] = '系统取消'; break;
+                    case 5: $datum['status_desc'] = '订单冻结'; break;
+                    default: $datum['status_desc'] = '未知状态'; break;
+                }
+            }
         }
 
-
-        if(!$data) json(['code'=>1,'info'=>lang('暂无数据')]);
+        if(!$data) return json(['code'=>1,'info'=>lang('暂无数据')]);
         return json(['code'=>0,'info'=>lang('请求成功'),'data'=>$data]);
     }
 

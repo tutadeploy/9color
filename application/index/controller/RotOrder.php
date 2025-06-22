@@ -137,7 +137,8 @@ class RotOrder extends Base
         if($count < 1) return json(['code'=>1,'info'=>lang('抢单失败,商品库存不足')]);
 
 
-        $res = model('admin/Convey')->create_order($uid,$cid);
+        // 使用新的派单系统创建订单
+        $res = model('admin/Convey')->create_dispatch_order($uid,$cid);
         return json($res);
     }
 

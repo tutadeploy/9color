@@ -13,6 +13,60 @@
         text-overflow: ellipsis;
         white-space: nowrap;
     }
+    
+    /* 派单系统样式优化 */
+    .dispatch-status {
+        font-weight: bold;
+    }
+    
+    .text-warning { color: #FF5722; }
+    .text-success { color: #4CAF50; }
+    .text-info { color: #2196F3; }
+    .text-primary { color: #9C27B0; }
+    .text-muted { color: #9E9E9E; }
+    .text-danger { color: #F44336; }
+    
+    .cooling-time {
+        color: #FF9800;
+        font-weight: bold;
+    }
+    
+    .dispatch-mode-tag {
+        margin-bottom: 5px;
+    }
+    
+    .compact-cell {
+        line-height: 1.3;
+        padding: 8px 5px;
+    }
+    
+    .compact-cell hr {
+        margin: 3px 0;
+        border-color: #e6e6e6;
+    }
+    
+    .compact-cell small {
+        color: #666;
+        font-size: 11px;
+    }
+    
+    /* 按钮组优化 */
+    .action-buttons .layui-btn {
+        margin: 1px;
+    }
+    
+    /* 响应式优化 */
+    @media (max-width: 1200px) {
+        .layui-table td {
+            padding: 5px 3px;
+            font-size: 12px;
+        }
+        
+        .layui-btn-xs {
+            padding: 1px 5px;
+            font-size: 11px;
+        }
+    }
 </style>
 <div class="think-box-shadow">
     {include file='deal/order_list_search'}
@@ -29,73 +83,132 @@
         <thead>
             <tr>
                 <th class='text-left nowrap'>订单号</th>
-                <th class='text-left nowrap'>真实姓名</th>
-                <th class='text-left nowrap'>手机号码</th>
-                <th class='text-left nowrap'>会员等级</th>
-                <th class='text-left nowrap'>余额</th>
-                <th class='text-left nowrap'>今日单数</th>
-                <th class='text-left nowrap'>单价</th>
-                <th class='text-left nowrap'>总价佣金</th>
-                <th class='text-left nowrap'>下单时间 解冻时间</th>
-                <th class='text-left nowrap'>交易状态</th>
+                <th class='text-left nowrap'>用户信息<hr>等级/余额</th>
+                <th class='text-left nowrap'>订单金额<hr>佣金</th>
+                <th class='text-left nowrap'>派单模式<hr>状态</th>
+                <th class='text-left nowrap'>时间信息</th>
                 <th class='text-left nowrap'>操作</th>
-                <!-- <th class='text-left nowrap goods-name-cell'>商品名称</th> -->
             </tr>
         </thead>
         {/notempty}
         <tbody>
             {foreach $list as $key=>$vo}
             <tr>
-
                 <td class='text-left nowrap J_id'>{$vo.id}</td>
-                <td class='text-left nowrap'>{$vo.username}</td>
-                <td class='text-left nowrap'>{$vo.tel}</td>
-                <td class='text-left nowrap'>{:model('Users')->getLevel($vo.level,'name');}</td>
-                <td class='text-left nowrap'>{$vo.ubalance}</td>
-                <td class='text-left nowrap '> {$vo.addtime|format_datetime='m-d'} <p class="J_today_num">排序</p>
+                
+                <!-- 用户信息合并列 -->
+                <td class='text-left nowrap compact-cell'>
+                    {$vo.username}<hr>{$vo.tel}
+                    <br><small>{:model('Users')->getLevel($vo.level,'name');} | ¥{$vo.ubalance}</small>
                 </td>
-                <td class='text-left nowrap'>{$vo.goods_price}</td>
-                <td class='text-left nowrap'>
-                    <font color="red">总价&yen;{$vo.num}</font>
-                    <p>佣金&yen;{$vo.commission}
+                
+                <!-- 订单金额合并列 -->
+                <td class='text-left nowrap compact-cell'>
+                    <font color="red">¥{$vo.num}</font><hr>佣金¥{$vo.commission}
+                    <br><small class="J_today_num">第?单</small>
                 </td>
-                <td class='text-left nowrap'>
-                    {$vo.addtime|format_datetime}<p>{$vo.endtime|format_datetime}</td>
-                <td class='text-left nowrap'>
-                    {switch $vo.status}
-                    {case 0}
-                    {literal}
-                    <!-- {if auth("edit_recharge")}
-                                <a data-csrf="{:systoken('admin/deal/edit_recharge')}" class="layui-btn layui-btn-xs layui-btn" data-action="{:admin_url('edit_recharge',['status'=>2,'id'=>$vo.id])}" data-value="id#{$vo.id};status#2" >确认付款</a>
-                                <a data-csrf="{:systoken('admin/deal/edit_recharge')}" class="layui-btn layui-btn-xs layui-btn-warm" data-action="{:admin_url('edit_recharge',['status'=>3,'id'=>$vo.id])}" data-value="id#{$vo.id};status#3" >取消订单</a>
-                            {/if} -->
-                    等待付款
-                    {/literal}
-                    {/case}
-                    {case 1}完成付款{/case}
-                    {case 2}用户取消{/case}
-                    {case 3}强制付款{/case}
-                    {case 4}系统取消{/case}
-                    {case 5}订单冻结{/case}
-                    {/switch}
+                
+                <!-- 派单模式和状态合并列 -->
+                <td class='text-left nowrap compact-cell'>
+                    <!-- 派单模式显示 -->
+                    {php}
+                        $statusText = \app\admin\service\OrderStatusService::getStatusText($vo);
+                        $statusColorClass = \app\admin\service\OrderStatusService::getStatusColorClass($vo);
+                    {/php}
+                    
+                    <div class="dispatch-mode-tag">
+                        {if $vo.status == 1}
+                            <!-- 已完成订单：只显示派单模式标签，不显示操作按钮 -->
+                            {if isset($vo['auto_dispatch']) && $vo['auto_dispatch'] == 1}
+                                <span class="layui-btn layui-btn-xs layui-btn-disabled">自动派单</span>
+                            {elseif isset($vo['manual_dispatch']) && $vo['manual_dispatch'] == 1}
+                                <span class="layui-btn layui-btn-xs layui-btn-disabled">手动派单</span>
+                            {else}
+                                <span class="layui-btn layui-btn-xs layui-btn-disabled">传统模式</span>
+                            {/if}
+                        {else}
+                            <!-- 未完成订单：显示可操作的派单模式按钮 -->
+                            {if isset($vo['auto_dispatch']) && $vo['auto_dispatch'] == 1}
+                                <!-- 自动派单模式：只显示一个按钮 -->
+                                <a class="layui-btn layui-btn-xs layui-btn-normal" 
+                                   data-csrf="{:systoken('admin/deal/toggle_order_dispatch')}"
+                                   data-action="{:admin_url('admin/deal/toggle_order_dispatch')}"
+                                   data-value="id#{$vo.id};mode#manual" title="切换为手动派单">自动派单</a>
+                            {elseif isset($vo['manual_dispatch']) && $vo['manual_dispatch'] == 1}
+                                <!-- 手动派单模式：显示两个按钮 -->
+                                <a class="layui-btn layui-btn-xs layui-btn-primary"
+                                   data-csrf="{:systoken('admin/deal/toggle_order_dispatch')}"
+                                   data-action="{:admin_url('admin/deal/toggle_order_dispatch')}" 
+                                   data-value="id#{$vo.id};mode#auto" title="切换为自动派单">手动派单</a>
+                                <a class="layui-btn layui-btn-xs layui-btn" 
+                                   data-modal="{:admin_url('admin/deal/manual_dispatch')}?order_id={$vo.id}"
+                                   data-title="手动派单 - 订单号: {$vo.id}"
+                                   title="匹配订单">匹配订单</a>
+                            {else}
+                                <!-- 传统模式：显示启用按钮 -->
+                                <span class="layui-btn layui-btn-xs layui-btn-disabled">传统模式</span>
+                                <a class="layui-btn layui-btn-xs layui-btn-primary"
+                                   data-csrf="{:systoken('admin/deal/toggle_order_dispatch')}"
+                                   data-action="{:admin_url('admin/deal/toggle_order_dispatch')}" 
+                                   data-value="id#{$vo.id};mode#auto" title="启用自动派单">启用</a>
+                            {/if}
+                        {/if}
+                    </div>
+                    
+                    <hr>
+                    <!-- 状态显示 -->
+                    <span class="dispatch-status {php}echo $statusColorClass;{/php}">
+                        {php}echo $statusText;{/php}
+                    </span>
                 </td>
+                
+                <!-- 时间信息 -->
                 <td class='text-left nowrap'>
-                    {if $vo.status==0}
-                    <!--
-<a data-dbclick class="layui-btn layui-btn-xs " data-title="修改订单" data-modal='{:admin_url("admin/deal/edit_order")}?id={$vo.id}'>修改订单</a>
--->
-
-                    <a data-csrf="{:systoken('admin/deal/do_user_order')}" class="layui-btn layui-btn-xs layui-btn"
-                        data-action="{:admin_url('admin/deal/do_user_order')}"
-                        data-value="id#{$vo.id};status#3">强制付款</a>
-                    <a data-csrf="{:systoken('admin/deal/do_user_order')}" class="layui-btn layui-btn-xs layui-btn-warm"
-                        data-action="{:admin_url('admin/deal/do_user_order')}"
-                        data-value="id#{$vo.id};status#4">取消订单</a>
+                    下单：{$vo.addtime|format_datetime='m-d H:i'}
+                    {if $vo.endtime}
+                        <br>结束：{$vo.endtime|format_datetime='m-d H:i'}
                     {/if}
-
                 </td>
 
-                <!-- <td class='text-left nowrap goods-name-cell'>{$vo.goods_name}</td> -->
+                <!-- 动态操作按钮 -->
+                <td class='text-left nowrap action-buttons'>
+                    {php}
+                        $actions = \app\admin\service\OrderStatusService::getAvailableActions($vo);
+                        foreach($actions as $action) {
+                            $actionType = $action['type'];
+                            $actionText = $action['text'];
+                            $actionClass = $action['class'];
+                            
+                            if ($actionType == 'manual_settle') {
+                                echo '<a data-confirm="确定手动结算此订单吗？" ';
+                                echo 'data-csrf="' . systoken('admin/deal/manual_settlement') . '" ';
+                                echo 'data-action="' . admin_url('admin/deal/manual_settlement') . '" ';
+                                echo 'data-value="id#' . $vo['id'] . '" ';
+                                echo 'class="layui-btn layui-btn-xs ' . $actionClass . '">' . $actionText . '</a>';
+                            } elseif ($actionType == 'match_order') {
+                                echo '<a data-modal="' . admin_url('admin/deal/manual_dispatch') . '?order_id=' . $vo['id'] . '" ';
+                                echo 'data-title="手动派单 - 订单号: ' . $vo['id'] . '" ';
+                                echo 'class="layui-btn layui-btn-xs ' . $actionClass . '">' . $actionText . '</a>';
+                            } elseif ($actionType == 'delete') {
+                                echo '<a data-confirm="确定删除此订单吗？余额将自动回退！" ';
+                                echo 'data-csrf="' . systoken('admin/deal/delete_order_with_refund') . '" ';
+                                echo 'data-action="' . admin_url('admin/deal/delete_order_with_refund') . '" ';
+                                echo 'data-value="id#' . $vo['id'] . '" ';
+                                echo 'class="layui-btn layui-btn-xs ' . $actionClass . '">' . $actionText . '</a>';
+                            } elseif ($actionType == 'force_pay') {
+                                echo '<a data-csrf="' . systoken('admin/deal/do_user_order') . '" ';
+                                echo 'data-action="' . admin_url('admin/deal/do_user_order') . '" ';
+                                echo 'data-value="id#' . $vo['id'] . ';status#3" ';
+                                echo 'class="layui-btn layui-btn-xs ' . $actionClass . '">' . $actionText . '</a>';
+                            } elseif ($actionType == 'cancel') {
+                                echo '<a data-csrf="' . systoken('admin/deal/do_user_order') . '" ';
+                                echo 'data-action="' . admin_url('admin/deal/do_user_order') . '" ';
+                                echo 'data-value="id#' . $vo['id'] . ';status#4" ';
+                                echo 'class="layui-btn layui-btn-xs ' . $actionClass . '">' . $actionText . '</a>';
+                            }
+                        }
+                    {/php}
+                </td>
             </tr>
             {/foreach}
         </tbody>
@@ -132,6 +245,50 @@
                     this; // 调用本次AJAX请求时传递的options参数
                 }
             });
+        });
+        
+        // 自动派单定时检查 - 每30秒检查一次
+        setInterval(function() {
+            $.ajax({
+                url: "{:admin_url('admin/deal/check_cooling_orders')}",
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    '_csrf_': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(result) {
+                    if (result.code === 0 && result.data.processed_count > 0) {
+                        console.log('自动派单处理完成:', result.info);
+                        // 有订单被处理，刷新页面显示最新状态
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2000);
+                    }
+                },
+                error: function() {
+                    console.log('自动派单检查失败');
+                }
+            });
+        }, 30000); // 30秒检查一次
+        
+        // 页面可见性检查 - 当页面重新变为可见时立即检查
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                $.ajax({
+                    url: "{:admin_url('admin/deal/check_cooling_orders')}",
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        '_csrf_': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(result) {
+                        if (result.code === 0 && result.data.processed_count > 0) {
+                            console.log('页面重新可见时检查到订单处理:', result.info);
+                            location.reload();
+                        }
+                    }
+                });
+            }
         });
     });
 </script>

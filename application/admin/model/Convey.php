@@ -88,7 +88,11 @@ class Convey extends Model
 
         $id = getSn('UB');
         Db::startTrans();
-        $res = Db::name('xy_users')->where('id',$uid)->update(['deal_status'=>3,'deal_time'=>strtotime(date('Y-m-d')),'deal_count'=>Db::raw('deal_count+1')]);//将账户状态改为交易中
+        
+        // 不立即设置deal_status=3，保持为2等待派单处理
+        // 原来：$res = Db::name('xy_users')->where('id',$uid)->update(['deal_status'=>3,'deal_time'=>strtotime(date('Y-m-d')),'deal_count'=>Db::raw('deal_count+1')]);
+        $res = Db::name('xy_users')->where('id',$uid)->update(['deal_time'=>strtotime(date('Y-m-d')),'deal_count'=>Db::raw('deal_count+1')]);
+        
         //通过商品id查找 佣金比例
      //$cate = Db::name('xy_goods_cate')->find($goods['cid']);
           //  if($goods['num'] > $uinfo['balance']) return ['code'=>1,'info'=>lang('抢到').$goods['num'].lang('的订单,余额不足,请重新抢单')];
@@ -128,88 +132,102 @@ class Convey extends Model
     /**
      * 随机生成订单
      */
-
- private function rand_order($min,$max,$cid=1)
+    private function rand_order($min,$max,$cid=1)
     {
-        
-        $num = mt_rand($min,$max);//随机交易额
-        
+        // 直接在价格区间内查找商品，确保商品数量为1
         $goods = Db::name('xy_goods_list')
                 ->orderRaw('rand()')
-                ->where('goods_price','between',[$num/10,$num])
+                ->where('goods_price','between',[$min,$max])
                 ->where('cid','=',$cid)
                 ->find();
 
-        
-          if (!$goods) {
+        // 如果没有找到完全匹配的商品，逐步放宽价格区间
+        if (!$goods) {
             $goods = Db::name('xy_goods_list')
                 ->orderRaw('rand()')
-                ->where('goods_price','between',[$num/20,$num])
+                ->where('goods_price','between',[$min/2,$max])
+                ->where('cid','=',$cid)
+                ->find();
+                
+            if (!$goods) {
+                $goods = Db::name('xy_goods_list')
+                ->orderRaw('rand()')
+                ->where('goods_price','between',[$min/5,$max])
                 ->where('cid','=',$cid)
                 ->find();
                 
                 if (!$goods) {
-                $goods = Db::name('xy_goods_list')
-                ->orderRaw('rand()')
-                ->where('goods_price','between',[$num/50,$num])
-                ->where('cid','=',$cid)
-                ->find();
+                    $goods = Db::name('xy_goods_list')
+                    ->orderRaw('rand()')
+                    ->where('goods_price','between',[$min/10,$max])
+                    ->where('cid','=',$cid)
+                    ->find();
+                    
                     if(!$goods){
                         $goods = Db::name('xy_goods_list')
                         ->orderRaw('rand()')
-                        ->where('goods_price','between',[$num/100,$num])
+                        ->where('goods_price','between',[$min/20,$max])
                         ->where('cid','=',$cid)
                         ->find();
+                        
                         if(!$goods){ 
                             $goods = Db::name('xy_goods_list')
                             ->orderRaw('rand()')
-                            ->where('goods_price','between',[$num/500,$num])
+                            ->where('goods_price','between',[$min/50,$max])
                             ->where('cid','=',$cid)
                             ->find();
+                            
                             if(!$goods){
                                  $goods = Db::name('xy_goods_list')
                                 ->orderRaw('rand()')
-                                ->where('goods_price','between',[$num/1000,$num])
+                                ->where('goods_price','between',[$min/100,$max])
                                 ->where('cid','=',$cid)
                                 ->find();
+                                
                                 if(!$goods){
                                      $goods = Db::name('xy_goods_list')
                                     ->orderRaw('rand()')
-                                    ->where('goods_price','between',[$num/5000,$num])
+                                    ->where('goods_price','between',[$min/200,$max])
                                     ->where('cid','=',$cid)
                                     ->find();
+                                    
                                     if(!$goods){
                                          $goods = Db::name('xy_goods_list')
                                             ->orderRaw('rand()')
-                                            ->where('goods_price','between',[$num/10000,$num])
+                                            ->where('goods_price','between',[$min/500,$max])
                                             ->where('cid','=',$cid)
                                             ->find();
+                                            
                                             if(!$goods){
                                                  $goods = Db::name('xy_goods_list')
                                                     ->orderRaw('rand()')
-                                                    ->where('goods_price','between',[$num/50000,$num])
+                                                    ->where('goods_price','between',[$min/1000,$max])
                                                     ->where('cid','=',$cid)
                                                     ->find();
+                                                    
                                                     if(!$goods){
                                                          $goods = Db::name('xy_goods_list')
                                                             ->orderRaw('rand()')
-                                                            ->where('goods_price','between',[$num/100000,$num])
+                                                            ->where('goods_price','between',[$min/2000,$max])
                                                             ->where('cid','=',$cid)
                                                             ->find();
+                                                            
                                                             if(!$goods){ 
                                                                 $goods = Db::name('xy_goods_list')
                                                                     ->orderRaw('rand()')
-                                                                    ->where('goods_price','between',[$num/500000,$num])
+                                                                    ->where('goods_price','between',[$min/5000,$max])
                                                                     ->where('cid','=',$cid)
                                                                     ->find();
+                                                                    
                                                                     if(!$goods){
                                                                         $goods = Db::name('xy_goods_list')
                                                                         ->orderRaw('rand()')
-                                                                        ->where('goods_price','between',[$num/1000000,$num])
+                                                                        ->where('goods_price','between',[$min/10000,$max])
                                                                         ->where('cid','=',$cid)
                                                                         ->find();
+                                                                        
                                                                         if(!$goods){
-                                                                            return ['code'=>1,'info'=>lang('抢单失败,该分类下价格区间库存不足')];die;
+                                                                            return ['code'=>1,'info'=>lang('抢单失败,该分类下价格区间库存不足')];
                                                                         }
                                                                     }
                                                             }
@@ -221,16 +239,27 @@ class Convey extends Model
                         }
                     }
                 }
-            
+            }
         }
 
-        $count = round($num/$goods['goods_price']);
-        //强行匹配在区间，商品价格按计算出的单价显示
-         //return ['code'=>0,'count'=>$count,'id'=>$goods['id'],'num'=>$num,'cid'=>$goods['cid'],'price'=>sprintf("%.2f",$num/$count)];
-       if($count*$goods['goods_price']<$min||$count*$goods['goods_price']>$max){
-            self::rand_order($min,$max,$cid);
+        // 固定商品数量为1，订单总金额就是商品价格
+        $count = 1;
+        $totalAmount = $goods['goods_price'];
+        
+        // 验证商品价格是否在允许的区间内
+        if($totalAmount < $min || $totalAmount > $max){
+            // 如果商品价格不在区间内，递归重新查找
+            return self::rand_order($min,$max,$cid);
         }
-       return ['code'=>0,'count'=>$count,'id'=>$goods['id'],'num'=>$count*$goods['goods_price'],'cid'=>$goods['cid'],'price'=>$goods['goods_price']];
+        
+        return [
+            'code' => 0,
+            'count' => $count,           // 固定为1
+            'id' => $goods['id'],
+            'num' => $totalAmount,       // 订单总金额 = 商品价格
+            'cid' => $goods['cid'],
+            'price' => $goods['goods_price']
+        ];
     }
 
     /**
@@ -433,5 +462,746 @@ class Convey extends Model
         }
        
         return $data;
+    }
+
+    /**
+     * 创建派单订单（新方法）
+     * @param int $uid 用户ID
+     * @param int $cid 商品分类ID
+     * @return array
+     */
+    public function create_dispatch_order($uid, $cid = 1)
+    {
+        // 检查用户状态
+        $userModel = new Users();
+        $checkResult = $userModel->checkUserDispatchStatus($uid);
+        if ($checkResult['code'] != 0) {
+            return $checkResult;
+        }
+
+        // 获取用户派单模式
+        $isAutoDispatch = $userModel->getUserDispatchMode($uid);
+        
+        if ($isAutoDispatch) {
+            // 自动派单：创建完整订单
+            $orderResult = $this->create_order($uid, $cid);
+            
+            if ($orderResult['code'] != 0) {
+                return $orderResult;
+            }
+
+            $orderId = $orderResult['oid'];
+            
+            // 设置自动派单相关字段
+            $coolingPeriod = get_dispatch_config('cooling_period_minutes', 1) * 60;
+            $updateData = [
+                'auto_dispatch' => 1,
+                'dispatch_status' => 0, // 0=冷却中
+                'manual_dispatch' => 0,
+                'cooling_end_time' => time() + $coolingPeriod,
+            ];
+
+            // 更新订单派单信息
+            $updateResult = Db::name('xy_convey')->where('id', $orderId)->update($updateData);
+            
+            if ($updateResult === false) {
+                return ['code' => 1, 'info' => '派单设置失败'];
+            }
+
+            return [
+                'code' => 0,
+                'info' => '自动派单成功，冷却期后自动结算',
+                'oid' => $orderId,
+                'dispatch_mode' => 'auto'
+            ];
+            
+        } else {
+            // 手动派单：创建不完整订单（等待管理员匹配商品）
+            $orderResult = $this->create_manual_dispatch_order($uid, $cid);
+            
+            if ($orderResult['code'] != 0) {
+                return $orderResult;
+            }
+
+            return [
+                'code' => 0,
+                'info' => '手动派单成功，等待管理员匹配',
+                'oid' => $orderResult['oid'],
+                'dispatch_mode' => 'manual'
+            ];
+        }
+    }
+
+    /**
+     * 创建手动派单订单（不包含商品信息）
+     * @param int $uid 用户ID
+     * @param int $cid 商品分类ID
+     * @return array
+     */
+    private function create_manual_dispatch_order($uid, $cid = 1)
+    {
+        $add_id = Db::name('xy_member_address')->where('uid',$uid)->value('id');
+        if(!$add_id) return ['code'=>1,'info'=>lang('还没有设置收货地址')];
+        
+        $uinfo = Db::name('xy_users')->field('deal_status,balance,level')->find($uid);
+        if($uinfo['deal_status']!=2) return ['code'=>1,'info'=>lang('抢单已终止')];
+
+        $level = $uinfo['level'];
+        !$uinfo['level'] ? $level = 0 : '';
+        $ulevel = Db::name('xy_level')->where('level',$level)->find();
+        if ($uinfo['balance'] < $ulevel['num_min']) {
+            return ['code'=>1,'info'=>lang('会员等级余额不足')];
+        }
+
+        $id = getSn('UB');
+        Db::startTrans();
+        
+        // 更新用户统计信息但不改变deal_status
+        $res = Db::name('xy_users')->where('id',$uid)->update([
+            'deal_time'=>strtotime(date('Y-m-d')),
+            'deal_count'=>Db::raw('deal_count+1')
+        ]);
+
+        // 创建不完整的订单记录（等待管理员匹配商品）
+        $res1 = Db::name($this->table)->insert([
+            'id'            => $id,
+            'uid'           => $uid,
+            'ubalance'      => $uinfo['balance'],
+            'num'           => 0, // 暂时为0，等待管理员设置
+            'addtime'       => time(),
+            'endtime'       => time()+config('deal_timeout'),
+            'add_id'        => $add_id,
+            'goods_id'      => 0, // 暂时为0，等待管理员选择
+            'goods_count'   => 0, // 暂时为0，等待管理员设置
+            'commission'    => 0, // 暂时为0，等待计算
+            'auto_dispatch' => 0,
+            'dispatch_status' => 0, // 0=等待匹配
+            'manual_dispatch' => 1,
+            'cooling_end_time' => 0, // 手动派单无冷却期
+            'order_num' => 0,
+            'grouping_id' => 0,
+        ]);
+        
+        if($res && $res1){
+            Db::commit();
+            return ['code'=>0,'info'=>lang('手动派单订单创建成功'),'oid'=>$id];
+        }else{
+            Db::rollback();
+            return ['code'=>1,'info'=>lang('订单创建失败!请稍后再试')];
+        }
+    }
+
+    /**
+     * 获取冷却期剩余时间
+     * @param string $orderId 订单ID
+     * @return int 剩余秒数，0表示已结束
+     */
+    public function getCoolingTimeLeft($orderId)
+    {
+        $order = Db::name('xy_convey')->where('id', $orderId)->find();
+        
+        if (!$order || !$order['cooling_end_time']) {
+            return 0;
+        }
+        
+        $timeLeft = $order['cooling_end_time'] - time();
+        return max(0, $timeLeft);
+    }
+
+    /**
+     * 检查并处理冷却期结束的订单
+     * @return array 处理结果
+     */
+    public function processCoolingOrders()
+    {
+        // 查找冷却期结束的自动派单订单
+        $orders = Db::name('xy_convey')
+            ->where('auto_dispatch', 1)
+            ->where('dispatch_status', 0) // 0=冷却中/等待状态
+            ->where('cooling_end_time', '>', 0) // 有设置冷却时间
+            ->where('cooling_end_time', '<=', time()) // 冷却期已结束
+            ->where('status', 0) // 待付款状态
+            ->select();
+
+        $processedCount = 0;
+        $errors = [];
+
+        foreach ($orders as $order) {
+            try {
+                Db::startTrans();
+                
+                // 先设置用户状态为交易中
+                $updateUserResult = Db::name('xy_users')
+                    ->where('id', $order['uid'])
+                    ->update(['deal_status' => 3]); // 3=交易中
+                
+                if (!$updateUserResult) {
+                    throw new \Exception('更新用户状态失败');
+                }
+                
+                // 自动付款并结算（根据设计：付款后立即结算）
+                $result = $this->do_order($order['id'], 1); // 1=确认付款
+                
+                if ($result['code'] == 0) {
+                    // 关键修改：确保派单状态和订单状态一致
+                    // 同时更新 dispatch_status 和 status 为已完成状态
+                    Db::name('xy_convey')
+                        ->where('id', $order['id'])
+                        ->update([
+                            'dispatch_status' => 1, // 1=已自动派单并结算
+                            'status' => 1 // 确保订单状态也是已完成
+                        ]);
+                    
+                    // 恢复用户状态为正常
+                    Db::name('xy_users')
+                        ->where('id', $order['uid'])
+                        ->update(['deal_status' => 1]); // 1=停止交易（正常状态）
+                    
+                    Db::commit();
+                    $processedCount++;
+                    
+                    // 记录成功日志
+                    error_log("自动派单成功: 订单ID {$order['id']}, 用户ID {$order['uid']}, 金额 {$order['num']}");
+                    
+                } else {
+                    Db::rollback();
+                    $errors[] = "订单 {$order['id']} 处理失败: " . $result['info'];
+                }
+                
+            } catch (\Exception $e) {
+                Db::rollback();
+                $errors[] = "订单 {$order['id']} 处理异常: " . $e->getMessage();
+                error_log("自动派单异常: 订单ID {$order['id']}, 错误: " . $e->getMessage());
+            }
+        }
+
+        return [
+            'code' => 0,
+            'processed_count' => $processedCount,
+            'total_found' => count($orders),
+            'errors' => $errors
+        ];
+    }
+
+    /**
+     * 手动提前结算（冷却期内）- 优化版本
+     * @param string $orderId 订单ID
+     * @param int $uid 用户ID（如果为0表示管理员操作）
+     * @return array
+     */
+    public function manualSettleOrder($orderId, $uid)
+    {
+        // 构建查询条件
+        $where = ['id' => $orderId];
+        if ($uid > 0) {
+            $where['uid'] = $uid;
+        }
+        
+        $order = Db::name('xy_convey')->where($where)->find();
+        
+        if (!$order) {
+            return ['code' => 1, 'info' => '订单不存在'];
+        }
+
+        // 检查订单状态：自动派单且在冷却期，或手动派单已付款等待结算
+        $canSettle = false;
+        $settleType = '';
+        
+        if ($order['auto_dispatch'] == 1 && $order['dispatch_status'] == 0) {
+            // 自动派单冷却期内手动结算
+            $canSettle = true;
+            $settleType = 'auto_manual';
+        } elseif ($order['manual_dispatch'] == 1 && $order['dispatch_status'] == 2 && $order['status'] == 0) {
+            // 手动派单已付款等待结算
+            $canSettle = true;
+            $settleType = 'manual_settle';
+        }
+        
+        if (!$canSettle) {
+            return ['code' => 1, 'info' => '该订单当前状态不支持手动结算'];
+        }
+
+        try {
+            Db::startTrans();
+            
+            if ($settleType == 'auto_manual') {
+                // 自动派单冷却期内手动结算 - 直接实现，避免调用do_order
+                
+                // 获取用户信息
+                $user = Db::name('xy_users')->where('id', $order['uid'])->find();
+                if (!$user) {
+                    throw new \Exception('用户不存在');
+                }
+                
+                // 检查余额是否足够
+                if ($user['balance'] < $order['num']) {
+                    throw new \Exception('账户余额不足，需要: ' . $order['num'] . '，当前余额: ' . $user['balance']);
+                }
+                
+                // 1. 执行付款：扣除余额，增加冻结余额
+                $updateUserResult = Db::name('xy_users')
+                    ->where('id', $order['uid'])
+                    ->update([
+                        'balance' => Db::raw('balance - ' . $order['num']),
+                        'freeze_balance' => Db::raw('freeze_balance + ' . ($order['num'] + $order['commission'])),
+                        'deal_status' => 3 // 交易中
+                    ]);
+                
+                if (!$updateUserResult) {
+                    throw new \Exception('扣除用户余额失败');
+                }
+                
+                // 2. 记录付款日志
+                $paymentLogResult = Db::name('xy_balance_log')->insert([
+                    'uid' => $order['uid'],
+                    'oid' => $orderId,
+                    'num' => $order['num'],
+                    'type' => 2, // 付款
+                    'status' => 2,
+                    'addtime' => time()
+                ]);
+                
+                if (!$paymentLogResult) {
+                    throw new \Exception('记录付款日志失败');
+                }
+                
+                // 3. 立即执行结算：返还本金+佣金，减少冻结余额
+                $settleAmount = $order['num'] + $order['commission'];
+                $settleUserResult = Db::name('xy_users')
+                    ->where('id', $order['uid'])
+                    ->update([
+                        'balance' => Db::raw('balance + ' . $settleAmount),
+                        'freeze_balance' => Db::raw('freeze_balance - ' . $settleAmount),
+                        'deal_status' => 1 // 恢复正常状态
+                    ]);
+                
+                if (!$settleUserResult) {
+                    throw new \Exception('结算用户余额失败');
+                }
+                
+                // 4. 记录佣金日志
+                $commissionLogResult = Db::name('xy_balance_log')->insert([
+                    'uid' => $order['uid'],
+                    'oid' => $orderId,
+                    'num' => $order['commission'],
+                    'type' => 3, // 佣金
+                    'status' => 1,
+                    'addtime' => time()
+                ]);
+                
+                if (!$commissionLogResult) {
+                    throw new \Exception('记录佣金日志失败');
+                }
+                
+                // 5. 更新订单状态
+                $updateOrderResult = Db::name('xy_convey')
+                    ->where('id', $orderId)
+                    ->update([
+                        'status' => 1, // 交易完成
+                        'dispatch_status' => 1, // 派单完成
+                        'c_status' => 1, // 佣金已发放
+                        'endtime' => time() + config('deal_feedze', 0)
+                    ]);
+                
+                if (!$updateOrderResult) {
+                    throw new \Exception('更新订单状态失败');
+                }
+                
+                // 6. 记录奖励日志
+                Db::name('xy_reward_log')->insert([
+                    'oid' => $orderId,
+                    'uid' => $order['uid'],
+                    'num' => $order['num'],
+                    'addtime' => time(),
+                    'type' => 2
+                ]);
+                
+                // 7. 发放上级奖励（在事务外执行，避免复杂度）
+                Db::commit();
+                
+                // 异步发放上级奖励
+                try {
+                    $this->deal_reward($order['uid'], $orderId, $order['num'], $order['commission']);
+                } catch (\Exception $e) {
+                    // 上级奖励失败不影响主流程
+                    error_log("发放上级奖励失败: " . $e->getMessage());
+                }
+                
+                return [
+                    'code' => 0,
+                    'info' => '手动结算成功',
+                    'settle_type' => $settleType
+                ];
+                
+            } elseif ($settleType == 'manual_settle') {
+                // 手动派单的手动结算
+                
+                // 执行结算逻辑
+                $orderAmount = $order['num'];
+                $commission = $order['commission'];
+                
+                // 返还本金和佣金
+                $settleAmount = $orderAmount + $commission;
+                $updateBalanceResult = Db::name('xy_users')
+                    ->where('id', $order['uid'])
+                    ->update([
+                        'balance' => Db::raw('balance + ' . $settleAmount),
+                        'deal_status' => 1 // 恢复正常状态
+                    ]);
+                
+                if (!$updateBalanceResult) {
+                    throw new \Exception('结算余额失败');
+                }
+                
+                // 记录结算日志
+                $logData = [
+                    'uid' => $order['uid'],
+                    'oid' => $orderId,
+                    'num' => $commission, // 记录佣金
+                    'type' => 3, // 结算
+                    'status' => 1,
+                    'addtime' => time()
+                ];
+                
+                $logResult = Db::name('xy_balance_log')->insert($logData);
+                if (!$logResult) {
+                    throw new \Exception('记录结算日志失败');
+                }
+                
+                // 更新订单状态
+                $updateOrderResult = Db::name('xy_convey')
+                    ->where('id', $orderId)
+                    ->update([
+                        'status' => 1, // 交易完成
+                        'dispatch_status' => 1, // 派单也完成
+                        'c_status' => 1 // 佣金已发放
+                    ]);
+                
+                if (!$updateOrderResult) {
+                    throw new \Exception('更新订单状态失败');
+                }
+                
+                Db::commit();
+                
+                // 异步发放上级奖励
+                try {
+                    $this->deal_reward($order['uid'], $orderId, $orderAmount, $commission);
+                } catch (\Exception $e) {
+                    // 上级奖励失败不影响主流程
+                    error_log("发放上级奖励失败: " . $e->getMessage());
+                }
+                
+                return [
+                    'code' => 0,
+                    'info' => '手动结算成功',
+                    'settle_type' => $settleType
+                ];
+            }
+            
+        } catch (\Exception $e) {
+            Db::rollback();
+            return ['code' => 1, 'info' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * 删除订单并退回余额
+     * @param string $orderId 订单ID
+     * @param int $adminId 管理员ID
+     * @return array
+     */
+    public function deleteOrderWithRefund($orderId, $adminId = 0)
+    {
+        $order = Db::name('xy_convey')->where('id', $orderId)->find();
+        
+        if (!$order) {
+            return ['code' => 1, 'info' => '订单不存在'];
+        }
+
+        // 只能删除待付款状态的订单
+        if ($order['status'] != 0) {
+            return ['code' => 1, 'info' => '只能删除待付款状态的订单'];
+        }
+
+        Db::startTrans();
+        
+        try {
+            // 删除订单
+            $deleteResult = Db::name('xy_convey')->where('id', $orderId)->delete();
+            
+            // 恢复用户状态
+            $userUpdateResult = Db::name('xy_users')
+                ->where('id', $order['uid'])
+                ->update(['deal_status' => 1]); // 恢复为可交易状态
+            
+            if ($deleteResult && $userUpdateResult !== false) {
+                Db::commit();
+                
+                // 记录删除日志
+                if ($adminId > 0) {
+                    Db::name('xy_message')->insert([
+                        'uid' => $order['uid'],
+                        'type' => 2,
+                        'title' => '系统通知',
+                        'content' => "订单 {$orderId} 已被管理员删除",
+                        'addtime' => time(),
+                        'status' => 0
+                    ]);
+                }
+                
+                return ['code' => 0, 'info' => '订单删除成功'];
+            } else {
+                Db::rollback();
+                return ['code' => 1, 'info' => '订单删除失败'];
+            }
+        } catch (\Exception $e) {
+            Db::rollback();
+            return ['code' => 1, 'info' => '删除失败: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * 切换到自动派单模式
+     * @param string $orderId 订单ID
+     * @return array
+     */
+    public function switchToAutoDispatch($orderId)
+    {
+        $order = Db::name('xy_convey')->where('id', $orderId)->find();
+        
+        if (!$order) {
+            return ['code' => 1, 'info' => '订单不存在'];
+        }
+        
+        if ($order['status'] != 0) {
+            return ['code' => 1, 'info' => '只能切换待付款状态的订单'];
+        }
+        
+        $coolingPeriod = get_dispatch_config('cooling_period_minutes', 1) * 60;
+        $updateData = [
+            'auto_dispatch' => 1,
+            'manual_dispatch' => 0,
+            'dispatch_status' => 0, // 冷却中
+            'cooling_end_time' => time() + $coolingPeriod
+        ];
+        
+        $result = Db::name('xy_convey')->where('id', $orderId)->update($updateData);
+        
+        if ($result !== false) {
+            return ['code' => 0, 'info' => '已切换为自动派单模式'];
+        } else {
+            return ['code' => 1, 'info' => '切换失败'];
+        }
+    }
+
+    /**
+     * 切换到手动派单模式
+     * @param string $orderId 订单ID
+     * @return array
+     */
+    public function switchToManualDispatch($orderId)
+    {
+        $order = Db::name('xy_convey')->where('id', $orderId)->find();
+        
+        if (!$order) {
+            return ['code' => 1, 'info' => '订单不存在'];
+        }
+        
+        if ($order['status'] != 0) {
+            return ['code' => 1, 'info' => '只能切换待付款状态的订单'];
+        }
+        
+        $updateData = [
+            'auto_dispatch' => 0,
+            'manual_dispatch' => 1,
+            'dispatch_status' => 0, // 等待匹配
+            'cooling_end_time' => 0
+        ];
+        
+        $result = Db::name('xy_convey')->where('id', $orderId)->update($updateData);
+        
+        if ($result !== false) {
+            return ['code' => 0, 'info' => '已切换为手动派单模式'];
+        } else {
+            return ['code' => 1, 'info' => '切换失败'];
+        }
+    }
+
+    /**
+     * 手动派单强制付款
+     * @param string $orderId 订单ID
+     * @param int $goodsId 商品ID
+     * @param float $goodsPrice 商品价格
+     * @param int $goodsCount 商品数量（固定为1）
+     * @return array
+     */
+    public function manualDispatchPayment($orderId, $goodsId, $goodsPrice, $goodsCount = 1)
+    {
+        // 强制商品数量为1
+        $goodsCount = 1;
+        
+        Db::startTrans();
+        try {
+            // 1. 获取订单信息
+            $order = Db::name('xy_convey')->where('id', $orderId)->find();
+            if (!$order) {
+                throw new \Exception('订单不存在');
+            }
+            
+            if ($order['dispatch_status'] != 0 || $order['manual_dispatch'] != 1) {
+                throw new \Exception('订单状态不允许手动派单');
+            }
+            
+            // 2. 获取用户信息
+            $user = Db::name('xy_users')->where('id', $order['uid'])->find();
+            if (!$user) {
+                throw new \Exception('用户不存在');
+            }
+            
+            // 3. 获取商品信息并验证
+            $goods = Db::name('xy_goods_list')->where('id', $goodsId)->find();
+            if (!$goods) {
+                throw new \Exception('商品不存在');
+            }
+            
+            // 4. 计算订单金额和佣金（商品数量固定为1）
+            $orderAmount = $goodsPrice * $goodsCount; // $goodsPrice * 1
+            $commission = $this->calculateCommission($orderAmount, $user['level']);
+            
+            // 5. 设置用户状态为交易中
+            $updateUserResult = Db::name('xy_users')
+                ->where('id', $order['uid'])
+                ->update(['deal_status' => 3]); // 3=交易中
+            
+            if (!$updateUserResult) {
+                throw new \Exception('更新用户状态失败');
+            }
+            
+            // 6. 更新订单商品信息
+            $updateOrderData = [
+                'goods_id' => $goodsId,
+                'goods_count' => $goodsCount,
+                'num' => $orderAmount,
+                'commission' => $commission,
+                'dispatch_status' => 2 // 已手动派单，等待结算
+                // status 保持为 0，等待后续结算时再更新为 1
+            ];
+            
+            $updateOrderResult = Db::name('xy_convey')->where('id', $orderId)->update($updateOrderData);
+            if (!$updateOrderResult) {
+                throw new \Exception('更新订单信息失败');
+            }
+            
+            // 7. 执行强制付款（允许余额为负）
+            $newBalance = $user['balance'] - $orderAmount;
+            $updateBalanceResult = Db::name('xy_users')->where('id', $order['uid'])->update([
+                'balance' => $newBalance
+            ]);
+            
+            if (!$updateBalanceResult) {
+                throw new \Exception('扣除用户余额失败');
+            }
+            
+            // 8. 记录余额变动日志
+            $logData = [
+                'uid' => $order['uid'],
+                'oid' => $orderId,
+                'num' => $orderAmount,
+                'type' => 4, // 强制付款
+                'status' => 1,
+                'addtime' => time()
+            ];
+            
+            $logResult = Db::name('xy_balance_log')->insert($logData);
+            if (!$logResult) {
+                throw new \Exception('记录余额日志失败');
+            }
+            
+            Db::commit();
+            
+            return [
+                'code' => 0, 
+                'info' => '手动派单成功，已强制扣除用户余额',
+                'data' => [
+                    'order_amount' => $orderAmount,
+                    'commission' => $commission,
+                    'user_balance' => $newBalance
+                ]
+            ];
+            
+        } catch (\Exception $e) {
+            Db::rollback();
+            return ['code' => 1, 'info' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * 计算佣金
+     * @param float $amount 订单金额
+     * @param int $userLevel 用户等级
+     * @return float
+     */
+    private function calculateCommission($amount, $userLevel)
+    {
+        // 获取用户等级佣金比例
+        $levelInfo = Db::name('xy_level')->where('level', $userLevel)->find();
+        if ($levelInfo && $levelInfo['bili']) {
+            return $amount * floatval($levelInfo['bili']);
+        }
+        
+        // 默认佣金比例（可从配置中读取）
+        $defaultCommissionRate = get_dispatch_config('default_commission_rate', 0.008);
+        return $amount * $defaultCommissionRate;
+    }
+
+    /**
+     * 检查和修复订单状态一致性
+     * 修复已完成派单但status仍为0的历史数据
+     * @return array 修复结果
+     */
+    public function fixOrderStatusConsistency()
+    {
+        // 查找状态不一致的订单
+        $inconsistentOrders = Db::name('xy_convey')
+            ->where('status', 0) // 订单状态为待付款
+            ->where(function($query) {
+                $query->where(function($q) {
+                    // 自动派单已完成但订单状态未更新
+                    $q->where('auto_dispatch', 1)->where('dispatch_status', 1);
+                })->whereOr(function($q) {
+                    // 手动派单已完成但订单状态未更新
+                    $q->where('manual_dispatch', 1)->where('dispatch_status', 1);
+                });
+            })
+            ->select();
+
+        $fixedCount = 0;
+        $errors = [];
+
+        foreach ($inconsistentOrders as $order) {
+            try {
+                // 修复状态不一致：将status设置为1（已完成）
+                $updateResult = Db::name('xy_convey')
+                    ->where('id', $order['id'])
+                    ->update(['status' => 1]);
+
+                if ($updateResult !== false) {
+                    $fixedCount++;
+                    error_log("修复订单状态一致性: 订单ID {$order['id']}, 用户ID {$order['uid']}");
+                } else {
+                    $errors[] = "修复订单 {$order['id']} 失败";
+                }
+            } catch (\Exception $e) {
+                $errors[] = "修复订单 {$order['id']} 异常: " . $e->getMessage();
+            }
+        }
+
+        return [
+            'code' => 0,
+            'total_found' => count($inconsistentOrders),
+            'fixed_count' => $fixedCount,
+            'errors' => $errors,
+            'message' => "检查了 " . count($inconsistentOrders) . " 个不一致订单，修复了 {$fixedCount} 个"
+        ];
     }
 }

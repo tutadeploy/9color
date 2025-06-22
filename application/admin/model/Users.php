@@ -853,4 +853,66 @@ public  function qeapaysign($signSource,$key) {
         return md5($signSource);
     }
 
+    /**
+     * 获取用户的派单设置（自动/手动）
+     * @param int $uid 用户ID
+     * @return bool true=自动派单, false=手动派单
+     */
+    public function getUserDispatchMode($uid)
+    {
+        $userMode = Db::table($this->table)->where('id', $uid)->value('default_auto_dispatch');
+        
+        // 如果用户没有设置，使用系统默认设置
+        if ($userMode === null) {
+            return get_dispatch_config('auto_dispatch_enabled', 1) == 1;
+        }
+        
+        return $userMode == 1;
+    }
+
+    /**
+     * 设置用户的派单模式
+     * @param int $uid 用户ID
+     * @param bool $autoMode true=自动派单, false=手动派单
+     * @return bool
+     */
+    public function setUserDispatchMode($uid, $autoMode)
+    {
+        $result = Db::table($this->table)
+            ->where('id', $uid)
+            ->update(['default_auto_dispatch' => $autoMode ? 1 : 0]);
+        
+        return $result !== false;
+    }
+
+    /**
+     * 检查用户是否可以进行派单操作
+     * @param int $uid 用户ID
+     * @return array
+     */
+    public function checkUserDispatchStatus($uid)
+    {
+        $user = Db::table($this->table)->where('id', $uid)->find();
+        
+        if (!$user) {
+            return ['code' => 1, 'info' => '用户不存在'];
+        }
+        
+        if ($user['status'] != 1) {
+            return ['code' => 1, 'info' => '用户状态异常，无法派单'];
+        }
+        
+        // 检查是否有正在进行的订单（只检查待付款状态的订单）
+        $activeOrder = Db::name('xy_convey')
+            ->where('uid', $uid)
+            ->where('status', 0) // 0=待付款状态才是正在进行的订单
+            ->find();
+        
+        if ($activeOrder) {
+            return ['code' => 1, 'info' => '您有正在进行的订单，请先完成'];
+        }
+        
+        return ['code' => 0, 'info' => '可以派单'];
+    }
+
 }

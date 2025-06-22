@@ -1,3 +1,5 @@
+# M1 Mac 本地开发环境配置文件
+# 数据库连接到独立的 database-server (localhost:3306)
 version: "3.8"
 
 services:
@@ -31,31 +33,12 @@ services:
     environment:
       - PHP_FPM_USER=www-data
       - PHP_FPM_GROUP=www-data
-
-  mysql:
-    image: mysql:5.7
-    container_name: 9color_mysql_prod
-    ports:
-      - "3306:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: root123456
-      MYSQL_DATABASE: 6ui
-      MYSQL_USER: app
-      MYSQL_PASSWORD: app123456
-    volumes:
-      - mysql_data:/var/lib/mysql
-      - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./mysql/00-create-database.sql:/docker-entrypoint-initdb.d/00-create-database.sql
-      - ./mysql/01-init.sql:/docker-entrypoint-initdb.d/01-init.sql
-      - ./logs/mysql:/var/log/mysql
-    networks:
-      - app-network
-    restart: unless-stopped
+      - DB_HOST=host.docker.internal
+      - DB_PORT=3306
+      - DB_NAME=6ui
+      - DB_USER=app
+      - DB_PASS=app123456
 
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  mysql_data:
-    driver: local

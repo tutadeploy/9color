@@ -24,6 +24,10 @@ class Deal extends Controller
     public function order_list()
     {
         $this->title = '订单列表';
+        
+        // 移除自动检查，改为守护进程处理
+        // $this->checkAndProcessCoolingOrders();
+        
         $where = [];
         if(input('oid/s','')) $where[] = ['xc.id','like','%'.input('oid','').'%'];
         if(input('username/s','')) $where[] = ['u.username','like','%' . input('username/s','') . '%'];
@@ -31,6 +35,28 @@ class Deal extends Controller
         if(input('addtime/s','')){
             $arr = explode(' - ',input('addtime/s',''));
             $where[] = ['xc.addtime','between',[strtotime($arr[0]),strtotime($arr[1])]];
+        }
+        
+        // 新增派单模式筛选
+        if(input('dispatch_mode/s','')){
+            $dispatchMode = input('dispatch_mode/s','');
+            switch($dispatchMode) {
+                case 'auto':
+                    $where[] = ['xc.auto_dispatch','=',1];
+                    break;
+                case 'manual':
+                    $where[] = ['xc.manual_dispatch','=',1];
+                    break;
+                case 'traditional':
+                    $where[] = ['xc.auto_dispatch','=',0];
+                    $where[] = ['xc.manual_dispatch','=',0];
+                    break;
+            }
+        }
+        
+        // 新增订单状态筛选
+        if(input('order_status/s','') !== ''){
+            $where[] = ['xc.status','=',input('order_status/d',0)];
         }
 
         $user = session('admin_user');
@@ -1479,41 +1505,428 @@ class Deal extends Controller
             return $this->error('提现记录不存在');
         }
         
-      
-            Db::startTrans();
-            
-            // 根据订单状态处理退款逻辑
-            if ($deposit['status'] == 1 || $deposit['status'] == 2) {
-                // 待审核记录或审核通过记录：需要退款
-                $refundAmount = $deposit['num'];
-                $res_refund = Db::name('xy_users')->where('id', $deposit['uid'])->setInc('balance', $refundAmount);
-                if (!$res_refund) {
-                    Db::rollback();
-                    return $this->error('退款失败，用户ID：' . $deposit['uid']);
-                }
-            }
-            // 审核驳回记录（status == 3）：不需要退款，钱已经在驳回时退回
-            
-            // 删除相关的余额日志记录
-            Db::name('xy_balance_log')->where('oid', $id)->delete();
-            
-            // 删除提现记录
-            $res1 = Db::name('xy_deposit')->where('id', $id)->delete();
-            
-            // delete()方法返回受影响的行数，正常情况下应该删除1条记录
-            if ($res1 === 1) {
-                Db::commit();
-                $message = '删除成功';
-                if ($deposit['status'] == 1 || $deposit['status'] == 2) {
-                    $message .= '，已退款 ' . $deposit['num'] . ' 元';
-                }
-                return $this->success($message);
-            } else {
+        Db::startTrans();
+        
+        // 根据订单状态处理退款逻辑
+        if ($deposit['status'] == 1 || $deposit['status'] == 2) {
+            // 待审核记录或审核通过记录：需要退款
+            $refundAmount = $deposit['num'];
+            $res_refund = Db::name('xy_users')->where('id', $deposit['uid'])->setInc('balance', $refundAmount);
+            if (!$res_refund) {
                 Db::rollback();
-                return $this->error('删除提现记录失败，影响行数：' . $res1);
+                return $this->error('退款失败，用户ID：' . $deposit['uid']);
             }
-       
+        }
+        // 审核驳回记录（status == 3）：不需要退款，钱已经在驳回时退回
+        
+        // 删除相关的余额日志记录
+        Db::name('xy_balance_log')->where('oid', $id)->delete();
+        
+        // 删除提现记录
+        $res1 = Db::name('xy_deposit')->where('id', $id)->delete();
+        
+        // delete()方法返回受影响的行数，正常情况下应该删除1条记录
+        if ($res1 === 1) {
+            Db::commit();
+            $message = '删除成功';
+            if ($deposit['status'] == 1 || $deposit['status'] == 2) {
+                $message .= '，已退款 ' . $deposit['num'] . ' 元';
+            }
+            return $this->success($message);
+        } else {
+            Db::rollback();
+            return $this->error('删除提现记录失败，影响行数：' . $res1);
+        }
     }
 
+    /**
+     * 切换订单派单模式
+     * @auth true
+     */
+    public function toggle_order_dispatch()
+    {
+        $this->applyCsrfToken();
+        $orderId = input('post.id/s', '');
+        $mode = input('post.mode/s', ''); // auto 或 manual
+        
+        if (!$orderId || !in_array($mode, ['auto', 'manual'])) {
+            return $this->error('参数错误');
+        }
+        
+        $conveyModel = new \app\admin\model\Convey();
+        if ($mode == 'auto') {
+            // 切换为自动派单
+            $result = $conveyModel->switchToAutoDispatch($orderId);
+        } else {
+            // 切换为手动派单
+            $result = $conveyModel->switchToManualDispatch($orderId);
+        }
+        
+        if ($result['code'] == 0) {
+            return $this->success($result['info']);
+        } else {
+            return $this->error($result['info']);
+        }
+    }
 
+    /**
+     * 手动结算
+     * @auth true  
+     */
+    public function manual_settlement()
+    {
+        $this->applyCsrfToken();
+        $orderId = input('post.id/s', '');
+        
+        $conveyModel = new \app\admin\model\Convey();
+        $result = $conveyModel->manualSettleOrder($orderId, 0); // 管理员操作
+        
+        if ($result['code'] == 0) {
+            return $this->success('结算成功');
+        } else {
+            return $this->error($result['info']);
+        }
+    }
+
+    /**
+     * 删除订单并回退余额
+     * @auth true
+     */
+    public function delete_order_with_refund()
+    {
+        $this->applyCsrfToken();
+        $orderId = input('post.id/s', '');
+        $adminId = session('admin_user.id');
+        
+        $conveyModel = new \app\admin\model\Convey();
+        $result = $conveyModel->deleteOrderWithRefund($orderId, $adminId);
+        
+        if ($result['code'] == 0) {
+            return $this->success('删除成功，余额已回退');
+        } else {
+            return $this->error($result['info']);
+        }
+    }
+
+    /**
+     * 手动派单页面
+     * @auth true
+     */
+    public function manual_dispatch()
+    {
+        $orderId = input('get.order_id/s', '');
+        
+        if (!$orderId) {
+            $this->error('订单ID参数错误');
+        }
+        
+        // 获取订单信息
+        $order = Db::name('xy_convey')->where('id', $orderId)->find();
+        if (!$order) {
+            $this->error('订单不存在');
+        }
+        
+        // 验证订单状态
+        if ($order['manual_dispatch'] != 1 || $order['dispatch_status'] != 0) {
+            $this->error('订单状态不允许手动派单');
+        }
+        
+        // 获取用户信息
+        $user = Db::name('xy_users')->where('id', $order['uid'])->find();
+        if (!$user) {
+            $this->error('用户不存在');
+        }
+        
+        $this->assign('order', $order);
+        $this->assign('user', $user);
+        
+        return $this->fetch();
+    }
+
+    /**
+     * 搜索可派单商品 (Ajax接口)
+     * @auth true
+     */
+    public function search_goods_for_dispatch()
+    {
+        $title = input('get.title/s', '');
+        $minPrice = input('get.min_price/f', 0);
+        $maxPrice = input('get.max_price/f', 999999);
+        $page = input('get.page/d', 1);
+        $pageSize = 10;
+        
+        // 构建查询
+        $query = Db::name('xy_goods_list')->where('status', 1);
+        
+        // 商品标题筛选
+        if (!empty($title)) {
+            $query->where('goods_name', 'like', "%{$title}%");
+        }
+        
+        // 价格筛选
+        if ($minPrice > 0) {
+            $query->where('goods_price', '>=', $minPrice);
+        }
+        
+        if ($maxPrice > 0 && $maxPrice < 999999) {
+            $query->where('goods_price', '<=', $maxPrice);
+        }
+        
+        // 查询商品列表
+        $offset = ($page - 1) * $pageSize;
+        $goodsList = $query->order('id desc')->limit($offset, $pageSize)->select();
+        
+        // 获取总数
+        $total = Db::name('xy_goods_list')->where('status', 1);
+        if (!empty($title)) {
+            $total->where('goods_name', 'like', "%{$title}%");
+        }
+        if ($minPrice > 0) {
+            $total->where('goods_price', '>=', $minPrice);
+        }
+        if ($maxPrice > 0 && $maxPrice < 999999) {
+            $total->where('goods_price', '<=', $maxPrice);
+        }
+        $total = $total->count();
+        
+        // 生成HTML
+        $html = '';
+        foreach ($goodsList as $goods) {
+            $html .= '<div class="goods-item" id="goods-' . $goods['id'] . '" onclick="selectGoods(' . $goods['id'] . ', \'' . htmlspecialchars($goods['goods_name']) . '\', ' . $goods['goods_price'] . ')">';
+            $html .= '<div class="layui-row">';
+            $html .= '<div class="layui-col-md2">';
+            if ($goods['goods_pic']) {
+                $html .= '<img src="' . $goods['goods_pic'] . '" style="width: 60px; height: 60px; object-fit: cover;">';
+            } else {
+                $html .= '<div style="width: 60px; height: 60px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">无图</div>';
+            }
+            $html .= '</div>';
+            $html .= '<div class="layui-col-md8">';
+            $html .= '<div class="goods-title">' . htmlspecialchars($goods['goods_name']) . '</div>';
+            $html .= '<div style="color: #999; margin-top: 5px;">店铺: ' . htmlspecialchars($goods['shop_name']) . '</div>';
+            $html .= '</div>';
+            $html .= '<div class="layui-col-md2 text-right">';
+            $html .= '<div class="goods-price">¥' . $goods['goods_price'] . '</div>';
+            $html .= '</div>';
+            $html .= '</div>';
+            $html .= '</div>';
+        }
+        
+        // 生成分页
+        if ($total > $pageSize) {
+            $totalPages = ceil($total / $pageSize);
+            $html .= '<div class="layui-box layui-laypage layui-laypage-default">';
+            
+            for ($i = 1; $i <= $totalPages; $i++) {
+                $activeClass = ($i == $page) ? 'layui-laypage-curr' : '';
+                $html .= '<a href="javascript:searchGoods(' . $i . ')" class="' . $activeClass . '">' . $i . '</a>';
+            }
+            
+            $html .= '</div>';
+        }
+        
+        if (empty($goodsList)) {
+            $html = '<div class="text-center" style="padding: 50px;">暂无符合条件的商品</div>';
+        }
+        
+        return json([
+            'code' => 0,
+            'info' => '查询成功',
+            'data' => [
+                'html' => $html,
+                'total' => $total,
+                'page' => $page
+            ]
+        ]);
+    }
+
+    /**
+     * 确认手动派单
+     * @auth true
+     */
+    public function confirm_manual_dispatch()
+    {
+        $this->applyCsrfToken();
+        
+        $orderId = input('post.order_id/s', '');
+        $goodsId = input('post.goods_id/d', 0);
+        $goodsPrice = input('post.goods_price/f', 0);
+        $goodsName = input('post.goods_name/s', '');
+        
+        if (!$orderId || !$goodsId || !$goodsPrice) {
+            return json(['code' => 1, 'info' => '参数错误']);
+        }
+        
+        $conveyModel = new \app\admin\model\Convey();
+        $result = $conveyModel->manualDispatchPayment($orderId, $goodsId, $goodsPrice, 1);
+        
+        return json($result);
+    }
+
+    /**
+     * 自动检查并处理冷却期结束的订单
+     * 页面访问时触发，无需crontab
+     */
+    private function checkAndProcessCoolingOrders()
+    {
+        try {
+            $conveyModel = new \app\admin\model\Convey();
+            $result = $conveyModel->processCoolingOrders();
+            
+            // 如果处理了订单，可以记录日志（可选）
+            if ($result['processed_count'] > 0) {
+                error_log("页面访问触发自动派单: 处理了 {$result['processed_count']} 个订单");
+            }
+        } catch (\Exception $e) {
+            // 静默处理异常，不影响页面正常显示
+            error_log("自动派单检查异常: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Ajax接口：手动触发冷却期检查
+     * @auth true
+     */
+    public function check_cooling_orders()
+    {
+        $conveyModel = new \app\admin\model\Convey();
+        $result = $conveyModel->processCoolingOrders();
+        
+        return json([
+            'code' => 0,
+            'info' => "自动派单处理完成！处理订单数: {$result['processed_count']}",
+            'data' => $result
+        ]);
+    }
+
+    /**
+     * 数据一致性检查和修复
+     * @auth true
+     * @menu true
+     */
+    public function fix_order_status_consistency()
+    {
+        if (request()->isPost()) {
+            $this->applyCsrfToken();
+            
+            $conveyModel = new \app\admin\model\Convey();
+            $result = $conveyModel->fixOrderStatusConsistency();
+            
+            return json($result);
+        }
+        
+        $this->title = '订单状态一致性检查';
+        return $this->fetch();
+    }
+
+    /**
+     * 自动派单监控页面 (Phase 5.4)
+     * @auth true
+     * @menu true
+     */
+    public function auto_dispatch_monitor()
+    {
+        $this->title = '自动派单监控';
+        
+        // 获取最近24小时的监控数据
+        $monitors = Db::name('xy_dispatch_monitor')
+            ->where('check_time', '>=', date('Y-m-d H:i:s', time() - 86400))
+            ->order('check_time DESC')
+            ->paginate(20);
+        
+        // 获取最近的处理日志
+        $logs = Db::name('xy_auto_dispatch_log')
+            ->where('create_time', '>=', date('Y-m-d H:i:s', time() - 86400))
+            ->order('create_time DESC')
+            ->limit(50)
+            ->select();
+        
+        // 统计数据
+        $stats = [
+            'total_processed' => Db::name('xy_auto_dispatch_log')->where('status', 'success')->count(),
+            'total_failed' => Db::name('xy_auto_dispatch_log')->where('status', '!=', 'success')->count(),
+            'today_processed' => Db::name('xy_auto_dispatch_log')
+                ->where('status', 'success')
+                ->where('create_time', '>=', date('Y-m-d 00:00:00'))
+                ->count(),
+            'pending_orders' => Db::name('xy_convey')
+                ->where('auto_dispatch', 1)
+                ->where('dispatch_status', 0)
+                ->where('cooling_end_time', '>', 0)
+                ->where('cooling_end_time', '<=', time())
+                ->where('status', 0)
+                ->count()
+        ];
+        
+        $this->assign('monitors', $monitors);
+        $this->assign('logs', $logs);
+        $this->assign('stats', $stats);
+        
+        return $this->fetch();
+    }
+
+    /**
+     * 手动触发自动派单检查 (Phase 5.4)
+     * @auth true
+     */
+    public function trigger_auto_dispatch()
+    {
+        try {
+            Db::execute('CALL ProcessAllExpiredOrders()');
+            return $this->success('手动触发成功，请查看监控页面');
+        } catch (\Exception $e) {
+            return $this->error('触发失败: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * 获取监控数据API (Phase 5.4)
+     * @auth true
+     */
+    public function get_monitor_data()
+    {
+        try {
+            // 最新监控记录
+            $latestMonitor = Db::name('xy_dispatch_monitor')
+                ->order('check_time DESC')
+                ->find();
+            
+            // 今日统计
+            $todayStats = [
+                'processed' => Db::name('xy_auto_dispatch_log')
+                    ->where('status', 'success')
+                    ->where('create_time', '>=', date('Y-m-d 00:00:00'))
+                    ->count(),
+                'failed' => Db::name('xy_auto_dispatch_log')
+                    ->where('status', '!=', 'success')
+                    ->where('create_time', '>=', date('Y-m-d 00:00:00'))
+                    ->count(),
+                'pending' => Db::name('xy_convey')
+                    ->where('auto_dispatch', 1)
+                    ->where('dispatch_status', 0)
+                    ->where('cooling_end_time', '>', 0)
+                    ->where('cooling_end_time', '<=', time())
+                    ->where('status', 0)
+                    ->count()
+            ];
+            
+            // 最近处理日志
+            $recentLogs = Db::name('xy_auto_dispatch_log')
+                ->order('create_time DESC')
+                ->limit(10)
+                ->select();
+            
+            return json([
+                'code' => 0,
+                'data' => [
+                    'latest_monitor' => $latestMonitor,
+                    'today_stats' => $todayStats,
+                    'recent_logs' => $recentLogs,
+                    'update_time' => date('Y-m-d H:i:s')
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return json(['code' => 1, 'msg' => $e->getMessage()]);
+        }
+    }
 }

@@ -48,6 +48,12 @@ class Users extends Controller
             $where[] = ['u.is_jia','=',$isjia ];
         }
         
+        // 添加派单模式筛选
+        if(input('dispatch_mode/s','') !== '') {
+            $dispatchMode = input('dispatch_mode/d', 0);
+            $where[] = ['u.default_auto_dispatch','=', $dispatchMode];
+        }
+        
         if(input('addtime/s','')){
             $arr = explode(' - ',input('addtime/s',''));
             $where[] = ['u.addtime','between',[strtotime($arr[0]),strtotime($arr[1])]];
@@ -84,13 +90,13 @@ class Users extends Controller
         }
 
             if($isonline){
-                  $query->field('u.id,u.tel,u.username,u.lixibao_balance,u.id_status,u.ip,u.is_jia,u.addtime,u.deal_min_num,u.deal_max_num,u.pipei_type,u.pipei_grouping,u.invite_code,u.freeze_balance,u.status,u.balance,u.level,u.activetime,u1.username as parent_name')
+                  $query->field('u.id,u.tel,u.username,u.lixibao_balance,u.id_status,u.ip,u.is_jia,u.addtime,u.deal_min_num,u.deal_max_num,u.pipei_type,u.pipei_grouping,u.invite_code,u.freeze_balance,u.status,u.balance,u.level,u.activetime,u.default_auto_dispatch,u1.username as parent_name')
                         ->leftJoin('xy_users u1','u.parent_id=u1.id')
                         ->where($where)->whereTime('u.activetime','-1 hours')
                         ->order('u.activetime desc')
                         ->page();
             }else{
-                  $query->field('u.id,u.tel,u.username,u.lixibao_balance,u.id_status,u.ip,u.is_jia,u.addtime,u.deal_min_num,u.deal_max_num,u.pipei_grouping,u.pipei_type,u.invite_code,u.freeze_balance,u.status,u.balance,u.level,u.activetime,u1.username as parent_name')
+                  $query->field('u.id,u.tel,u.username,u.lixibao_balance,u.id_status,u.ip,u.is_jia,u.addtime,u.deal_min_num,u.deal_max_num,u.pipei_grouping,u.pipei_type,u.invite_code,u.freeze_balance,u.status,u.balance,u.level,u.activetime,u.default_auto_dispatch,u1.username as parent_name')
                         ->leftJoin('xy_users u1','u.parent_id=u1.id')
                         ->where($where)
                         ->order('u.id desc')
@@ -332,11 +338,89 @@ class Users extends Controller
     {
         $this->applyCsrfToken();
         $id = input('post.id/d',0);
-        $res = Db::table('xy_users')->where('id',$id)->delete();
-        if($res)
-            $this->success('删除成功!');
-        else
-            $this->error('删除失败!');
+        
+        if (!$id) {
+            $this->error('参数错误!');
+        }
+        
+        // 先检查用户是否存在
+        $user = Db::table('xy_users')->where('id', $id)->find();
+        if (!$user) {
+            $this->error('用户不存在!');
+        }
+        
+        // 开启事务确保数据一致性
+        Db::startTrans();
+        try {
+            // 统计要删除的相关数据数量（用于日志记录）
+            $conveyCount = Db::table('xy_convey')->where('uid', $id)->count();
+            $rechargeCount = Db::table('xy_recharge')->where('uid', $id)->count();
+            $depositCount = Db::table('xy_deposit')->where('uid', $id)->count();
+            $balanceLogCount = Db::table('xy_balance_log')->where('uid', $id)->count();
+            $rewardLogCount = Db::table('xy_reward_log')->where('uid', $id)->count();
+            $addressCount = Db::table('xy_member_address')->where('uid', $id)->count();
+            $messageCount = Db::table('xy_message')->where('uid', $id)->count();
+            $readsCount = Db::table('xy_reads')->where('uid', $id)->count();
+            
+            // 删除用户相关的所有数据（级联删除）
+            // 1. 删除交易订单
+            Db::table('xy_convey')->where('uid', $id)->delete();
+            
+            // 2. 删除充值记录
+            Db::table('xy_recharge')->where('uid', $id)->delete();
+            
+            // 3. 删除提现记录
+            Db::table('xy_deposit')->where('uid', $id)->delete();
+            
+            // 4. 删除余额变动日志
+            Db::table('xy_balance_log')->where('uid', $id)->delete();
+            
+            // 5. 删除佣金奖励记录
+            Db::table('xy_reward_log')->where('uid', $id)->delete();
+            
+            // 6. 删除收货地址
+            Db::table('xy_member_address')->where('uid', $id)->delete();
+            
+            // 7. 删除消息记录（接收的消息）
+            Db::table('xy_message')->where('uid', $id)->delete();
+            
+            // 8. 删除消息已读记录
+            Db::table('xy_reads')->where('uid', $id)->delete();
+            
+            // 9. 删除发送的消息记录
+            Db::table('xy_message')->where('sid', $id)->delete();
+            
+            // 10. 处理下级用户的上级关系（将下级用户的parent_id设为0或其他处理）
+            Db::table('xy_users')->where('parent_id', $id)->update(['parent_id' => 0]);
+            
+            // 11. 最后删除用户本身
+            Db::table('xy_users')->where('id', $id)->delete();
+            
+            // 提交事务
+            Db::commit();
+            
+            // 记录删除日志
+            $logMessage = "用户删除成功 - 用户ID: {$id}, 用户名: {$user['username']}, 手机: {$user['tel']}" . 
+                         " | 删除关联数据: 订单({$conveyCount}), 充值({$rechargeCount}), 提现({$depositCount}), " .
+                         "余额日志({$balanceLogCount}), 佣金记录({$rewardLogCount}), 地址({$addressCount}), " .
+                         "消息({$messageCount}), 已读记录({$readsCount})";
+            
+            // 可以在这里添加系统日志记录
+            // Log::write($logMessage, 'info');
+            
+        } catch (\Exception $e) {
+            // 回滚事务
+            Db::rollback();
+            
+            // 记录错误日志
+            $errorMessage = "用户删除失败 - 用户ID: {$id}, 错误信息: " . $e->getMessage();
+            // Log::write($errorMessage, 'error');
+            
+            $this->error('删除失败: ' . $e->getMessage());
+        }
+        
+        // 修复：将success调用移到try-catch外面，避免HttpResponseException被错误捕获
+        $this->success('删除成功! 已清理用户相关的所有数据。');
     }
 
     /**
@@ -1449,5 +1533,43 @@ class Users extends Controller
         //下载文件在浏览器窗口
         $objWriter->save('php://output');
         exit;
+    }
+
+    /**
+     * 切换用户派单模式
+     * @auth true
+     */
+    public function toggle_user_dispatch()
+    {
+        $this->applyCsrfToken();
+        $id = input('post.id/d', 0);
+        $mode = input('post.mode/d', 0);
+        
+        if (!$id) {
+            return $this->error('用户ID参数错误');
+        }
+        
+        // 验证模式参数
+        if (!in_array($mode, [0, 1])) {
+            return $this->error('派单模式参数错误');
+        }
+        
+        // 检查用户是否存在
+        $user = Db::table($this->table)->find($id);
+        if (!$user) {
+            return $this->error('用户不存在');
+        }
+        
+        // 更新用户派单模式
+        $res = Db::table($this->table)
+            ->where('id', $id)
+            ->update(['default_auto_dispatch' => $mode]);
+            
+        if ($res !== false) {
+            $modeText = $mode ? '自动派单' : '手动派单';
+            return $this->success("已将用户【{$user['username']}】设置为{$modeText}模式");
+        } else {
+            return $this->error('切换失败，请重试');
+        }
     }
 }

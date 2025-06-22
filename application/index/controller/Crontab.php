@@ -413,4 +413,119 @@ class Crontab extends Controller
             }
         }
     }
+
+    /**
+     * 自动派单定时任务
+     * @说明 处理冷却期结束的自动派单订单
+     * @地址 http://域名/index/crontab/auto_dispatch
+     */
+    public function auto_dispatch()
+    {
+        try {
+            $conveyModel = model('admin/Convey');
+            $result = $conveyModel->processCoolingOrders();
+            
+            $message = "自动派单处理完成！处理订单数: {$result['processed_count']}";
+            
+            if (!empty($result['errors'])) {
+                $message .= " 错误: " . implode(', ', $result['errors']);
+            }
+            
+            // 记录执行日志
+            $this->logCrontabExecution('auto_dispatch', $result['processed_count'], $result['errors']);
+            
+            return json(['code' => 0, 'info' => $message]);
+            
+        } catch (\Exception $e) {
+            $errorMsg = '自动派单处理异常: ' . $e->getMessage();
+            $this->logCrontabExecution('auto_dispatch', 0, [$errorMsg]);
+            return json(['code' => 1, 'info' => $errorMsg]);
+        }
+    }
+
+    /**
+     * 综合定时任务（包含自动派单）
+     * @说明 执行所有定时任务，包括传统订单处理和新的自动派单
+     * @地址 http://域名/index/crontab/comprehensive_task
+     */
+    public function comprehensive_task()
+    {
+        $results = [];
+        
+        try {
+            // 1. 执行自动派单处理
+            $autoDispatchResult = $this->auto_dispatch();
+            $results['auto_dispatch'] = json_decode($autoDispatchResult->getContent(), true);
+            
+            // 2. 执行传统订单冻结和解冻
+            $this->freeze_order();
+            $results['freeze_order'] = ['code' => 0, 'info' => '订单冻结处理完成'];
+            
+            // 3. 执行佣金发放
+            $rewardResult = $this->do_reward();
+            $results['do_reward'] = ['code' => 0, 'info' => '佣金发放处理完成'];
+            
+            // 4. 执行利息宝相关任务
+            $lxbResult = $this->lxb_jiesuannew();
+            $results['lxb_task'] = json_decode($lxbResult->getContent(), true);
+            
+            $successCount = 0;
+            $totalTasks = count($results);
+            
+            foreach ($results as $task => $result) {
+                if ($result['code'] == 0) {
+                    $successCount++;
+                }
+            }
+            
+            return json([
+                'code' => 0,
+                'info' => "综合定时任务执行完成！成功: {$successCount}/{$totalTasks}",
+                'details' => $results
+            ]);
+            
+        } catch (\Exception $e) {
+            return json([
+                'code' => 1,
+                'info' => '综合定时任务执行异常: ' . $e->getMessage(),
+                'details' => $results
+            ]);
+        }
+    }
+
+    /**
+     * 记录定时任务执行日志
+     * @param string $taskName 任务名称
+     * @param int $processedCount 处理数量
+     * @param array $errors 错误信息
+     */
+    private function logCrontabExecution($taskName, $processedCount, $errors = [])
+    {
+        try {
+            $logData = [
+                'task_name' => $taskName,
+                'processed_count' => $processedCount,
+                'error_count' => count($errors),
+                'errors' => empty($errors) ? '' : implode('; ', $errors),
+                'execute_time' => time(),
+                'date' => date('Y-m-d H:i:s')
+            ];
+            
+            // 写入日志文件
+            $logFile = RUNTIME_PATH . 'log/crontab_' . date('Y-m-d') . '.log';
+            $logContent = date('Y-m-d H:i:s') . " [{$taskName}] 处理数量: {$processedCount}";
+            
+            if (!empty($errors)) {
+                $logContent .= " 错误: " . implode('; ', $errors);
+            }
+            
+            $logContent .= PHP_EOL;
+            
+            file_put_contents($logFile, $logContent, FILE_APPEND | LOCK_EX);
+            
+        } catch (\Exception $e) {
+            // 日志记录失败时不影响主流程
+            error_log("定时任务日志记录失败: " . $e->getMessage());
+        }
+    }
 }

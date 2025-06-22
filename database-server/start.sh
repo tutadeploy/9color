@@ -1,103 +1,257 @@
 #!/bin/bash
 
-# 数据库服务器完整启动脚本
-# 包含 MySQL、备份服务、phpMyAdmin
+# 9Color数据库服务器智能启动脚本
+# 自动识别环境并使用对应的配置文件
 
-echo "======================================="
-echo "        9Color 数据库服务器启动"
-echo "======================================="
-echo "时间: $(date)"
-echo "服务器: $(hostname -I | awk '{print $1}')"
-echo ""
+set -e
+
+# 错误处理函数
+cleanup_on_error() {
+    print_error "启动过程中发生错误，正在清理..."
+    $DOCKER_COMPOSE -f $COMPOSE_FILE down >/dev/null 2>&1 || true
+    exit 1
+}
+
+# 设置错误陷阱
+trap cleanup_on_error ERR
+
+echo "=== 9Color数据库服务器启动 ==="
+
+# 获取脚本所在目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# 颜色定义
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+print_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+print_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+# 环境检测函数
+detect_environment() {
+    # 检测操作系统
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        OS_TYPE="macos"
+        print_info "检测到 macOS 环境"
+    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        OS_TYPE="linux"
+        print_info "检测到 Linux 环境"
+    else
+        OS_TYPE="unknown"
+        print_warning "未知操作系统: $OSTYPE"
+    fi
+
+    # 检测CPU架构
+    ARCH=$(uname -m)
+    if [[ "$ARCH" == "arm64" ]] || [[ "$ARCH" == "aarch64" ]]; then
+        print_info "检测到 ARM64 架构 (M1/M2)"
+        IS_ARM=true
+    else
+        print_info "检测到 x86_64 架构"
+        IS_ARM=false
+    fi
+
+    # 根据环境选择配置文件
+    if [[ "$OS_TYPE" == "macos" ]] && [[ "$IS_ARM" == true ]]; then
+        COMPOSE_FILE="docker-compose-m1.yml"
+        ENVIRONMENT="M1 macOS"
+        print_info "使用 M1 macOS 配置文件: $COMPOSE_FILE"
+    else
+        COMPOSE_FILE="docker-compose.yml"
+        ENVIRONMENT="Ubuntu22/x86_64"
+        print_info "使用标准 Linux 配置文件: $COMPOSE_FILE"
+    fi
+
+    # 设置Docker Compose命令
+    if command -v "docker-compose" >/dev/null 2>&1; then
+        DOCKER_COMPOSE="docker-compose"
+    elif docker compose version >/dev/null 2>&1; then
+        DOCKER_COMPOSE="docker compose"
+    else
+        print_error "未找到 docker-compose 或 docker compose 命令"
+        exit 1
+    fi
+}
 
 # 检查Docker是否运行
-if ! docker info >/dev/null 2>&1; then
-    echo "❌ Docker未运行，请先启动Docker服务"
-    exit 1
-fi
+check_docker() {
+    if ! docker version >/dev/null 2>&1; then
+        print_error "Docker未运行，请先启动Docker"
+        exit 1
+    fi
+    print_success "Docker服务正常运行"
+}
 
-echo "✅ Docker服务正常"
+# 预检查必要文件
+pre_check() {
+    print_info "检查必要文件..."
 
-# 进入脚本目录
-cd "$(dirname "$0")"
+    # 检查Docker Compose文件
+    if [ ! -f "$COMPOSE_FILE" ]; then
+        print_error "Docker Compose配置文件不存在: $COMPOSE_FILE"
+        exit 1
+    fi
 
-echo ""
-echo "=== 1. 启动MySQL和备份服务 ==="
+    # 检查MySQL初始化文件
+    if [ ! -d "mysql" ]; then
+        print_error "MySQL配置目录不存在: mysql/"
+        exit 1
+    fi
 
-# 使用docker compose启动主要服务
-docker compose up -d mysql mysql-backup
+    # 检查脚本目录
+    if [ ! -d "scripts" ]; then
+        print_warning "脚本目录不存在，创建中..."
+        mkdir -p scripts
+    fi
 
-echo "等待MySQL启动完成..."
-sleep 10
+    print_success "必要文件检查完成"
+}
 
-# 检查MySQL状态
-if docker ps | grep -q "9color_mysql_standalone"; then
-    echo "✅ MySQL服务启动成功"
-else
-    echo "❌ MySQL服务启动失败"
-    docker logs 9color_mysql_standalone --tail 20
-    exit 1
-fi
+# 创建必要的目录并修复权限
+create_directories() {
+    print_info "创建必要的目录..."
+    mkdir -p logs/mysql
+    mkdir -p backup
+    print_success "目录创建完成"
+}
 
-# 检查备份服务状态
-if docker ps | grep -q "9color_mysql_backup"; then
-    echo "✅ 备份服务启动成功"
-else
-    echo "❌ 备份服务启动失败"
-    docker logs 9color_mysql_backup --tail 20
-fi
+# 修复脚本权限
+fix_permissions() {
+    print_info "检查并修复脚本权限..."
 
-echo ""
-echo "=== 2. 启动phpMyAdmin ==="
+    # 修复当前启动脚本权限
+    chmod +x "$0" 2>/dev/null || true
 
-# 运行phpMyAdmin启动脚本
-if [ -f "./start-phpmyadmin.sh" ]; then
-    chmod +x ./start-phpmyadmin.sh
-    ./start-phpmyadmin.sh
-else
-    echo "❌ phpMyAdmin启动脚本不存在"
-fi
+    # 修复备份调度脚本权限
+    if [ -f "scripts/backup-scheduler.sh" ]; then
+        chmod +x scripts/backup-scheduler.sh
+        print_success "备份调度脚本权限已修复"
+    fi
 
-echo ""
-echo "=== 3. 服务状态总览 ==="
+    # 修复其他可能的脚本权限
+    find scripts/ -name "*.sh" -type f -exec chmod +x {} \; 2>/dev/null || true
 
-echo ""
-echo "运行中的容器:"
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+    print_success "脚本权限检查完成"
+}
 
-echo ""
-echo "系统资源使用:"
-echo "内存使用情况:"
-free -h
+# 停止现有服务
+stop_existing_services() {
+    print_info "停止现有服务..."
+    $DOCKER_COMPOSE -f $COMPOSE_FILE down >/dev/null 2>&1 || true
+    print_success "现有服务已停止"
+}
 
-echo ""
-echo "磁盘使用情况:"
-df -h /
+# 启动服务
+start_services() {
+    print_info "启动数据库服务..."
 
-echo ""
-echo "Docker容器资源使用:"
-docker stats --no-stream --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.NetIO}}\t{{.BlockIO}}"
+    if $DOCKER_COMPOSE -f $COMPOSE_FILE up -d --build; then
+        print_success "数据库服务启动成功"
+    else
+        print_error "数据库服务启动失败"
+        exit 1
+    fi
+}
 
-echo ""
-echo "=== 4. 服务访问信息 ==="
-SERVER_IP=$(hostname -I | awk '{print $1}')
+# 等待服务就绪
+wait_for_services() {
+    print_info "等待服务就绪..."
 
-echo "🔗 服务访问地址:"
-echo "  📊 phpMyAdmin:    http://$SERVER_IP:8090"
-echo "  🗄️  MySQL端口:    $SERVER_IP:3306"
-echo ""
-echo "👤 数据库用户:"
-echo "  🔑 root          / root123456     (超级管理员)"
-echo "  💼 app           / app123456      (应用用户)"
-echo "  👁️  readonly      / readonly123456 (只读用户)"
-echo "  💾 backup        / backup123456   (备份用户)"
-echo ""
-echo "📁 数据存储:"
-echo "  🗂️  数据目录:     /var/lib/mysql (容器内)"
-echo "  💾 备份目录:     /backup"
-echo "  📋 日志目录:     ./logs/mysql"
+    # 等待MySQL就绪
+    local max_attempts=60
+    local attempt=1
 
-echo ""
-echo "=== 启动完成 ==="
-echo "所有服务已启动完成，可以开始使用数据库服务器"
-echo "======================================="
+    while [ $attempt -le $max_attempts ]; do
+        if docker exec 9color_mysql_standalone mysqladmin ping -h localhost -u root -proot123456 --silent >/dev/null 2>&1; then
+            print_success "MySQL服务就绪"
+            break
+        fi
+
+        if [ $attempt -eq $max_attempts ]; then
+            print_error "MySQL启动超时"
+            print_info "查看MySQL日志: docker logs 9color_mysql_standalone"
+            exit 1
+        fi
+
+        echo -n "."
+        sleep 2
+        ((attempt++))
+    done
+
+    # 检查备份容器状态
+    sleep 3
+    if docker ps | grep -q "9color_mysql_backup.*Up"; then
+        print_success "MySQL备份服务就绪"
+    else
+        print_warning "MySQL备份服务可能需要更多时间启动"
+        print_info "查看备份服务日志: docker logs 9color_mysql_backup"
+    fi
+
+    # 等待phpMyAdmin就绪
+    sleep 5
+    if curl -s http://localhost:8090 >/dev/null 2>&1; then
+        print_success "phpMyAdmin服务就绪"
+    else
+        print_warning "phpMyAdmin可能需要更多时间启动"
+        print_info "查看phpMyAdmin日志: docker logs 9color_phpmyadmin"
+    fi
+}
+
+# 显示服务信息
+show_service_info() {
+    echo ""
+    echo "======================================="
+    echo "        服务启动完成"
+    echo "======================================="
+    print_info "环境: $ENVIRONMENT"
+    print_info "配置文件: $COMPOSE_FILE"
+    echo ""
+    print_success "服务访问地址:"
+    echo "  📊 phpMyAdmin: http://localhost:8090"
+    echo "  🗄️  MySQL:     localhost:3306"
+    echo ""
+    print_info "数据库连接信息:"
+    echo "  数据库: 6ui"
+    echo "  用户名: app"
+    echo "  密码: app123456"
+    echo "  Root密码: root123456"
+    echo ""
+    print_info "管理命令:"
+    echo "  查看状态: docker ps"
+    echo "  查看日志: docker logs 9color_mysql_standalone"
+    echo "  停止服务: $DOCKER_COMPOSE -f $COMPOSE_FILE down"
+    echo "======================================="
+}
+
+# 主执行流程
+main() {
+    detect_environment
+    check_docker
+    pre_check
+    create_directories
+    fix_permissions
+    stop_existing_services
+    start_services
+    wait_for_services
+    show_service_info
+}
+
+# 执行主函数
+main "$@"

@@ -29,6 +29,31 @@
             </div>
         </div>
         <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">派单模式</label>
+            <div class="layui-input-inline">
+                <select name="dispatch_mode" lay-search="">
+                    <option value="">全部模式</option>
+                    <option value="auto" {if $Think.get.dispatch_mode == 'auto'}selected{/if}>自动派单</option>
+                    <option value="manual" {if $Think.get.dispatch_mode == 'manual'}selected{/if}>手动派单</option>
+                    <option value="traditional" {if $Think.get.dispatch_mode == 'traditional'}selected{/if}>传统模式</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">订单状态</label>
+            <div class="layui-input-inline">
+                <select name="order_status" lay-search="">
+                    <option value="">全部状态</option>
+                    <option value="0" {if $Think.get.order_status == '0'}selected{/if}>待付款</option>
+                    <option value="1" {if $Think.get.order_status == '1'}selected{/if}>已付款</option>
+                    <option value="2" {if $Think.get.order_status == '2'}selected{/if}>用户取消</option>
+                    <option value="3" {if $Think.get.order_status == '3'}selected{/if}>强制付款</option>
+                    <option value="4" {if $Think.get.order_status == '4'}selected{/if}>系统取消</option>
+                    <option value="5" {if $Think.get.order_status == '5'}selected{/if}>订单冻结</option>
+                </select>
+            </div>
+        </div>
+        <div class="layui-form-item layui-inline">
             <button class="layui-btn layui-btn-primary"><i class="layui-icon">&#xe615;</i> 搜 索</button>
         </div>
     </form>

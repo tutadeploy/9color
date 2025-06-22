@@ -46,4 +46,63 @@ class GoodsList extends Model
         else 
             return ['code'=>1,'info'=>'操作失败!'];
     }
+
+    /**
+     * 搜索可派单商品
+     * @param string $title 商品标题
+     * @param float $minPrice 最低价格
+     * @param float $maxPrice 最高价格
+     * @param int $page 页码
+     * @param int $pageSize 每页数量
+     * @return array
+     */
+    public function searchForDispatch($title = '', $minPrice = 0, $maxPrice = 999999, $page = 1, $pageSize = 10)
+    {
+        $where = [];
+        $where[] = ['status', '=', 1]; // 只显示上架商品
+        
+        if ($title) {
+            $where[] = ['goods_name', 'like', "%{$title}%"];
+        }
+        
+        if ($minPrice > 0) {
+            $where[] = ['goods_price', '>=', $minPrice];
+        }
+        
+        if ($maxPrice < 999999) {
+            $where[] = ['goods_price', '<=', $maxPrice];
+        }
+        
+        // 查询商品列表
+        $goodsList = Db::name('xy_goods_list')
+            ->where($where)
+            ->field('id,goods_name,shop_name,goods_price,goods_pic,addtime')
+            ->order('id desc')
+            ->page($page, $pageSize)
+            ->select();
+        
+        // 获取总数
+        $total = Db::name('xy_goods_list')->where($where)->count();
+        
+        return [
+            'list' => $goodsList,
+            'total' => $total,
+            'page' => $page,
+            'pageSize' => $pageSize,
+            'totalPages' => ceil($total / $pageSize)
+        ];
+    }
+
+    /**
+     * 获取商品详情（用于派单）
+     * @param int $goodsId 商品ID
+     * @return array|null
+     */
+    public function getGoodsForDispatch($goodsId)
+    {
+        return Db::name('xy_goods_list')
+            ->where('id', $goodsId)
+            ->where('status', 1)
+            ->find();
+    }
 }
