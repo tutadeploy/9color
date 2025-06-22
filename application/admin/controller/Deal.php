@@ -1297,7 +1297,7 @@ class Deal extends Controller
                         //记录返佣信息
                         'uid'       => $v['uid'],
                         'oid'       => $v['oid'],
-                        'num'       => $v['num']+$v['cnum'],
+                        'num'       => $v['num']+$v['cnum'],  // 记录商品价格+佣金
                         'type'      => 3,
                         'addtime'   => time()
                     ]);

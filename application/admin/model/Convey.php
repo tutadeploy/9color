@@ -25,54 +25,9 @@ class Convey extends Model
         
         $cidinfo= Db::name('xy_goods_cate')->field('deal_min_num,deal_max_num')->find($cid);;//获取收款地址信息s
      
-      $commission=0;
-      $order_num=0;
-      //分组配置
-      if(($uinfo['pipei_type']==2)&&($uinfo['pipei_grouping']>0)){
-        $group_pipei = $this->get_group_pipei_config($uid);
-        if($group_pipei['cancontinue']==0)  return ['code'=>1,'info'=>lang('如需继续刷单请联系派单员')];
-        
-                    $max = $group_pipei['pipei_max'];
-                    $min = $group_pipei['pipei_min'];
-                    $commission=$group_pipei['pipei_dan_run'];
-                    $order_num=$group_pipei['leftorder'];
-  //  return ['code'=>1,'info'=>'grouping:'.$uinfo['pipei_grouping'].'xu:'.$group_pipei['order_xu'].'max:'.$max.'min:'.$min.'run:'.$group_pipei['pipei_dan_run']];
-                    
-      }else{
-          
-        //获取个人独立订单配置信息
-        $u_pipei = model('admin/Users')->get_user_pipei_num_config($uid);
-            if(($u_pipei['pipei_max']>0)&&($u_pipei['pipei_max']>$u_pipei['pipei_min'])){
-                    if($u_pipei['pipei_type']==0){
-                        
-                    //匹配为百分比
-                    $min = $uinfo['balance']*$u_pipei['pipei_min']/100;
-                    $max = $uinfo['balance']*$u_pipei['pipei_max']/100;
-                    }else{
-                    //匹配为金额
-                    $min = $u_pipei['pipei_min'];
-                    $max = $u_pipei['pipei_max'];
-                    }
-                
-            }else{
-                //获取个人总体订单区间信息
-               if($uinfo['deal_max_num']!=0){
-                    $min = $uinfo['balance']*$uinfo['deal_min_num']/100;
-                    $max = $uinfo['balance']*$uinfo['deal_max_num']/100;
-                }else{
-                    //调用栏目区间信息
-                    if($cidinfo['deal_max_num']!=0){
-                        $min = $uinfo['balance']*$cidinfo['deal_min_num']/100;
-                        $max = $uinfo['balance']*$cidinfo['deal_max_num']/100;
-                    }else{
-                        
-                        //调用系统总区间信息
-                        $min = $uinfo['balance']*config('deal_min_num')/100;
-                        $max = $uinfo['balance']*config('deal_max_num')/100;
-                    }
-                }  
-            } 
-      }
+      // 简化佣金计算：只使用系统配置的订单区间
+      $min = $uinfo['balance']*config('deal_min_num')/100;
+      $max = $uinfo['balance']*config('deal_max_num')/100;
 
         
          
@@ -93,12 +48,8 @@ class Convey extends Model
         // 原来：$res = Db::name('xy_users')->where('id',$uid)->update(['deal_status'=>3,'deal_time'=>strtotime(date('Y-m-d')),'deal_count'=>Db::raw('deal_count+1')]);
         $res = Db::name('xy_users')->where('id',$uid)->update(['deal_time'=>strtotime(date('Y-m-d')),'deal_count'=>Db::raw('deal_count+1')]);
         
-        //通过商品id查找 佣金比例
-     //$cate = Db::name('xy_goods_cate')->find($goods['cid']);
-          //  if($goods['num'] > $uinfo['balance']) return ['code'=>1,'info'=>lang('抢到').$goods['num'].lang('的订单,余额不足,请重新抢单')];
-
-        if(!$commission) $commission=$goods['num']*$ulevel['bili'];
-            $grouping_id=$uinfo['pipei_grouping'];
+        // 佣金计算：只基于用户等级的佣金比例
+        $commission = $goods['num'] * $ulevel['bili'];
         //var_dump($cate,123,$goods);die;
 
         $res1 = Db::name($this->table)
@@ -112,13 +63,7 @@ class Convey extends Model
                     'add_id'        => $add_id,
                     'goods_id'      => $goods['id'],
                     'goods_count'   => $goods['count'],
-                    //'commission'    => $goods['num']*config('vip_1_commission'),
-                    //'commission'    => $goods['num']*$cate['bili'],  //交易佣金按照分类
-                    //'commission'    => $goods['num']*$ulevel['bili'],  //交易佣金按照会员等级
-                    
-                    'commission'    => $commission,  
-                    'order_num'=>$order_num,
-                    'grouping_id'=>$grouping_id,
+                    'commission'    => $commission,  // 只基于用户等级佣金比例计算
                 ]);
         if($res && $res1){
             Db::commit();
@@ -341,6 +286,14 @@ class Convey extends Model
      */
     public function deal_reward($uid,$oid,$num,$cnum)
     {
+        // 检查是否已经发放过佣金，避免重复发放
+        $c_status = Db::name('xy_convey')->where('id',$oid)->value('c_status');
+        if($c_status == 1) {
+            // 佣金已发放，只发放上级奖励
+            $this->deal_reward_to_parent_only($uid, $oid, $num, $cnum);
+            return;
+        }
+        
         //$res = Db::name('xy_users')->where('id',$uid)->where('status',1)->setInc('balance',$num+$cnum);
         $res = Db::name('xy_users')->where('id',$uid)->where('status',1)->setInc('balance',$num+$cnum);
         $res2 = Db::name('xy_users')->where('id',$uid)->where('status',1)->setDec('freeze_balance',$num+$cnum);
@@ -350,8 +303,7 @@ class Convey extends Model
                     //记录返佣信息
                     'uid'       => $uid,
                     'oid'       => $oid,
-                    //'num'       => $num+$cnum,
-                    'num'       => $cnum,
+                    'num'       => $num+$cnum,  // 记录商品价格+佣金
                     'type'      => 3,
                     'addtime'   => time()
                 ]);
@@ -396,6 +348,58 @@ class Convey extends Model
             $res1 = Db::name('xy_convey')->where('id',$oid)->update(['c_status'=>2]);//记录账号异常
         }
         
+    }
+
+    /**
+     * 只发放上级奖励，不重复发放当前用户佣金
+     * 用于手动结算等场景，避免重复发放佣金
+     */
+    public function deal_reward_to_parent_only($uid,$oid,$num,$cnum)
+    {
+        /************* 发放交易奖励 *********/
+        $userList = model('admin/Users')->parent_user($uid,5);
+        if($userList){
+            foreach($userList as $v){
+                if($v['status']===1){
+                    // 检查是否已经发放过此上级用户的奖励
+                    $existingReward = Db::name('xy_reward_log')
+                        ->where('uid', $v['id'])
+                        ->where('sid', $uid)
+                        ->where('oid', $oid)
+                        ->where('type', 2)
+                        ->find();
+                    
+                    if (!$existingReward) {
+                        Db::name('xy_reward_log')
+                        ->insert([
+                            'uid'       => $v['id'],
+                            'sid'       => $uid,
+                            'oid'       => $oid,
+                            'num'       => $cnum*config($v['lv'].'_d_reward'),
+                            'lv'        => $v['lv'],
+                            'type'      => 2,
+                            'status'    => 1,
+                            'addtime'   => time(),
+                        ]);
+                        $res1 = Db::name('xy_balance_log')->insert([
+                            //记录返佣信息
+                            'uid'       => $v['id'],
+                            'oid'       => $oid,
+                            'sid'       => $uid,
+                            'num'       => $cnum*config($v['lv'].'_d_reward'),
+                            'type'      => 6,
+                            'status'    => 1,
+                            'f_lv'        => $v['lv'],
+                            'addtime'   => time()
+                        ]);
+
+                        $num3 = $cnum*config($v['lv'].'_d_reward'); //佣金
+                        $res = Db::name('xy_users')->where('id',$v['id'])->where('status',1)->setInc('balance',$num3);
+                    }
+                }
+            }
+        }
+        /************* 发放交易奖励 *********/
     }
      public function getGroupingField($id,$field){
         $res=db('xy_grouping')->find($id);
@@ -822,7 +826,7 @@ class Convey extends Model
                 $commissionLogResult = Db::name('xy_balance_log')->insert([
                     'uid' => $order['uid'],
                     'oid' => $orderId,
-                    'num' => $order['commission'],
+                    'num' => $order['num'] + $order['commission'],  // 记录商品价格+佣金
                     'type' => 3, // 佣金
                     'status' => 1,
                     'addtime' => time()
@@ -858,9 +862,9 @@ class Convey extends Model
                 // 7. 发放上级奖励（在事务外执行，避免复杂度）
                 Db::commit();
                 
-                // 异步发放上级奖励
+                // 异步发放上级奖励 - 但不重复发放佣金给当前用户
                 try {
-                    $this->deal_reward($order['uid'], $orderId, $order['num'], $order['commission']);
+                    $this->deal_reward_to_parent_only($order['uid'], $orderId, $order['num'], $order['commission']);
                 } catch (\Exception $e) {
                     // 上级奖励失败不影响主流程
                     error_log("发放上级奖励失败: " . $e->getMessage());
@@ -896,7 +900,7 @@ class Convey extends Model
                 $logData = [
                     'uid' => $order['uid'],
                     'oid' => $orderId,
-                    'num' => $commission, // 记录佣金
+                    'num' => $orderAmount + $commission, // 记录商品价格+佣金
                     'type' => 3, // 结算
                     'status' => 1,
                     'addtime' => time()
@@ -922,9 +926,9 @@ class Convey extends Model
                 
                 Db::commit();
                 
-                // 异步发放上级奖励
+                // 异步发放上级奖励 - 但不重复发放佣金给当前用户
                 try {
-                    $this->deal_reward($order['uid'], $orderId, $orderAmount, $commission);
+                    $this->deal_reward_to_parent_only($order['uid'], $orderId, $orderAmount, $commission);
                 } catch (\Exception $e) {
                     // 上级奖励失败不影响主流程
                     error_log("发放上级奖励失败: " . $e->getMessage());
@@ -1209,8 +1213,8 @@ class Convey extends Model
                 'uid' => $order['uid'],
                 'oid' => $orderId,
                 'num' => $orderAmount,
-                'type' => 4, // 强制付款
-                'status' => 1,
+                'type' => 2, // 用户接单，支出状态
+                'status' => 2, // 支出状态
                 'addtime' => time()
             ];
             
@@ -1238,7 +1242,7 @@ class Convey extends Model
     }
 
     /**
-     * 计算佣金
+     * 计算佣金（只基于用户等级的佣金比例）
      * @param float $amount 订单金额
      * @param int $userLevel 用户等级
      * @return float
@@ -1251,9 +1255,8 @@ class Convey extends Model
             return $amount * floatval($levelInfo['bili']);
         }
         
-        // 默认佣金比例（可从配置中读取）
-        $defaultCommissionRate = get_dispatch_config('default_commission_rate', 0.008);
-        return $amount * $defaultCommissionRate;
+        // 如果没有找到等级信息，返回0佣金
+        return 0;
     }
 
     /**
