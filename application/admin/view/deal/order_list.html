@@ -146,14 +146,6 @@
                                        data-modal="{:admin_url('admin/deal/manual_dispatch')}?order_id={$vo.id}"
                                        data-title="手动派单 - 订单号: {$vo.id}"
                                        title="匹配订单">匹配订单</a>
-                                {elseif $vo.dispatch_status == 2}
-                                    <!-- 已派单等待结算状态，显示手动结算按钮 -->
-                                    <a class="layui-btn layui-btn-xs layui-btn-normal" 
-                                       data-confirm="确定手动结算此订单吗？"
-                                       data-csrf="{:systoken('admin/deal/manual_settlement')}"
-                                       data-action="{:admin_url('admin/deal/manual_settlement')}"
-                                       data-value="id#{$vo.id}"
-                                       title="手动结算">手动结算</a>
                                 {/if}
                             {else}
                                 <!-- 传统模式：显示启用按钮 -->
