@@ -15,8 +15,7 @@ services:
       - mysql_data:/var/lib/mysql
       - mysql_backup:/var/backups
       - ./mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./mysql/00-create-database.sql:/docker-entrypoint-initdb.d/00-create-database.sql
-      - ./mysql/02-import-data.sql:/docker-entrypoint-initdb.d/02-import-data.sql
+      - ./mysql/00-complete-init.sql:/docker-entrypoint-initdb.d/00-complete-init.sql
       - ./logs/mysql:/var/log/mysql
       - ./backup:/backup
     networks:

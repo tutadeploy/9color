@@ -1,6 +1,6 @@
-# 9Color 数据库服务器
+# 9Color 独立数据库服务器
 
-独立的数据库服务器，包含完整的9Color系统数据库结构和数据。
+这是9Color电商平台的独立数据库服务器配置，包含完整的数据库初始化脚本和配置。
 
 ## 🚀 快速启动
 
@@ -94,105 +94,185 @@ docker-compose -f docker-compose.yml down
 
 ```
 database-server/
-├── start.sh                    # 智能启动脚本
-├── docker-compose.yml          # Ubuntu22配置
-├── docker-compose-m1.yml       # M1 Mac配置
+├── docker-compose.yml          # Docker编排配置
+├── docker-compose-m1.yml       # M1芯片Mac专用配置
+├── README.md                   # 说明文档
 ├── mysql/
-│   ├── my.cnf                  # MySQL配置
-│   ├── 00-create-database.sql  # 数据库初始化
-│   └── 02-import-data.sql      # 数据导入
-├── phpmyadmin/                 # phpMyAdmin配置
-├── scripts/                    # 备份脚本
+│   ├── 00-complete-init.sql    # 统一数据库初始化脚本 ⭐
+│   └── my.cnf                  # MySQL配置文件
+├── backup/                     # 数据库备份目录
 ├── logs/                       # 日志目录
-└── backup/                     # 备份目录
+├── phpmyadmin/                 # phpMyAdmin配置
+└── scripts/                    # 维护脚本
 ```
 
-## 🔧 配置说明
+## 🚀 快速部署
 
-### MySQL配置优化
-- 字符集: utf8mb4
-- 连接池: 300
-- 缓冲池: 512M (M1) / 768M (Ubuntu22)
-- 二进制日志: 启用，保留7天
+### 1. 启动数据库服务器
 
-### 安全配置
-- 绑定所有接口
-- 密码认证
-- 权限分离
+```bash
+# 进入数据库服务器目录
+cd database-server
 
-## ⚠️ 注意事项
+# 启动服务（首次启动会自动初始化数据库）
+docker-compose up -d
 
-1. **端口占用**: 确保 3306 和 8090 端口未被占用
-2. **数据持久化**: 数据存储在Docker卷中，删除容器不会丢失数据
-3. **首次启动**: 数据导入可能需要几分钟时间
-4. **M1兼容**: M1 Mac会自动使用 `linux/amd64` 平台
+# 查看启动状态
+docker-compose ps
+```
+
+### 2. 验证部署
+
+```bash
+# 检查数据库连接
+mysql -h localhost -P 3306 -u app -papp123456 6ui -e "SHOW TABLES;"
+
+# 检查管理员账号
+mysql -h localhost -P 3306 -u app -papp123456 6ui -e "SELECT username FROM system_user WHERE username='admin';"
+```
+
+## 📋 统一初始化脚本说明
+
+### `00-complete-init.sql` 包含内容：
+
+1. **数据库创建**：创建`6ui`数据库，设置utf8mb4字符集
+2. **用户权限**：创建`app`、`readonly`、`backup`三个用户并授权
+3. **完整表结构**：所有业务表的DDL语句
+4. **初始数据**：系统配置、管理员账号、权限设置等
+5. **自动派单功能**：相关表和存储过程
+6. **索引优化**：所有必要的索引和约束
+
+### 默认账号信息：
+
+| 类型 | 用户名 | 密码 | 权限 |
+|------|--------|------|------|
+| 数据库管理员 | root | root123456 | 全部权限 |
+| 应用用户 | app | app123456 | 6ui数据库全部权限 |
+| 只读用户 | readonly | readonly123456 | 6ui数据库只读权限 |
+| 备份用户 | backup | backup123456 | 备份相关权限 |
+| 后台管理员 | admin | admin123456 | 后台系统超级管理员 |
+
+## 🔧 环境变量配置
+
+可以通过环境变量自定义配置：
+
+```bash
+# 数据库root密码
+MYSQL_ROOT_PASSWORD=your_root_password
+
+# 数据库名
+MYSQL_DATABASE=6ui
+
+# 应用用户名和密码
+MYSQL_USER=app
+MYSQL_PASSWORD=your_app_password
+```
+
+## 📊 服务组件
+
+### MySQL 5.7
+- **端口**：3306
+- **数据持久化**：使用Docker Volume
+- **配置文件**：`mysql/my.cnf`
+- **初始化脚本**：`mysql/00-complete-init.sql`
+
+### phpMyAdmin
+- **访问地址**：http://your-server-ip:8090
+- **用户名**：app 或 root
+- **密码**：对应的数据库密码
+
+### 自动备份服务
+- **备份目录**：`./backup/`
+- **备份脚本**：`scripts/backup-scheduler.sh`
+- **备份频率**：可配置
+
+## 🛠️ 维护操作
+
+### 查看日志
+```bash
+# 查看MySQL日志
+docker-compose logs mysql
+
+# 查看备份服务日志
+docker-compose logs mysql-backup
+
+# 查看phpMyAdmin日志
+docker-compose logs phpmyadmin
+```
+
+### 手动备份
+```bash
+# 进入备份容器
+docker exec -it 9color_mysql_backup bash
+
+# 执行备份
+/scripts/backup-scheduler.sh
+```
+
+### 重新初始化数据库
+```bash
+# 停止服务
+docker-compose down
+
+# 删除数据卷（⚠️ 会丢失所有数据）
+docker volume rm database-server_mysql_data
+
+# 重新启动（会重新初始化）
+docker-compose up -d
+```
+
+## 🔒 安全建议
+
+1. **修改默认密码**：部署后立即修改所有默认密码
+2. **网络安全**：配置防火墙，只允许必要的端口访问
+3. **定期备份**：确保备份服务正常运行
+4. **监控日志**：定期检查数据库和应用日志
+5. **版本更新**：定期更新MySQL和相关组件
+
+## 📝 数据迁移
+
+### 从现有数据库迁移
+如果需要从其他数据库迁移数据，可以：
+
+1. 导出现有数据：
+```bash
+mysqldump -h source_host -u user -p source_db > migration.sql
+```
+
+2. 导入到新数据库：
+```bash
+mysql -h localhost -P 3306 -u app -papp123456 6ui < migration.sql
+```
 
 ## 🆘 故障排除
 
-### MySQL启动失败
-```bash
-# 查看详细日志
-docker logs 9color_mysql_standalone
+### 常见问题
 
-# 检查端口占用
-lsof -i :3306
-```
+1. **容器启动失败**
+   - 检查端口是否被占用
+   - 查看Docker日志：`docker-compose logs`
 
-### 数据导入失败
-```bash
-# 重新初始化（会清空数据）
-docker-compose down -v
-./start.sh
-```
+2. **数据库连接失败**
+   - 确认容器状态：`docker-compose ps`
+   - 检查网络配置和防火墙设置
 
-### phpMyAdmin无法访问
-```bash
-# 检查容器状态
-docker ps | grep phpmyadmin
+3. **初始化脚本执行失败**
+   - 查看MySQL日志中的错误信息
+   - 检查SQL脚本语法
 
-# 查看phpMyAdmin日志
-docker logs 9color_phpmyadmin
-```
+4. **phpMyAdmin无法访问**
+   - 确认端口8090未被占用
+   - 检查防火墙设置
 
-## 监控信息
+## 📞 技术支持
 
-### 资源使用
-```bash
-# 查看详细状态
-docker ps
-```
-
-### 容器状态
-```bash
-# 查看所有容器
-docker ps
-
-# 查看资源使用
-docker stats
-```
-
-## 安全注意事项
-
-1. **防火墙设置**: 确保只开放必要端口
-2. **密码安全**: 定期更换数据库密码
-3. **备份验证**: 定期验证备份文件完整性
-4. **访问控制**: 限制phpMyAdmin访问IP
-
-## 维护计划
-
-### 日常维护
-- 检查服务状态
-- 监控资源使用
-- 查看错误日志
-
-### 周期维护
-- 验证备份完整性
-- 清理旧日志文件
-- 更新系统补丁
-
-## 联系信息
-如有问题，请联系系统管理员。
+如有问题，请提供以下信息：
+- 系统环境（操作系统、Docker版本）
+- 错误日志（`docker-compose logs`）
+- 配置文件内容
+- 具体的错误现象描述
 
 ---
-*文档版本: 1.0*  
-*更新时间: 2025-06-19* 
+
+**最后更新**：2025-06-22  
+**版本**：v1.0 - 统一初始化脚本版本
