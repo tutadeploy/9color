@@ -1436,6 +1436,7 @@ class Deal extends Controller
 	}
 
     /**
+<<<<<<< Updated upstream
      * 删除充值记录
      * @auth true
      */
@@ -1540,6 +1541,8 @@ class Deal extends Controller
     }
 
     /**
+=======
+>>>>>>> Stashed changes
      * 切换订单派单模式
      * @auth true
      */
@@ -1547,18 +1550,32 @@ class Deal extends Controller
     {
         $this->applyCsrfToken();
         $orderId = input('post.id/s', '');
+<<<<<<< Updated upstream
         $mode = input('post.mode/s', ''); // auto 或 manual
         
         if (!$orderId || !in_array($mode, ['auto', 'manual'])) {
+=======
+        $mode = input('post.mode/s', ''); // open 或 close
+        
+        if (!$orderId || !in_array($mode, ['open', 'close'])) {
+>>>>>>> Stashed changes
             return $this->error('参数错误');
         }
         
         $conveyModel = new \app\admin\model\Convey();
+<<<<<<< Updated upstream
         if ($mode == 'auto') {
             // 切换为自动派单
             $result = $conveyModel->switchToAutoDispatch($orderId);
         } else {
             // 切换为手动派单
+=======
+        if ($mode == 'open') {
+            // 开启自动派单
+            $result = $conveyModel->switchToAutoDispatch($orderId);
+        } else {
+            // 关闭自动派单（切换为手动派单）
+>>>>>>> Stashed changes
             $result = $conveyModel->switchToManualDispatch($orderId);
         }
         
@@ -1707,6 +1724,10 @@ class Deal extends Controller
             $html .= '</div>';
             $html .= '<div class="layui-col-md2 text-right">';
             $html .= '<div class="goods-price">¥' . $goods['goods_price'] . '</div>';
+<<<<<<< Updated upstream
+=======
+            $html .= '<button type="button" class="layui-btn layui-btn-xs layui-btn-normal" style="margin-top: 5px;">选择</button>';
+>>>>>>> Stashed changes
             $html .= '</div>';
             $html .= '</div>';
             $html .= '</div>';

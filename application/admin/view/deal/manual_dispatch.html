@@ -1,9 +1,15 @@
 {extend name='main'}
 
 {block name="content"}
+<<<<<<< Updated upstream
 <div class="manual-dispatch-container">
         <!-- 用户信息区域 -->
         <div class="layui-row layui-col-space10 user-info-section">
+=======
+<div style="padding: 20px; max-height: 80vh; overflow-y: auto; max-width: 100%; box-sizing: border-box;">
+        <!-- 用户信息区域 -->
+        <div class="layui-row layui-col-space10" style="margin-bottom: 15px;">
+>>>>>>> Stashed changes
             <div class="layui-col-md6">
                 <div class="info-box">
                     <div class="info-title">用户信息</div>
@@ -31,6 +37,10 @@
         
         <!-- 商品搜索区域 -->
         <div class="search-section">
+<<<<<<< Updated upstream
+=======
+            <div class="section-title">商品搜索</div>
+>>>>>>> Stashed changes
             <form class="layui-form" id="searchForm">
                 <!-- 第一行：商品标题 -->
                 <div class="layui-form-item search-row">
@@ -169,6 +179,7 @@ $(document).ready(function() {
 </script>
 
 <style>
+<<<<<<< Updated upstream
 /* 弹窗整体容器样式 - 自适应浏览器高度 */
 .manual-dispatch-container {
     padding: 20px;
@@ -214,6 +225,8 @@ $(document).ready(function() {
     margin-top: 15px;
 }
 
+=======
+>>>>>>> Stashed changes
 /* 弹窗整体样式 */
 .info-box {
     background: #f8f9fa;
@@ -258,7 +271,18 @@ $(document).ready(function() {
     font-weight: bold;
 }
 
+<<<<<<< Updated upstream
 /* 搜索区域详细样式 */
+=======
+/* 搜索区域样式 */
+.search-section {
+    margin-bottom: 15px;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 15px;
+}
+>>>>>>> Stashed changes
 
 .search-row {
     margin-bottom: 12px;
@@ -330,11 +354,14 @@ $(document).ready(function() {
 
 /* 响应式处理 */
 @media (max-width: 768px) {
+<<<<<<< Updated upstream
     .manual-dispatch-container {
         padding: 15px;
         max-height: 90vh;
     }
     
+=======
+>>>>>>> Stashed changes
     .search-row {
         flex-direction: column;
         align-items: stretch;
@@ -363,6 +390,7 @@ $(document).ready(function() {
     .info-box {
         margin-bottom: 15px;
     }
+<<<<<<< Updated upstream
     
     .goods-section {
         min-height: 150px;
@@ -397,6 +425,8 @@ $(document).ready(function() {
         padding-top: 10px;
         margin-top: 10px;
     }
+=======
+>>>>>>> Stashed changes
 }
 
 .section-title {
@@ -408,16 +438,29 @@ $(document).ready(function() {
     border-bottom: 1px solid #e9ecef;
 }
 
+<<<<<<< Updated upstream
 /* 商品区域详细样式 */
 
 .goods-list-container {
     flex: 1;
+=======
+/* 商品区域样式 */
+.goods-section {
+    margin-bottom: 15px;
+}
+
+.goods-list-container {
+    max-height: 300px;
+>>>>>>> Stashed changes
     overflow-y: auto;
     border: 1px solid #e9ecef;
     border-radius: 4px;
     padding: 10px;
     background: #fff;
+<<<<<<< Updated upstream
     min-height: 150px;
+=======
+>>>>>>> Stashed changes
 }
 
 .goods-item {
@@ -452,7 +495,18 @@ $(document).ready(function() {
     font-weight: bold;
 }
 
+<<<<<<< Updated upstream
 /* 操作按钮详细样式 */
+=======
+/* 操作按钮样式 */
+.action-buttons {
+    text-align: center;
+    padding-top: 15px;
+    border-top: 1px solid #e9ecef;
+    margin-top: 15px;
+}
+
+>>>>>>> Stashed changes
 .action-buttons .layui-btn {
     margin: 0 5px;
 }

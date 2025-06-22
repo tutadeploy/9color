@@ -1039,7 +1039,6 @@ class Convey extends Model
     {
         // 强制商品数量为1
         $goodsCount = 1;
-        
         Db::startTrans();
         try {
             // 1. 获取订单信息
