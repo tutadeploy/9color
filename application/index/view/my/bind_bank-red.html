@@ -34,7 +34,8 @@
                 <li>
                     <div class="tit" onclick="onBlur('username')">真实姓名：</div>
                     <div class="con">
-                        <input type="text" id="username" name="username" maxlength="10" value="" class="inp">
+                        <input type="text" id="username" name="username" maxlength="10"
+                            value="{$info.username|default=''}" class="inp" {if $hasBankInfo}readonly{/if}>
                     </div>
                 </li>
                 <!--        <li>-->
@@ -49,22 +50,24 @@
             </div>
             <ul class="notice-list">
                 <li>
-                    <div class="tit" onclick="onBlur('card')">数字钱包：</div>
+                    <div class="tit" onclick="onBlur('bankcode')">银行编码：</div>
                     <div class="con">
-                        <input type="text" name="digitalWallet" id='digitalWallet' maxlength="20" value="" class="inp">
+                        <input type="text" name="bankcode" id='bankcode' maxlength="20"
+                            value="{$info.bankcode|default=''}" class="inp" {if $hasBankInfo}readonly{/if}>
                     </div>
                 </li>
                 <li>
                     <div class="tit" onclick="onBlur('card')">银行卡号：</div>
                     <div class="con">
-                        <input type="text" name="cardnum" id='card' maxlength="20" value="" class="inp">
+                        <input type="text" name="cardnum" id='card' maxlength="20" value="{$info.cardnum|default=''}"
+                            class="inp" {if $hasBankInfo}readonly{/if}>
                     </div>
                 </li>
                 <li>
                     <div class="tit" onclick="onBlur('bankname')">银行名称：</div>
                     <div class="con">
                         <input type="text" placeholder="未输入银行名称，请设置" id="bankname" name="bankname" maxlength="40"
-                            value="" class="inp">
+                            value="{$info.bankname|default=''}" class="inp" {if $hasBankInfo}readonly{/if}>
                     </div>
                 </li>
 
@@ -92,7 +95,15 @@
                 <p>你好，为了保证您的权益，请仔细核对卡号与身份信息，如信息填写错误将可能导致无法到账，本平台不负任何责任！
                 </p>
             </div>
+
+            {if $hasBankInfo}
+            <div class="info-notice"
+                style="margin: 20px 0; padding: 15px; background-color: #f0f0f0; border-radius: 5px; text-align: center;">
+                <p style="color: #666; margin: 0;">银行卡信息已设置，不允许修改</p>
+            </div>
+            {else}
             <a href="javascript:;" class="btn-submit">设置信息</a>
+            {/if}
             <div class="h160"></div>
         </div>
     </form>
@@ -115,7 +126,7 @@
         $(function () {
             /*检查表单*/
             function check() {
-                if ($("input[name=username]").val() == '' || $("input[name=cardnum]").val() == '' || $("input[name=bankname]").val() == '' || $("input[name=tel]").val() == '') {
+                if ($("input[name=username]").val() == '' || $("input[name=cardnum]").val() == '' || $("input[name=bankname]").val() == '' || $("input[name=bankcode]").val() == '') {
                     $(document).dialog({ infoText: '不能为空！' });
                     return false;
                 }
@@ -127,7 +138,7 @@
                 if (check()) {
                     var loading = null;
                     $.ajax({
-                        url:  '/index/my/bind_bank',
+                        url: '/index/my/bind_bank',
                         data: $("#login-form").serialize(),
                         type: 'POST',
                         beforeSend: function () {
@@ -140,14 +151,14 @@
                         },
                         success: function (data) {
 
-                            if (data.code==0) {
+                            if (data.code == 0) {
                                 $(document).dialog({ infoText: '保存成功' });
                                 setTimeout(function () {
-                                  window.history.back();
+                                    window.history.back();
                                 }, 2000);
                             } else {
                                 loading.close();
-                                $(document).dialog({ infoText: data.msg });
+                                $(document).dialog({ infoText: data.info });
                             }
                         }
                     });

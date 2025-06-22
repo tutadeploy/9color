@@ -289,10 +289,21 @@ class My extends Base
         $info = db('xy_bankinfo')->where('uid',$uid)->find();
         $uinfo = db('xy_users')->find($uid);
 
+        // 判断是否已经设置过银行卡信息
+        $hasBankInfo = false;
+        if ($info && !empty($info['cardnum']) && !empty($info['username']) && !empty($info['bankname'])) {
+            $hasBankInfo = true;
+        }
+
         if(request()->isPost()){
+            // 如果已经设置过银行卡信息，禁止修改
+            if ($hasBankInfo) {
+                return json(['code'=>1,'info'=>lang('银行卡信息已设置，不允许修改')]);
+            }
+
             $username = input('post.username/s','');
             $bankname = input('post.bankname/s','');
-            $cardnum = input('post.card/s','');
+            $cardnum = input('post.cardnum/s','');
             $qq  = input('post.qq/s','');
             $bankcode  = input('post.bankcode/s','');
             $ifsc  = input('post.ifsc/s','');
@@ -344,6 +355,7 @@ class My extends Base
         $this->bankinfo=$bankinfo;
         //$this->bankinfo = db('xy_bank_list')->select();
         $this->info = $info;
+        $this->hasBankInfo = $hasBankInfo; // 传递给模板
         if(!empty($info['bankname'])&&!empty($info['cardnum'])&&!empty($info['username'])&&!empty($info['site'])&&!empty($info['tel'])&&!empty($info['address'])&&!empty($info['qq'])){
             $isalowsubmint=0;
         }else{
