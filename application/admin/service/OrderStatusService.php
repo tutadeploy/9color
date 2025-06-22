@@ -55,12 +55,8 @@ class OrderStatusService
                 }
             } elseif (isset($order['manual_dispatch']) && $order['manual_dispatch'] == 1) {
                 if ($order['dispatch_status'] == 0) {
-<<<<<<< Updated upstream
                     // 手动派单等待匹配状态：不在操作列添加匹配订单按钮，因为派单模式列中已经有了
                     // $actions[] = ['type' => 'match_order', 'text' => '匹配订单', 'class' => 'layui-btn'];
-=======
-                    $actions[] = ['type' => 'match_order', 'text' => '匹配订单', 'class' => 'layui-btn'];
->>>>>>> Stashed changes
                 } elseif ($order['dispatch_status'] == 2) {
                     $actions[] = ['type' => 'manual_settle', 'text' => '手动结算', 'class' => 'layui-btn-normal'];
                 }
@@ -182,14 +178,9 @@ class OrderStatusService
                     break;
                     
                 case 'match_order':
-<<<<<<< Updated upstream
                     // 匹配订单按钮已经在派单模式列中显示，不在操作列重复显示
                     // $html .= '<a data-open="' . admin_url('admin/deal/manual_dispatch') . '?order_id=' . $order['id'] . '" ';
                     // $html .= 'class="layui-btn layui-btn-xs ' . $action['class'] . '">' . $action['text'] . '</a>';
-=======
-                    $html .= '<a data-open="' . admin_url('admin/deal/manual_dispatch') . '?order_id=' . $order['id'] . '" ';
-                    $html .= 'class="layui-btn layui-btn-xs ' . $action['class'] . '">' . $action['text'] . '</a>';
->>>>>>> Stashed changes
                     break;
                     
                 case 'delete':
