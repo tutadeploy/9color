@@ -1626,8 +1626,8 @@ class Deal extends Controller
             $this->error('订单不存在');
         }
         
-        // 验证订单状态
-        if ($order['manual_dispatch'] != 1 || $order['dispatch_status'] != 0) {
+        // 验证订单状态（支持等待匹配和已有默认商品两种状态）
+        if ($order['manual_dispatch'] != 1 || !in_array($order['dispatch_status'], [0, 2])) {
             $this->error('订单状态不允许手动派单');
         }
         
@@ -1637,8 +1637,15 @@ class Deal extends Controller
             $this->error('用户不存在');
         }
         
+        // 如果订单已经有默认商品，获取商品信息
+        $currentGoods = null;
+        if ($order['goods_id'] > 0) {
+            $currentGoods = Db::name('xy_goods_list')->where('id', $order['goods_id'])->find();
+        }
+        
         $this->assign('order', $order);
         $this->assign('user', $user);
+        $this->assign('currentGoods', $currentGoods);
         
         return $this->fetch();
     }

@@ -533,7 +533,7 @@ class Convey extends Model
     }
 
     /**
-     * 创建手动派单订单（不包含商品信息）
+     * 创建手动派单订单（包含默认商品信息）
      * @param int $uid 用户ID
      * @param int $cid 商品分类ID
      * @return array
@@ -553,6 +553,45 @@ class Convey extends Model
             return ['code'=>1,'info'=>lang('会员等级余额不足')];
         }
 
+        // 像自动派单一样，为手动派单默认分配一个商品
+        $userBalance = $uinfo['balance'];
+        $minPrice = max(1, $userBalance * 0.8); // 最低80%余额
+        $maxPrice = $userBalance * 1.2; // 最高120%余额
+        
+        // 如果有等级限制，使用等级的价格范围
+        if ($ulevel && isset($ulevel['num_min']) && $ulevel['num_min'] > 0) {
+            $minPrice = max($minPrice, $ulevel['num_min']);
+        }
+        if ($ulevel && isset($ulevel['num_max']) && $ulevel['num_max'] > 0) {
+            $maxPrice = min($maxPrice, $ulevel['num_max']);
+        }
+        
+        // 获取默认商品（价格在用户余额范围内的商品）
+        $defaultGoods = Db::name('xy_goods_list')
+            ->where('status', 1)
+            ->where('goods_price', '>=', $minPrice)
+            ->where('goods_price', '<=', $maxPrice)
+            ->order('goods_price ASC') // 优先选择价格较低的商品
+            ->find();
+        
+        if (!$defaultGoods) {
+            // 如果没有合适的商品，降低要求再试一次
+            $defaultGoods = Db::name('xy_goods_list')
+                ->where('status', 1)
+                ->where('goods_price', '<=', $userBalance)
+                ->order('goods_price ASC')
+                ->find();
+        }
+        
+        if (!$defaultGoods) {
+            return ['code'=>1,'info'=>'没有找到适合的商品，请联系管理员'];
+        }
+
+        // 计算订单金额和佣金（商品数量固定为1）
+        $goodsCount = 1;
+        $orderAmount = $defaultGoods['goods_price'] * $goodsCount;
+        $commission = $this->calculateCommission($orderAmount, $level);
+
         $id = getSn('UB');
         Db::startTrans();
         
@@ -562,20 +601,20 @@ class Convey extends Model
             'deal_count'=>Db::raw('deal_count+1')
         ]);
 
-        // 创建不完整的订单记录（等待管理员匹配商品）
+        // 创建完整的订单记录（包含默认商品信息）
         $res1 = Db::name($this->table)->insert([
             'id'            => $id,
             'uid'           => $uid,
             'ubalance'      => $uinfo['balance'],
-            'num'           => 0, // 暂时为0，等待管理员设置
+            'num'           => $orderAmount, // 设置默认金额
             'addtime'       => time(),
             'endtime'       => time()+config('deal_timeout'),
             'add_id'        => $add_id,
-            'goods_id'      => 0, // 暂时为0，等待管理员选择
-            'goods_count'   => 0, // 暂时为0，等待管理员设置
-            'commission'    => 0, // 暂时为0，等待计算
+            'goods_id'      => $defaultGoods['id'], // 设置默认商品
+            'goods_count'   => $goodsCount, // 固定数量为1
+            'commission'    => $commission, // 计算佣金
             'auto_dispatch' => 0,
-            'dispatch_status' => 0, // 0=等待匹配
+            'dispatch_status' => 2, // 2=已手动派单（有默认商品），等待手动结算
             'manual_dispatch' => 1,
             'cooling_end_time' => 0, // 手动派单无冷却期
             'order_num' => 0,
@@ -584,7 +623,7 @@ class Convey extends Model
         
         if($res && $res1){
             Db::commit();
-            return ['code'=>0,'info'=>lang('手动派单订单创建成功'),'oid'=>$id];
+            return ['code'=>0,'info'=>lang('手动派单订单创建成功，已分配默认商品'),'oid'=>$id];
         }else{
             Db::rollback();
             return ['code'=>1,'info'=>lang('订单创建失败!请稍后再试')];
