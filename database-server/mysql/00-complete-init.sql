@@ -1631,6 +1631,14 @@ DELIMITER ;
 -- Dump completed on 2025-06-22 15:35:28
 
 -- ===========================================
+-- 创建自动派单事件
+-- ===========================================
+CREATE EVENT IF NOT EXISTS auto_dispatch_event
+ON SCHEDULE EVERY 1 MINUTE
+STARTS NOW()
+DO CALL ProcessAllExpiredOrders();
+
+-- ===========================================
 -- 初始化完成提示
 -- ===========================================
 SELECT '=== 9Color数据库初始化完成 ===' as status;
