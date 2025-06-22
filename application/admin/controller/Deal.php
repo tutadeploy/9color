@@ -1547,18 +1547,18 @@ class Deal extends Controller
     {
         $this->applyCsrfToken();
         $orderId = input('post.id/s', '');
-        $mode = input('post.mode/s', ''); // open 或 close
+        $mode = input('post.mode/s', ''); // auto 或 manual
         
-        if (!$orderId || !in_array($mode, ['open', 'close'])) {
+        if (!$orderId || !in_array($mode, ['auto', 'manual'])) {
             return $this->error('参数错误');
         }
         
         $conveyModel = new \app\admin\model\Convey();
-        if ($mode == 'open') {
-            // 开启自动派单
+        if ($mode == 'auto') {
+            // 切换为自动派单
             $result = $conveyModel->switchToAutoDispatch($orderId);
         } else {
-            // 关闭自动派单（切换为手动派单）
+            // 切换为手动派单
             $result = $conveyModel->switchToManualDispatch($orderId);
         }
         
