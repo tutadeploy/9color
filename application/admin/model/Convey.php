@@ -634,42 +634,128 @@ class Convey extends Model
             try {
                 Db::startTrans();
                 
-                // 先设置用户状态为交易中
-                $updateUserResult = Db::name('xy_users')
-                    ->where('id', $order['uid'])
-                    ->update(['deal_status' => 3]); // 3=交易中
+                // 检查是否已经扣款（通过余额日志判断）
+                $paymentLog = Db::name('xy_balance_log')
+                    ->where('oid', $order['id'])
+                    ->where('type', 2) // 支出类型
+                    ->where('status', 2) // 支出状态
+                    ->find();
                 
-                if (!$updateUserResult) {
-                    throw new \Exception('更新用户状态失败');
-                }
+                $alreadyPaid = !empty($paymentLog);
                 
-                // 自动付款并结算（根据设计：付款后立即结算）
-                $result = $this->do_order($order['id'], 1); // 1=确认付款
-                
-                if ($result['code'] == 0) {
-                    // 关键修改：确保派单状态和订单状态一致
-                    // 同时更新 dispatch_status 和 status 为已完成状态
-                    Db::name('xy_convey')
-                        ->where('id', $order['id'])
+                if ($alreadyPaid) {
+                    // 场景2：手动匹配后切回自动 - 已扣款，只需结算
+                    
+                    // 获取用户信息
+                    $user = Db::name('xy_users')->where('id', $order['uid'])->find();
+                    if (!$user) {
+                        throw new \Exception('用户不存在');
+                    }
+                    
+                    // 直接执行结算：返还本金+佣金
+                    $orderAmount = $order['num'];
+                    $commission = $order['commission'];
+                    $settleAmount = $orderAmount + $commission;
+                    
+                    $updateBalanceResult = Db::name('xy_users')
+                        ->where('id', $order['uid'])
                         ->update([
-                            'dispatch_status' => 1, // 1=已自动派单并结算
-                            'status' => 1 // 确保订单状态也是已完成
+                            'balance' => Db::raw('balance + ' . $settleAmount),
+                            'deal_status' => 1 // 恢复正常状态
                         ]);
                     
-                    // 恢复用户状态为正常
-                    Db::name('xy_users')
-                        ->where('id', $order['uid'])
-                        ->update(['deal_status' => 1]); // 1=停止交易（正常状态）
+                    if (!$updateBalanceResult) {
+                        throw new \Exception('结算余额失败');
+                    }
+                    
+                    // 记录结算日志
+                    $logData = [
+                        'uid' => $order['uid'],
+                        'oid' => $order['id'],
+                        'num' => $settleAmount, // 记录商品价格+佣金
+                        'type' => 3, // 结算
+                        'status' => 1,
+                        'addtime' => time()
+                    ];
+                    
+                    $logResult = Db::name('xy_balance_log')->insert($logData);
+                    if (!$logResult) {
+                        throw new \Exception('记录结算日志失败');
+                    }
+                    
+                    // 更新订单状态
+                    $updateOrderResult = Db::name('xy_convey')
+                        ->where('id', $order['id'])
+                        ->update([
+                            'status' => 1, // 交易完成
+                            'dispatch_status' => 1, // 派单完成
+                            'c_status' => 1, // 佣金已发放
+                            'endtime' => time()
+                        ]);
+                    
+                    if (!$updateOrderResult) {
+                        throw new \Exception('更新订单状态失败');
+                    }
+                    
+                    // 记录奖励日志
+                    Db::name('xy_reward_log')->insert([
+                        'oid' => $order['id'],
+                        'uid' => $order['uid'],
+                        'num' => $orderAmount,
+                        'addtime' => time(),
+                        'type' => 2
+                    ]);
                     
                     Db::commit();
-                    $processedCount++;
                     
-                    // 记录成功日志
-                    error_log("自动派单成功: 订单ID {$order['id']}, 用户ID {$order['uid']}, 金额 {$order['num']}");
+                    // 异步发放上级奖励
+                    try {
+                        $this->deal_reward_to_parent_only($order['uid'], $order['id'], $orderAmount, $commission);
+                    } catch (\Exception $e) {
+                        error_log("发放上级奖励失败: " . $e->getMessage());
+                    }
+                    
+                    $processedCount++;
+                    error_log("自动结算成功（已扣款订单）: 订单ID {$order['id']}, 用户ID {$order['uid']}, 金额 {$orderAmount}");
                     
                 } else {
-                    Db::rollback();
-                    $errors[] = "订单 {$order['id']} 处理失败: " . $result['info'];
+                    // 场景1：纯自动派单 - 未扣款，需要先扣款再结算
+                    
+                    // 先设置用户状态为交易中
+                    $updateUserResult = Db::name('xy_users')
+                        ->where('id', $order['uid'])
+                        ->update(['deal_status' => 3]); // 3=交易中
+                    
+                    if (!$updateUserResult) {
+                        throw new \Exception('更新用户状态失败');
+                    }
+                    
+                    // 调用原有的扣款+结算逻辑
+                    $result = $this->do_order($order['id'], 1); // 1=确认付款
+                    
+                    if ($result['code'] == 0) {
+                        // 确保派单状态和订单状态一致
+                        Db::name('xy_convey')
+                            ->where('id', $order['id'])
+                            ->update([
+                                'dispatch_status' => 1, // 1=已自动派单并结算
+                                'status' => 1 // 确保订单状态也是已完成
+                            ]);
+                        
+                        // 恢复用户状态为正常
+                        Db::name('xy_users')
+                            ->where('id', $order['uid'])
+                            ->update(['deal_status' => 1]); // 1=停止交易（正常状态）
+                        
+                        Db::commit();
+                        $processedCount++;
+                        
+                        error_log("自动派单成功（扣款+结算）: 订单ID {$order['id']}, 用户ID {$order['uid']}, 金额 {$order['num']}");
+                        
+                    } else {
+                        Db::rollback();
+                        $errors[] = "订单 {$order['id']} 处理失败: " . $result['info'];
+                    }
                 }
                 
             } catch (\Exception $e) {
@@ -1294,16 +1380,27 @@ class Convey extends Model
             ];
             $message = '已切换为手动派单模式，订单已付款，可以手动结算';
         } else {
-            // 未付款的订单：无论是否有商品，都重新进入匹配流程（C状态）
+            // 未付款的订单：无论是否有商品，都清除商品重新进入匹配流程（C状态）
+            // 这包括：
+            // - A状态：自动派单+无商品 -> C状态：手动派单+无商品
+            // - B状态：自动派单+有商品（冷却中） -> C状态：手动派单+无商品（清除自动派的商品）
             $updateData = [
                 'auto_dispatch' => 0,
                 'manual_dispatch' => 1,
                 'dispatch_status' => 0, // 等待匹配
                 'cooling_end_time' => 0, // 清除冷却时间
                 'goods_id' => null, // 清除商品，重新匹配
-                'goods_count' => 0
+                'goods_count' => 0,
+                'num' => 0, // 清除订单金额，等待重新匹配商品后设置
+                'commission' => 0 // 清除佣金，等待重新匹配商品后计算
             ];
-            $message = '已切换为手动派单模式，请重新匹配商品';
+            
+            // 根据原状态给出不同的提示
+            if (!empty($order['goods_id']) && $order['goods_id'] > 0) {
+                $message = '已切换为手动派单模式，已清除自动派单的商品和价格信息，请重新匹配商品';
+            } else {
+                $message = '已切换为手动派单模式，请重新匹配商品';
+            }
         }
         
         $result = Db::name('xy_convey')->where('id', $orderId)->update($updateData);

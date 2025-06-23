@@ -316,7 +316,7 @@ class Users extends Controller
             $deal_max_num = input('post.deal_max_num/f',0);
             $credit_score = input('post.credit_score/d',100);
             $token = input('__token__');
-            if($balance<0) $this->error('余额不能低于0');
+            // 移除余额不能为负数的限制，允许设置负值
             $res = model('Users')->edit_users($id,$tel,$user_name,$pwd,$parent_id,$balance,$freeze_balance,$token,$pwd2,$deal_min_num,$deal_max_num);
             $res2 = Db::table($this->table)->where('id',$id)->update(['deal_status'=>$deal_status,'level'=>$level,'credit_score'=>$credit_score]);
 

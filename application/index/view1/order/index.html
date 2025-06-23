@@ -173,6 +173,7 @@
                                                     </div> <!---->
                                                     <img data-v-35ad745e="" src="{$img}" class="records_tabs_box_img">
                                                     <div data-v-35ad745e="" class="records_tabs_box_des">
+                                                        {if $v.goods_id && $v.goods_name}
                                                         <div data-v-35ad745e="" class="tabs_box_des_img">
                                                             <img data-v-35ad745e="" src="{$v.goods_pic}">
                                                         </div>
@@ -184,6 +185,21 @@
                                                                 <p data-v-35ad745e="">x {$v.goods_count}</p>
                                                             </div>
                                                         </div>
+                                                        {else}
+                                                        <div data-v-35ad745e="" class="tabs_box_des_img">
+                                                            <div style="width: 60px; height: 60px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999; font-size: 12px;">
+                                                                {:lang('等待匹配')}
+                                                            </div>
+                                                        </div>
+                                                        <div data-v-35ad745e="" class="tabs_box_des_r">
+                                                            <p data-v-35ad745e="" class="tabs_box_des_r_tit" style="color: #999;">
+                                                                {if $v.manual_dispatch == 1}{:lang('等待手动匹配商品')}{else}{:lang('等待自动派单')}{/if}</p>
+                                                            <div data-v-35ad745e="" class="tabs_box_des_r_pic">
+                                                                <p data-v-35ad745e="" style="color: #999;">{:lang('￥')} --</p>
+                                                                <p data-v-35ad745e="" style="color: #999;">x --</p>
+                                                            </div>
+                                                        </div>
+                                                        {/if}
                                                     </div>
                                                     <div data-v-35ad745e="" class="tabs_box_des_r_pic">
                                                         <p data-v-35ad745e="" class="gray">{:lang('订单总额')}</p>
