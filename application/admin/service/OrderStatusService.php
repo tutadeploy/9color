@@ -137,7 +137,7 @@ class OrderStatusService
                     $deleteConfirm = '确定删除此订单吗？（待付款状态，无需退款）';
                     break;
                 case 1:
-                    $deleteConfirm = '确定删除此订单吗？将退回本金并扣除已发放的佣金！';
+                    $deleteConfirm = '确定删除此订单吗？（已完成状态，不退款）';
                     break;
                 case 2:
                 case 4:
@@ -330,7 +330,7 @@ class OrderStatusService
                     break;
                     
                 case 'delete':
-                    $confirmText = isset($action['confirm']) ? $action['confirm'] : '确定删除此订单吗？余额将自动回退！';
+                    $confirmText = isset($action['confirm']) ? $action['confirm'] : '确定删除此订单吗？';
                     $html .= '<a data-confirm="' . htmlspecialchars($confirmText) . '" ';
                     $html .= 'data-action="' . admin_url('admin/deal/delete_order_with_refund') . '" ';
                     $html .= 'data-value="id#' . $order['id'] . '" ';

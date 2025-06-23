@@ -1103,15 +1103,15 @@ class Convey extends Model
                     $refundMessage = '订单删除成功（待付款状态，无需退款）';
                 }
             } elseif ($order['status'] == 1) {
-                // 已完成状态：需要退回本金，扣除佣金（如果有）
-                $refundAmount = $order['num']; // 退回本金
-                
-                // 如果订单已发放佣金，需要扣除佣金
+                // 已完成状态：扣除佣金（如果有）
                 if ($order['c_status'] == 1 && $order['commission'] > 0) {
-                    $refundAmount -= $order['commission']; // 扣除已发放的佣金
-                    $refundMessage = "订单删除成功，退回本金 ¥{$order['num']}，扣除佣金 ¥{$order['commission']}";
+                    // 已发放佣金，需要扣除
+                    $refundAmount = -$order['commission']; // 负数表示扣除
+                    $refundMessage = "订单删除成功，扣除佣金 ¥{$order['commission']}";
                 } else {
-                    $refundMessage = "订单删除成功，退回本金 ¥{$order['num']}";
+                    // 未发放佣金，无需处理
+                    $refundAmount = 0;
+                    $refundMessage = "订单删除成功（已完成状态，无佣金扣除）";
                 }
             } elseif (in_array($order['status'], [2, 4])) {
                 // 用户取消或系统取消：通常已经处理过退款，但为安全起见检查一下
@@ -1132,9 +1132,9 @@ class Convey extends Model
                 throw new \Exception('用户不存在');
             }
             
-            // 执行余额退款
-            if ($refundAmount > 0) {
-                // 计算退款后的余额
+            // 执行余额操作（退款或扣除）
+            if ($refundAmount != 0) {
+                // 计算操作后的余额（refundAmount为正数是退款，负数是扣除）
                 $newBalance = $user['balance'] + $refundAmount;
                 
                 $updateBalanceResult = Db::name('xy_users')
@@ -1148,13 +1148,13 @@ class Convey extends Model
                     throw new \Exception('退款失败');
                 }
                 
-                // 记录退款日志
+                // 记录余额变动日志
                 $logResult = Db::name('xy_balance_log')->insert([
                     'uid' => $order['uid'],
                     'oid' => $orderId,
-                    'num' => $refundAmount,
-                    'type' => 5, // 订单删除退款
-                    'status' => 1,
+                    'num' => abs($refundAmount), // 记录绝对值
+                    'type' => $refundAmount > 0 ? 5 : 6, // 5=订单删除退款, 6=订单删除扣除佣金
+                    'status' => $refundAmount > 0 ? 1 : 2, // 1=收入, 2=支出
                     'addtime' => time()
                 ]);
                 
@@ -1162,19 +1162,23 @@ class Convey extends Model
                     throw new \Exception('记录退款日志失败');
                 }
                 
-                // 如果用户原本余额为负数，在退款信息中说明
-                if ($user['balance'] < 0) {
-                    $refundMessage .= "（用户原余额为负 ¥{$user['balance']}，退款后余额 ¥{$newBalance}）";
+                // 如果用户原本余额为负数或操作后余额为负数，在信息中说明
+                if ($user['balance'] < 0 || $newBalance < 0) {
+                    $operation = $refundAmount > 0 ? '操作后' : '扣除后';
+                    $refundMessage .= "（用户原余额 ¥{$user['balance']}，{$operation}余额 ¥{$newBalance}）";
                 }
             } else {
-                // 无需退款，只恢复用户状态
-                $userUpdateResult = Db::name('xy_users')
-                    ->where('id', $order['uid'])
-                    ->update(['deal_status' => 1]); // 恢复为可交易状态
-                
-                if (!$userUpdateResult) {
-                    throw new \Exception('恢复用户状态失败');
+                // 无需退款，只恢复用户状态（如果需要的话）
+                if ($user['deal_status'] != 1) {
+                    $userUpdateResult = Db::name('xy_users')
+                        ->where('id', $order['uid'])
+                        ->update(['deal_status' => 1]); // 恢复为可交易状态
+                    
+                    if (!$userUpdateResult) {
+                        throw new \Exception('恢复用户状态失败');
+                    }
                 }
+                // 如果用户状态已经是1（可交易），则无需更新
             }
             
             // 删除相关的余额日志记录

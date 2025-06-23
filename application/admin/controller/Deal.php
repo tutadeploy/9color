@@ -1653,7 +1653,7 @@ class Deal extends Controller
         $result = $conveyModel->deleteOrderWithRefund($orderId, $adminId);
         
         if ($result['code'] == 0) {
-            return $this->success('删除成功，余额已回退');
+            return $this->success($result['info']); // 使用模型返回的具体信息
         } else {
             return $this->error($result['info']);
         }
