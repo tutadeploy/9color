@@ -1626,8 +1626,10 @@ class Deal extends Controller
             $this->error('订单不存在');
         }
         
-        // 验证订单状态（只支持等待匹配状态）
-        if ($order['manual_dispatch'] != 1 || $order['dispatch_status'] != 0) {
+        // 验证订单状态（支持C状态和D状态）
+        // C状态：manual_dispatch=1, dispatch_status=0 (等待匹配商品)
+        // D状态：manual_dispatch=1, dispatch_status=2 (修改商品)
+        if ($order['manual_dispatch'] != 1 || !in_array($order['dispatch_status'], [0, 2])) {
             $this->error('订单状态不允许手动派单');
         }
         

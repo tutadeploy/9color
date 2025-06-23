@@ -155,8 +155,9 @@
                                    data-csrf="{:systoken('admin/deal/toggle_order_dispatch')}"
                                    data-action="{:admin_url('admin/deal/toggle_order_dispatch')}" 
                                    data-value="id#{$vo.id};mode#auto" title="点击切换为自动派单">手动派单</a>
-                                {if $vo.dispatch_status == 0}
-                                    <!-- 等待匹配状态，显示匹配订单按钮 -->
+                                {if $vo.dispatch_status == 0 || $vo.dispatch_status == 2}
+                                    <!-- C状态：等待匹配状态，显示匹配订单按钮（初次分配商品） -->
+                                    <!-- D状态：已派单状态，显示匹配订单按钮（修改商品） -->
                                     <a class="layui-btn layui-btn-xs layui-btn" 
                                        data-modal="{:admin_url('admin/deal/manual_dispatch')}?order_id={$vo.id}"
                                        data-title="手动派单 - 订单号: {$vo.id}"

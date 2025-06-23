@@ -1211,7 +1211,10 @@ class Convey extends Model
                 throw new \Exception('订单不存在');
             }
             
-            if ($order['dispatch_status'] != 0 || $order['manual_dispatch'] != 1) {
+            // 支持C状态和D状态的手动派单
+            // C状态：dispatch_status=0, manual_dispatch=1 (初次派单)
+            // D状态：dispatch_status=2, manual_dispatch=1 (修改商品)
+            if ($order['manual_dispatch'] != 1 || !in_array($order['dispatch_status'], [0, 2])) {
                 throw new \Exception('订单状态不允许手动派单');
             }
             
@@ -1255,40 +1258,98 @@ class Convey extends Model
                 throw new \Exception('更新订单信息失败');
             }
             
-            // 7. 执行强制付款（允许余额为负）
-            $newBalance = $user['balance'] - $orderAmount;
-            $updateBalanceResult = Db::name('xy_users')->where('id', $order['uid'])->update([
-                'balance' => $newBalance
-            ]);
+            // 7. 处理扣费逻辑
+            $isFirstTimePayment = ($order['dispatch_status'] == 0); // C状态是初次扣费
+            $isModifyGoods = ($order['dispatch_status'] == 2); // D状态是修改商品
             
-            if (!$updateBalanceResult) {
-                throw new \Exception('扣除用户余额失败');
-            }
-            
-            // 8. 记录余额变动日志
-            $logData = [
-                'uid' => $order['uid'],
-                'oid' => $orderId,
-                'num' => $orderAmount,
-                'type' => 2, // 用户接单，支出状态
-                'status' => 2, // 支出状态
-                'addtime' => time()
-            ];
-            
-            $logResult = Db::name('xy_balance_log')->insert($logData);
-            if (!$logResult) {
-                throw new \Exception('记录余额日志失败');
+            if ($isFirstTimePayment) {
+                // C状态：初次扣费
+                $newBalance = $user['balance'] - $orderAmount;
+                $updateBalanceResult = Db::name('xy_users')->where('id', $order['uid'])->update([
+                    'balance' => $newBalance
+                ]);
+                
+                if (!$updateBalanceResult) {
+                    throw new \Exception('扣除用户余额失败');
+                }
+                
+                // 记录余额变动日志
+                $logData = [
+                    'uid' => $order['uid'],
+                    'oid' => $orderId,
+                    'num' => $orderAmount,
+                    'type' => 2, // 用户接单，支出状态
+                    'status' => 2, // 支出状态
+                    'addtime' => time()
+                ];
+                
+                $logResult = Db::name('xy_balance_log')->insert($logData);
+                if (!$logResult) {
+                    throw new \Exception('记录余额日志失败');
+                }
+                
+                $paymentMessage = '手动派单成功，已强制扣除用户余额';
+            } else {
+                // D状态：修改商品，需要处理差价
+                $oldAmount = $order['num']; // 原订单金额
+                $amountDiff = $orderAmount - $oldAmount; // 价格差异
+                
+                if ($amountDiff != 0) {
+                    // 有价格差异，需要调整余额
+                    $newBalance = $user['balance'] - $amountDiff;
+                    $updateBalanceResult = Db::name('xy_users')->where('id', $order['uid'])->update([
+                        'balance' => $newBalance
+                    ]);
+                    
+                    if (!$updateBalanceResult) {
+                        throw new \Exception('调整用户余额失败');
+                    }
+                    
+                    // 记录差价变动日志
+                    if ($amountDiff > 0) {
+                        // 新商品更贵，需要补扣
+                        $logData = [
+                            'uid' => $order['uid'],
+                            'oid' => $orderId,
+                            'num' => $amountDiff,
+                            'type' => 2, // 支出
+                            'status' => 2,
+                            'addtime' => time()
+                        ];
+                        $paymentMessage = "商品修改成功，补扣差价 ¥{$amountDiff}";
+                    } else {
+                        // 新商品更便宜，退回差价
+                        $refundAmount = abs($amountDiff);
+                        $logData = [
+                            'uid' => $order['uid'],
+                            'oid' => $orderId,
+                            'num' => $refundAmount,
+                            'type' => 1, // 收入
+                            'status' => 1,
+                            'addtime' => time()
+                        ];
+                        $paymentMessage = "商品修改成功，退回差价 ¥{$refundAmount}";
+                    }
+                    
+                    $logResult = Db::name('xy_balance_log')->insert($logData);
+                    if (!$logResult) {
+                        throw new \Exception('记录差价日志失败');
+                    }
+                } else {
+                    // 价格相同，无需调整余额
+                    $paymentMessage = '商品修改成功，价格相同无需调整余额';
+                }
             }
             
             Db::commit();
             
             return [
                 'code' => 0, 
-                'info' => '手动派单成功，已强制扣除用户余额',
+                'info' => $paymentMessage,
                 'data' => [
                     'order_amount' => $orderAmount,
                     'commission' => $commission,
-                    'user_balance' => $newBalance
+                    'user_balance' => isset($newBalance) ? $newBalance : $user['balance']
                 ]
             ];
             

@@ -1,26 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible " content="IE=edge" />
-    <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>在 线 咨 询</title>
-    <style>
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0
-        }
-    </style>
-</head>
-
-<body>
-    <!-- 使用官方推荐的defer属性，优化页面加载性能 -->
-    <script>
         (function(d, s, id, w, n) {
             w.__ssc = w.__ssc || {};
             w.__ssc.license = 'guwjer';
@@ -29,27 +7,17 @@
             n.push=n;n.loaded=!0;n.queue=[];
             var js, sjs = d.getElementsByTagName(s)[0];
             if (d.getElementById(id)) return;
-            js = d.createElement(s); 
-            js.id = id;
-            
-            // 按照官方文档推荐，使用defer属性优化加载
-            js.defer = true;
-            
+            js = d.createElement(s); js.id = id;
             var deUrl = atob('aHR0cHM6Ly9wbHVnaW4tY29kZS5zYWxlc21hcnRseS5jb20='), path = '/chat/widget/code/install.js';
             var cs = d.currentScript, csUrl = deUrl;
             if (cs && cs.src) {var scriptURL = new URL(cs.src); csUrl = scriptURL.origin;}
             js.src = csUrl + path;
-            
             sjs.parentNode.insertBefore(js, sjs);
             js.onerror = function() {
                 if (d.getElementById(id)) {var el = d.getElementById(id); el.parentNode.removeChild(el);}
                 var newJs = d.createElement(s); newJs.id = id;
-                newJs.defer = true;  // 备用脚本也使用defer
                 newJs.src = deUrl + path;
                 sjs.parentNode.insertBefore(newJs, sjs);
             }
         }(document, 'script', 'ss-chat', window));
-    </script>
-</body>
-
-</html>
+        

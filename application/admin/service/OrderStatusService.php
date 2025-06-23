@@ -225,8 +225,10 @@ class OrderStatusService
             $html .= 'data-action="' . admin_url('admin/deal/toggle_order_dispatch') . '" ';
             $html .= 'data-value="id#' . $order['id'] . ';mode#auto">切换自动</a>';
             
-            // C状态：手动派单 + 无商品 = 显示匹配订单按钮
-            if ($order['dispatch_status'] == 0) {
+            // C状态和D状态都显示匹配订单按钮
+            // C状态：手动派单 + 无商品 = 匹配订单（初次分配商品）
+            // D状态：手动派单 + 有商品 = 匹配订单（修改商品）
+            if ($order['dispatch_status'] == 0 || $order['dispatch_status'] == 2) {
                 $html .= '<a class="layui-btn layui-btn-xs layui-btn" ';
                 $html .= 'data-open="' . admin_url('admin/deal/manual_dispatch') . '?order_id=' . $order['id'] . '">匹配订单</a>';
             }

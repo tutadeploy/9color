@@ -2,29 +2,37 @@
 
 {block name="content"}
 <div style="padding: 20px; max-height: 75vh; overflow-y: auto; max-width: 100%; box-sizing: border-box; display: flex; flex-direction: column; margin-top: -50px;">
-    <!-- 用户信息区域 -->
+    <!-- 用户信息和订单信息区域 -->
     <div class="layui-row layui-col-space10" style="margin-bottom: 15px; margin-top: 50px; flex-shrink: 0;">
-        <div class="layui-col-md6">
+        <div class="layui-col-md12">
             <div class="info-box">
-                <div class="info-title">用户信息</div>
-                <div class="info-content">
-                    <div class="info-item"><label>手机号:</label> {$user.tel}</div>
-                    <div class="info-item"><label>用户名:</label> {$user.username}</div>
-                    <div class="info-item"><label>当前余额:</label> <span class="balance">¥{$user.balance}</span></div>
-                    <div class="info-item"><label>用户等级:</label> {:model('Users')->getLevel($user.level,'name');}</div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="layui-col-md6">
-            <div class="info-box">
-                <div class="info-title">当前订单信息</div>
-                <div class="info-content">
-                    <div class="info-item"><label>订单金额:</label> ¥{$order.num|default='待设置'}</div>
-                    <div class="info-item"><label>订单佣金:</label> ¥{$order.commission|default='待设置'}</div>
-                    <div class="info-item"><label>创建时间:</label> {$order.addtime|format_datetime='Y-m-d H:i:s'}</div>
-                    <div class="info-item"><label>派单状态:</label> 
-                        <span class="status-waiting">等待匹配商品</span>
+                <div class="layui-row">
+                    <!-- 用户信息 -->
+                    <div class="layui-col-md6">
+                        <div class="info-title">用户信息</div>
+                        <div class="info-content">
+                            <div class="info-item"><label>手机号:</label> {$user.tel}</div>
+                            <div class="info-item"><label>用户名:</label> {$user.username}</div>
+                            <div class="info-item"><label>当前余额:</label> <span class="balance">¥{$user.balance}</span></div>
+                            <div class="info-item"><label>用户等级:</label> {:model('Users')->getLevel($user.level,'name');}</div>
+                        </div>
+                    </div>
+                    
+                    <!-- 订单信息 -->
+                    <div class="layui-col-md6">
+                        <div class="info-title">当前订单信息</div>
+                        <div class="info-content">
+                            <div class="info-item"><label>订单金额:</label> ¥{$order.num|default='待设置'}</div>
+                            <div class="info-item"><label>订单佣金:</label> ¥{$order.commission|default='待设置'}</div>
+                            <div class="info-item"><label>创建时间:</label> {$order.addtime|format_datetime='Y-m-d H:i:s'}</div>
+                            <div class="info-item"><label>派单状态:</label> 
+                                {if $order.dispatch_status == 0}
+                                    <span class="status-waiting">等待匹配商品</span>
+                                {elseif $order.dispatch_status == 2}
+                                    <span class="status-ready">已派单，可修改商品</span>
+                                {/if}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -32,7 +40,7 @@
     </div>
     
 
-    
+
     <!-- 商品搜索区域 -->
     <div class="search-section" style="flex-shrink: 0;">
         <div class="section-title">商品搜索</div>
@@ -78,7 +86,11 @@
     <!-- 确认派单按钮 -->
     <div class="action-buttons" style="flex-shrink: 0;">
         <button type="button" class="layui-btn" id="confirmDispatch" disabled>
-            确定派单
+            {if $order.dispatch_status == 0}
+                确定派单
+            {elseif $order.dispatch_status == 2}
+                确定修改商品
+            {/if}
         </button>
         <button type="button" class="layui-btn layui-btn-primary" data-close>
             取消返回
@@ -145,8 +157,21 @@ $('#confirmDispatch').click(function() {
         return;
     }
     
-    layer.confirm('确定要派发此商品吗？这将立即扣除用户余额！', {
-        btn: ['确定派单', '取消']
+    // 根据订单状态显示不同的确认文字
+    var dispatchStatus = {$order.dispatch_status};
+    var confirmText = '';
+    var btnText = '';
+    
+    if (dispatchStatus == 0) {
+        confirmText = '确定要派发此商品吗？这将立即扣除用户余额！';
+        btnText = '确定派单';
+    } else if (dispatchStatus == 2) {
+        confirmText = '确定要修改为此商品吗？差额将从用户余额中补扣或退还！';
+        btnText = '确定修改';
+    }
+    
+    layer.confirm(confirmText, {
+        btn: [btnText, '取消']
     }, function(index) {
         $.post('/sgcpj/deal/confirm_manual_dispatch.html', {
             order_id: $('#orderId').val(),
