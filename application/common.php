@@ -205,11 +205,17 @@ function get_dispatch_config($key, $default = null)
             'min_cooling_time' => 1,   // 最小冷却时间（分钟）
         ];
         
-        // 尝试从数据库读取配置（如果有配置表）
+        // 从system_config表读取配置
         try {
-            $dbConfig = \think\Db::name('xy_dispatch_config')->column('value', 'key');
-            if ($dbConfig) {
-                $dispatchConfig = array_merge($dispatchConfig, $dbConfig);
+            $systemConfig = \think\Db::name('system_config')->column('value', 'name');
+            if ($systemConfig) {
+                // 只合并派单相关的配置
+                $dispatchKeys = array_keys($dispatchConfig);
+                foreach ($dispatchKeys as $configKey) {
+                    if (isset($systemConfig[$configKey])) {
+                        $dispatchConfig[$configKey] = $systemConfig[$configKey];
+                    }
+                }
             }
         } catch (\Exception $e) {
             // 配置表不存在时使用默认配置

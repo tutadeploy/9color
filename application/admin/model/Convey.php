@@ -503,6 +503,7 @@ class Convey extends Model
                 'dispatch_status' => 0, // 0=冷却中
                 'manual_dispatch' => 0,
                 'cooling_end_time' => time() + $coolingPeriod,
+                'endtime' => time() + $coolingPeriod, // 自动派单订单的超时时间与冷却期匹配
             ];
 
             // 更新订单派单信息
