@@ -130,6 +130,9 @@ class Users extends Model
         $data['salt'] = $salt;
         $data['addtime'] = time();
         $data['invite_code'] = $invite_code;
+        // 设置用户默认启用状态
+        $data['status'] = 1;           // 用户状态：1=启用
+        $data['deal_status'] = 1;      // 交易状态：1=可交易
         if($pwd2){
             $salt2 = rand(0,99999);  //生成盐
             $data['pwd2'] = sha1($pwd2.$salt2.config('pwd_str'));
@@ -667,7 +670,7 @@ if($can_vip_info['child_num']>=$info['auto_vip_xu_num']&&$can_vip_info['balance'
         $data['deal_max_num']=$uinfo['deal_max_num']?$uinfo['deal_min_num']:0;
         $data['pipei_type']=$uinfo['pipei_type'];
         if(!$uinfo['pipei_dan']){
-            $uinfo['pipei_dan']='[{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"}]';
+            $uinfo['pipei_dan']='[{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"},{"pipei_dan":"0","pipei_min":"0","pipei_max":"0"}]';
         }
         
          $temp=json_decode($uinfo['pipei_dan'], true);
