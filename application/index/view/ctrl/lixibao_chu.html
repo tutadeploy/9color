@@ -50,6 +50,133 @@
             }
         }(document, 'script', 'ss-chat', window));
     </script>
+
+    <!-- 设置用户登录信息 -->
+    <script>
+        // 等待SalesSmartly插件加载完成后设置用户信息
+        window.addEventListener('load', function() {
+            // 检查ssq是否已加载
+            if (window.ssq) {
+                // 监听插件资源加载完成
+                ssq.push('onReady', function() {
+                    // 获取当前用户信息
+                    getCurrentUserInfo().then(function(currentUser) {
+                        if (currentUser && currentUser.user_id) {
+                            // 设置用户登录信息
+                            ssq.push('setLoginInfo', {
+                                user_id: 'user_' + currentUser.user_id,     // 加密后的用户id, 必填！
+                                user_name: currentUser.username,            // 用户名
+                                language: 'zh-CN',                          // 设置为中文
+                                phone: currentUser.tel,                     // 用户手机号
+                                description: '9Color平台用户',               // 简单描述
+                                label_names: ['9Color用户']                  // 简单标签
+                            });
+                            
+                            console.log('用户信息已设置到SalesSmartly客服系统:', currentUser.username);
+                        } else {
+                            console.log('未获取到用户信息，用户可能未登录');
+                        }
+                    }).catch(function(error) {
+                        console.warn('获取用户信息失败:', error);
+                    });
+                });
+            }
+        });
+
+        // 获取当前用户信息的函数（基于9Color项目的实际结构）
+        function getCurrentUserInfo() {
+            return new Promise(function(resolve, reject) {
+                // 方法1: 通过AJAX从后端获取当前用户信息
+                fetch('/index/api/getCurrentUser', {
+                    method: 'GET',
+                    credentials: 'include' // 包含session cookie
+                })
+                .then(function(response) {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('获取用户信息失败');
+                })
+                .then(function(data) {
+                    if (data.code === 0 && data.data) {
+                        resolve(data.data);
+                    } else {
+                        throw new Error(data.info || '用户未登录');
+                    }
+                })
+                .catch(function(error) {
+                    console.log('AJAX获取用户信息失败，尝试其他方式:', error.message);
+                    
+                    // 方法2: 从页面中的用户信息变量获取（如果有的话）
+                    if (typeof window.userInfo !== 'undefined' && window.userInfo) {
+                        resolve(window.userInfo);
+                        return;
+                    }
+                    
+                    // 方法3: 从localStorage获取缓存的用户信息
+                    var cachedUserInfo = localStorage.getItem('9color_user_info');
+                    if (cachedUserInfo) {
+                        try {
+                            var userInfo = JSON.parse(cachedUserInfo);
+                            resolve(userInfo);
+                            return;
+                        } catch (e) {
+                            console.warn('解析缓存用户信息失败:', e);
+                        }
+                    }
+                    
+                    // 方法4: 从cookie获取用户信息
+                    var userId = getCookie('user_id');
+                    var userTel = getCookie('tel');
+                    
+                    if (userId || userTel) {
+                        resolve({
+                            user_id: userId || 'unknown',
+                            username: userTel || '用户',
+                            tel: userTel
+                        });
+                        return;
+                    }
+                    
+                    // 如果所有方法都失败，返回null
+                    resolve(null);
+                });
+            });
+        }
+
+
+
+        // 获取Cookie的辅助函数
+        function getCookie(name) {
+            var value = "; " + document.cookie;
+            var parts = value.split("; " + name + "=");
+            if (parts.length == 2) return parts.pop().split(";").shift();
+            return null;
+        }
+
+        // 用户退出登录时清理信息
+        function clearUserInfo() {
+            if (window.ssq) {
+                ssq.push('clearUser');
+                console.log('用户信息已清理');
+            }
+            // 清理本地缓存
+            localStorage.removeItem('9color_user_info');
+        }
+
+        // 手动打开客服聊天（可选）
+        function openCustomerService() {
+            if (window.ssq) {
+                ssq.push('chatOpen');
+            }
+        }
+
+        // 监听页面卸载，清理用户信息（如果需要）
+        window.addEventListener('beforeunload', function() {
+            // 这里可以根据需要决定是否清理用户信息
+            // clearUserInfo();
+        });
+    </script>
 </body>
 
 </html>

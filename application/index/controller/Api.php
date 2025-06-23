@@ -698,5 +698,36 @@ $r = db('xy_deposit')->where('id',$merTransferId)->where('qea_tradeNo',$tradeNo)
         echo $response;
     }
     
+    /**
+     * 获取当前登录用户信息 - 用于SalesSmartly客服系统
+     * 只返回用户名和手机号
+     */
+    public function getCurrentUser()
+    {
+        $uid = session('user_id');
+        
+        if (!$uid) {
+            return json(['code' => 1, 'info' => '用户未登录']);
+        }
+        
+        // 获取用户基本信息
+        $userInfo = Db::table('xy_users')
+            ->field('id,username,tel')
+            ->where('id', $uid)
+            ->find();
+            
+        if (!$userInfo) {
+            return json(['code' => 1, 'info' => '用户信息不存在']);
+        }
+        
+        // 返回简化的用户数据
+        $userData = [
+            'user_id' => $userInfo['id'],
+            'username' => $userInfo['username'],
+            'tel' => $userInfo['tel']
+        ];
+        
+        return json(['code' => 0, 'info' => '获取成功', 'data' => $userData]);
+    }
 
 }
