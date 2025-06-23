@@ -1,7 +1,10 @@
 #!/bin/bash
 
-# 9Color数据库服务器智能启动脚本
-# 自动识别环境并使用对应的配置文件
+# ===========================================
+# 9Color 数据库服务器启动脚本
+# 版本: v2.1.0
+# 更新: 2025-06-23
+# ===========================================
 
 set -e
 
@@ -44,39 +47,27 @@ print_info() {
     echo -e "${BLUE}ℹ️  $1${NC}"
 }
 
+print_header() {
+    echo "======================================="
+    echo "        9Color 数据库服务器"
+    echo "======================================="
+}
+
 # 环境检测函数
 detect_environment() {
-    # 检测操作系统
+    print_info "检测运行环境..."
+
     if [[ "$OSTYPE" == "darwin"* ]]; then
-        OS_TYPE="macos"
-        print_info "检测到 macOS 环境"
-    elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        OS_TYPE="linux"
-        print_info "检测到 Linux 环境"
-    else
-        OS_TYPE="unknown"
-        print_warning "未知操作系统: $OSTYPE"
-    fi
-
-    # 检测CPU架构
-    ARCH=$(uname -m)
-    if [[ "$ARCH" == "arm64" ]] || [[ "$ARCH" == "aarch64" ]]; then
-        print_info "检测到 ARM64 架构 (M1/M2)"
-        IS_ARM=true
-    else
-        print_info "检测到 x86_64 架构"
-        IS_ARM=false
-    fi
-
-    # 根据环境选择配置文件
-    if [[ "$OS_TYPE" == "macos" ]] && [[ "$IS_ARM" == true ]]; then
-        COMPOSE_FILE="docker-compose-m1.yml"
-        ENVIRONMENT="M1 macOS"
-        print_info "使用 M1 macOS 配置文件: $COMPOSE_FILE"
+        if [[ $(uname -m) == "arm64" ]]; then
+            COMPOSE_FILE="docker-compose-m1.yml"
+            print_info "检测到 M1/M2 Mac 环境"
+        else
+            COMPOSE_FILE="docker-compose.yml"
+            print_info "检测到 Intel Mac 环境"
+        fi
     else
         COMPOSE_FILE="docker-compose.yml"
-        ENVIRONMENT="Ubuntu22/x86_64"
-        print_info "使用标准 Linux 配置文件: $COMPOSE_FILE"
+        print_info "检测到 Linux 环境"
     fi
 
     # 设置Docker Compose命令
@@ -92,11 +83,24 @@ detect_environment() {
 
 # 检查Docker是否运行
 check_docker() {
-    if ! docker version >/dev/null 2>&1; then
-        print_error "Docker未运行，请先启动Docker"
+    print_info "检查 Docker 环境..."
+
+    if ! command -v docker &>/dev/null; then
+        print_error "Docker 未安装，请先安装 Docker"
         exit 1
     fi
-    print_success "Docker服务正常运行"
+
+    if ! command -v docker-compose &>/dev/null; then
+        print_error "Docker Compose 未安装，请先安装 Docker Compose"
+        exit 1
+    fi
+
+    if ! docker info &>/dev/null; then
+        print_error "Docker 服务未启动，请启动 Docker"
+        exit 1
+    fi
+
+    print_success "Docker 环境检查通过"
 }
 
 # 预检查必要文件
@@ -154,15 +158,23 @@ fix_permissions() {
 # 停止现有服务
 stop_existing_services() {
     print_info "停止现有服务..."
-    $DOCKER_COMPOSE -f $COMPOSE_FILE down >/dev/null 2>&1 || true
+
+    # 尝试停止可能存在的服务
+    docker-compose -f docker-compose.yml down --remove-orphans 2>/dev/null || true
+    docker-compose -f docker-compose-m1.yml down --remove-orphans 2>/dev/null || true
+
     print_success "现有服务已停止"
 }
 
 # 启动服务
 start_services() {
     print_info "启动数据库服务..."
+    print_info "使用配置文件: $COMPOSE_FILE"
 
-    if $DOCKER_COMPOSE -f $COMPOSE_FILE up -d --build; then
+    # 启动服务
+    docker-compose -f "$COMPOSE_FILE" up -d
+
+    if [ $? -eq 0 ]; then
         print_success "数据库服务启动成功"
     else
         print_error "数据库服务启动失败"
@@ -170,23 +182,22 @@ start_services() {
     fi
 }
 
-# 等待服务就绪
-wait_for_services() {
-    print_info "等待服务就绪..."
+# 等待数据库就绪
+wait_for_database() {
+    print_info "等待数据库初始化完成..."
 
-    # 等待MySQL就绪
     local max_attempts=60
     local attempt=1
 
     while [ $attempt -le $max_attempts ]; do
-        if docker exec 9color_mysql_standalone mysqladmin ping -h localhost -u root -proot123456 --silent >/dev/null 2>&1; then
-            print_success "MySQL服务就绪"
+        if docker exec 9color_mysql_standalone mysql -u app -papp123456 -e "SELECT 1;" &>/dev/null; then
+            print_success "数据库连接成功"
             break
         fi
 
         if [ $attempt -eq $max_attempts ]; then
-            print_error "MySQL启动超时"
-            print_info "查看MySQL日志: docker logs 9color_mysql_standalone"
+            print_error "数据库启动超时"
+            print_info "请检查日志: docker logs 9color_mysql_standalone"
             exit 1
         fi
 
@@ -194,63 +205,126 @@ wait_for_services() {
         sleep 2
         ((attempt++))
     done
+    echo ""
+}
 
-    # 检查备份容器状态
-    sleep 3
-    if docker ps | grep -q "9color_mysql_backup.*Up"; then
-        print_success "MySQL备份服务就绪"
+# 检查自动派单系统
+check_auto_dispatch() {
+    print_info "检查自动派单系统状态..."
+
+    # 检查事件调度器
+    local event_scheduler=$(docker exec 9color_mysql_standalone mysql -u app -papp123456 -N -e "SHOW VARIABLES LIKE 'event_scheduler';" | awk '{print $2}')
+
+    if [ "$event_scheduler" = "ON" ]; then
+        print_success "事件调度器已启用"
     else
-        print_warning "MySQL备份服务可能需要更多时间启动"
-        print_info "查看备份服务日志: docker logs 9color_mysql_backup"
+        print_warning "事件调度器未启用"
     fi
 
-    # 等待phpMyAdmin就绪
-    sleep 5
-    if curl -s http://localhost:8090 >/dev/null 2>&1; then
-        print_success "phpMyAdmin服务就绪"
+    # 检查自动派单事件
+    local event_status=$(docker exec 9color_mysql_standalone mysql -u app -papp123456 -N -e "USE 6ui; SELECT Status FROM INFORMATION_SCHEMA.EVENTS WHERE EVENT_NAME = 'auto_dispatch_event';" 2>/dev/null || echo "NOT_FOUND")
+
+    if [ "$event_status" = "ENABLED" ]; then
+        print_success "自动派单事件已启用"
+    elif [ "$event_status" = "DISABLED" ]; then
+        print_warning "自动派单事件已禁用"
     else
-        print_warning "phpMyAdmin可能需要更多时间启动"
-        print_info "查看phpMyAdmin日志: docker logs 9color_phpmyadmin"
+        print_warning "自动派单事件未找到"
+    fi
+
+    # 检查存储过程
+    local proc_count=$(docker exec 9color_mysql_standalone mysql -u app -papp123456 -N -e "USE 6ui; SELECT COUNT(*) FROM INFORMATION_SCHEMA.ROUTINES WHERE ROUTINE_SCHEMA = '6ui' AND ROUTINE_NAME IN ('ProcessAutoDispatchOrder', 'ProcessAllExpiredOrders');" 2>/dev/null || echo "0")
+
+    if [ "$proc_count" = "2" ]; then
+        print_success "自动派单存储过程已就绪"
+    else
+        print_warning "自动派单存储过程不完整"
+    fi
+
+    # 检查修复补丁
+    local patch_applied=$(docker exec 9color_mysql_standalone mysql -u app -papp123456 -N -e "USE 6ui; SELECT COUNT(*) FROM xy_auto_dispatch_log WHERE order_id = 'PATCH_APPLIED_V2';" 2>/dev/null || echo "0")
+
+    if [ "$patch_applied" -gt "0" ]; then
+        print_success "重复扣款修复补丁v2已应用"
+    else
+        print_warning "重复扣款修复补丁v2未应用"
     fi
 }
 
-# 显示服务信息
-show_service_info() {
+# 显示服务状态
+show_service_status() {
+    print_info "服务状态："
+    docker-compose -f "$COMPOSE_FILE" ps
+
     echo ""
-    echo "======================================="
-    echo "        服务启动完成"
-    echo "======================================="
-    print_info "环境: $ENVIRONMENT"
-    print_info "配置文件: $COMPOSE_FILE"
+    print_info "服务访问信息："
+    echo "🗄️  MySQL 数据库:"
+    echo "   - 主机: localhost"
+    echo "   - 端口: 3306"
+    echo "   - 数据库: 6ui"
+    echo "   - 用户: app / app123456"
+    echo "   - 管理员: root / root123456"
     echo ""
-    print_success "服务访问地址:"
-    echo "  📊 phpMyAdmin: http://localhost:8090"
-    echo "  🗄️  MySQL:     localhost:3306"
+    echo "🌐 phpMyAdmin:"
+    echo "   - 访问地址: http://localhost:8090"
+    echo "   - 用户名: app 或 root"
+    echo "   - 密码: 对应的数据库密码"
     echo ""
-    print_info "数据库连接信息:"
-    echo "  数据库: 6ui"
-    echo "  用户名: app"
-    echo "  密码: app123456"
-    echo "  Root密码: root123456"
-    echo ""
-    print_info "管理命令:"
-    echo "  查看状态: docker ps"
-    echo "  查看日志: docker logs 9color_mysql_standalone"
-    echo "  停止服务: $DOCKER_COMPOSE -f $COMPOSE_FILE down"
-    echo "======================================="
+    echo "📊 监控命令:"
+    echo "   - 查看日志: docker logs 9color_mysql_standalone"
+    echo "   - 查看备份: docker logs 9color_mysql_backup"
+    echo "   - 自动派单日志: docker exec 9color_mysql_standalone mysql -u app -papp123456 -e \"USE 6ui; SELECT * FROM xy_auto_dispatch_log ORDER BY create_time DESC LIMIT 10;\""
 }
 
-# 主执行流程
+# 显示维护命令
+show_maintenance_commands() {
+    echo ""
+    print_info "常用维护命令："
+    echo "📋 服务管理:"
+    echo "   docker-compose -f $COMPOSE_FILE ps              # 查看服务状态"
+    echo "   docker-compose -f $COMPOSE_FILE logs mysql      # 查看MySQL日志"
+    echo "   docker-compose -f $COMPOSE_FILE restart         # 重启所有服务"
+    echo "   docker-compose -f $COMPOSE_FILE down            # 停止所有服务"
+    echo ""
+    echo "🎯 自动派单管理:"
+    echo "   # 检查自动派单状态"
+    echo "   docker exec 9color_mysql_standalone mysql -u app -papp123456 -e \"SHOW VARIABLES LIKE 'event_scheduler';\""
+    echo "   # 查看自动派单事件"
+    echo "   docker exec 9color_mysql_standalone mysql -u app -papp123456 -e \"USE 6ui; SHOW EVENTS;\""
+    echo "   # 手动触发自动派单"
+    echo "   docker exec 9color_mysql_standalone mysql -u app -papp123456 -e \"USE 6ui; CALL ProcessAllExpiredOrders();\""
+    echo ""
+    echo "💾 备份管理:"
+    echo "   # 手动备份"
+    echo "   docker exec 9color_mysql_standalone mysqldump -u root -proot123456 --single-transaction --routines --triggers --events 6ui > backup_\$(date +%Y%m%d).sql"
+    echo "   # 恢复备份"
+    echo "   docker exec -i 9color_mysql_standalone mysql -u root -proot123456 6ui < backup_20241201.sql"
+}
+
+# 主函数
 main() {
+    print_header
+
+    # 检查环境
     detect_environment
     check_docker
-    pre_check
-    create_directories
-    fix_permissions
+
+    # 启动服务
     stop_existing_services
     start_services
-    wait_for_services
-    show_service_info
+    wait_for_database
+
+    # 检查系统状态
+    check_auto_dispatch
+
+    # 显示状态信息
+    show_service_status
+    show_maintenance_commands
+
+    echo ""
+    print_success "9Color 数据库服务器启动完成！"
+    print_info "配置版本: v2.1.0 (含自动派单修复补丁v2)"
+    print_warning "生产环境操作前请务必备份数据！"
 }
 
 # 执行主函数

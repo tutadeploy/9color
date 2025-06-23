@@ -1,102 +1,22 @@
-# 9Color 独立数据库服务器
+# 9Color 数据库服务器配置
 
-这是 9Color 电商平台的独立数据库服务器配置，包含完整的数据库初始化脚本和配置。
+## 概述
+
+本目录包含9Color电商平台的数据库服务器配置，基于MySQL 5.7，包含完整的数据库初始化、备份策略和自动派单系统。
+
+**重要**: 本配置已与线上环境完全同步，包含最新的自动派单修复补丁v2。
 
 ## 🚀 快速启动
 
-### 一键启动（推荐）
-
 ```bash
-# 给启动脚本执行权限
-chmod +x start.sh
+# 启动数据库服务
+docker-compose up -d
 
-# 启动数据库服务器
-./start.sh
-```
+# 查看服务状态
+docker-compose ps
 
-启动脚本会自动：
-
-- 检测运行环境（M1 Mac / Ubuntu22）
-- 选择对应的配置文件
-- 启动所有必要的服务
-- 导入完整的数据库结构和数据
-
-## 🏗️ 服务架构
-
-### 包含的服务
-
-1. **MySQL 5.7** - 主数据库服务
-
-   - 端口: 3306
-   - 数据库: `6ui`
-   - 用户: `app` / 密码: `app123456`
-   - Root 密码: `root123456`
-
-2. **phpMyAdmin** - 数据库管理界面
-
-   - 端口: 8090
-   - 访问: http://localhost:8090
-
-3. **备份服务** - 自动数据库备份
-
-### 环境适配
-
-- **M1 Mac**: 使用 `docker-compose-m1.yml`（包含 `platform: linux/amd64`）
-- **Ubuntu22**: 使用 `docker-compose.yml`（标准配置）
-
-## 📊 数据库信息
-
-### 连接信息
-
-```
-主机: localhost
-端口: 3306
-数据库: 6ui
-用户名: app
-密码: app123456
-```
-
-### 用户权限
-
-- `app@%`: 应用用户，拥有数据库完整权限
-- `readonly@%`: 只读用户，用于报表查询
-- `backup@%`: 备份用户，用于数据备份
-
-## 🗃️ 数据导入
-
-数据库启动时会自动执行以下初始化：
-
-1. `00-create-database.sql` - 创建数据库和用户
-2. `02-import-data.sql` - 导入完整的表结构和数据
-
-## 🛠️ 管理命令
-
-### 查看服务状态
-
-```bash
-docker ps
-```
-
-### 查看 MySQL 日志
-
-```bash
-docker logs 9color_mysql_standalone
-```
-
-### 停止服务
-
-```bash
-# M1 Mac
-docker-compose -f docker-compose-m1.yml down
-
-# Ubuntu22
-docker-compose -f docker-compose.yml down
-```
-
-### 重启服务
-
-```bash
-./start.sh
+# 查看日志
+docker-compose logs -f mysql
 ```
 
 ## 📁 目录结构
@@ -105,214 +25,325 @@ docker-compose -f docker-compose.yml down
 database-server/
 ├── docker-compose.yml          # Docker编排配置
 ├── docker-compose-m1.yml       # M1芯片Mac专用配置
-├── README.md                   # 说明文档
-├── mysql/
-│   ├── 00-complete-init.sql    # 统一数据库初始化脚本 ⭐
-│   └── my.cnf                  # MySQL配置文件
-├── backup/                     # 数据库备份目录
-├── logs/                       # 日志目录
+├── start.sh                    # 启动脚本
+├── README.md                   # 本文档
+├── mysql/                      # MySQL配置
+│   ├── 00-complete-init.sql    # 完整数据库初始化脚本（含v2修复）
+│   ├── my.cnf                  # MySQL配置文件
+│   └── fix-auto-dispatch-duplicate-payment-v2.sql  # 自动派单修复补丁
+├── scripts/                    # 维护脚本
+│   └── backup-scheduler.sh     # 数据库备份调度器
 ├── phpmyadmin/                 # phpMyAdmin配置
-└── scripts/                    # 维护脚本
+│   ├── config.user.inc.php     # phpMyAdmin用户配置
+│   └── php-init.php           # PHP初始化配置
+├── backup/                     # 备份存储目录
+└── logs/                       # 日志存储目录
 ```
 
-## 🚀 快速部署
+## 🔧 服务配置
 
-### 1. 启动数据库服务器
+### MySQL 主服务
 
-```bash
-# 进入数据库服务器目录
-cd database-server
-
-# 启动服务（首次启动会自动初始化数据库）
-docker-compose up -d
-
-# 查看启动状态
-docker-compose ps
-```
-
-### 2. 验证部署
-
-```bash
-# 检查数据库连接
-mysql -h localhost -P 3306 -u app -papp123456 6ui -e "SHOW TABLES;"
-
-# 检查管理员账号
-mysql -h localhost -P 3306 -u app -papp123456 6ui -e "SELECT username FROM system_user WHERE username='admin';"
-```
-
-## 📋 统一初始化脚本说明
-
-### `00-complete-init.sql` 包含内容：
-
-1. **数据库创建**：创建`6ui`数据库，设置 utf8mb4 字符集
-2. **用户权限**：创建`app`、`readonly`、`backup`三个用户并授权
-3. **完整表结构**：所有业务表的 DDL 语句
-4. **初始数据**：系统配置、管理员账号、权限设置等
-5. **自动派单功能**：相关表和存储过程（已修复返佣金额记录问题）
-6. **索引优化**：所有必要的索引和约束
-
-### 默认账号信息：
-
-| 类型         | 用户名   | 密码           | 权限               |
-| ------------ | -------- | -------------- | ------------------ |
-| 数据库管理员 | root     | root123456     | 全部权限           |
-| 应用用户     | app      | app123456      | 6ui 数据库全部权限 |
-| 只读用户     | readonly | readonly123456 | 6ui 数据库只读权限 |
-| 备份用户     | backup   | backup123456   | 备份相关权限       |
-| 后台管理员   | admin    | admin123456    | 后台系统超级管理员 |
-
-## 🔧 环境变量配置
-
-可以通过环境变量自定义配置：
-
-```bash
-# 数据库root密码
-MYSQL_ROOT_PASSWORD=your_root_password
-
-# 数据库名
-MYSQL_DATABASE=6ui
-
-# 应用用户名和密码
-MYSQL_USER=app
-MYSQL_PASSWORD=your_app_password
-```
-
-## 📊 服务组件
-
-### MySQL 5.7
-
-- **端口**：3306
-- **数据持久化**：使用 Docker Volume
-- **配置文件**：`mysql/my.cnf`
-- **初始化脚本**：`mysql/00-complete-init.sql`
-
-### phpMyAdmin
-
-- **访问地址**：http://your-server-ip:8090
-- **用户名**：app 或 root
-- **密码**：对应的数据库密码
+- **镜像**: mysql:5.7
+- **端口**: 3306
+- **字符集**: utf8mb4
+- **排序规则**: utf8mb4_unicode_ci
+- **内存配置**: 768MB InnoDB缓冲池
+- **事件调度器**: 启用（自动派单必需）
 
 ### 自动备份服务
 
-- **备份目录**：`./backup/`
-- **备份脚本**：`scripts/backup-scheduler.sh`
-- **备份频率**：可配置
+- **完整备份**: 每日凌晨2点
+- **增量备份**: 每小时执行
+- **备份保留**: 完整备份5天，增量备份2天
+- **监控**: 数据库健康检查
 
-## 🛠️ 维护操作
+### phpMyAdmin 管理面板
 
-### 查看日志
+- **访问地址**: http://localhost:8090
+- **用户**: app / app123456
+- **管理员**: root / root123456
 
-```bash
-# 查看MySQL日志
-docker-compose logs mysql
+## 🎯 自动派单系统
 
-# 查看备份服务日志
-docker-compose logs mysql-backup
+### 系统架构
 
-# 查看phpMyAdmin日志
-docker-compose logs phpmyadmin
+本系统实现了智能的自动派单功能，支持A、B、C、D四种状态的智能切换：
+
+- **A状态**: 自动派单+无商品，等待自动分配商品
+- **B状态**: 自动派单+有商品，冷却计时或等待自动结算
+- **C状态**: 手动派单+无商品，等待手动匹配商品  
+- **D状态**: 手动派单+有商品，已派单等待手动结算
+
+### 核心组件
+
+#### 1. 存储过程
+
+- **ProcessAutoDispatchOrder**: 处理单个订单的自动派单（v2修复版）
+- **ProcessAllExpiredOrders**: 批量处理所有到期订单
+
+#### 2. MySQL事件调度器
+
+```sql
+-- 自动派单事件（每分钟执行）
+CREATE EVENT auto_dispatch_event
+ON SCHEDULE EVERY 1 MINUTE
+ON COMPLETION PRESERVE
+ENABLE
+DO CALL ProcessAllExpiredOrders();
 ```
+
+#### 3. 重复扣款修复（v2）
+
+**修复问题**: 手动派单切换到自动派单时的重复扣款问题
+
+**解决方案**: 
+- 在扣款前检查`xy_balance_log`表中是否已存在扣款记录
+- 区分"已扣款"和"未扣款"两种情况
+- `already_paid_auto`: 已扣款，只执行结算
+- `auto_manual`: 未扣款，执行完整的扣款+结算流程
+
+### 监控表
+
+#### xy_auto_dispatch_log
+记录所有自动派单的执行日志：
+
+```sql
+SELECT create_time, order_id, status, error_msg 
+FROM xy_auto_dispatch_log 
+ORDER BY create_time DESC LIMIT 10;
+```
+
+**状态说明**:
+- `success`: 处理成功（旧版本）
+- `auto_manual`: 完整的扣款+结算流程
+- `already_paid_auto`: 已扣款，只执行结算
+- `insufficient_balance`: 余额不足
+- `skipped`: 订单已被其他进程处理
+- `not_found`: 未找到符合条件的订单
+
+## 🗄️ 数据库配置
+
+### 用户权限
+
+```sql
+-- 应用用户（完全权限）
+CREATE USER 'app'@'%' IDENTIFIED BY 'app123456';
+GRANT ALL PRIVILEGES ON 6ui.* TO 'app'@'%';
+
+-- 只读用户
+CREATE USER 'readonly'@'%' IDENTIFIED BY 'readonly123456';
+GRANT SELECT ON 6ui.* TO 'readonly'@'%';
+
+-- 备份用户
+CREATE USER 'backup'@'%' IDENTIFIED BY 'backup123456';
+GRANT SELECT, LOCK TABLES, SHOW DATABASES, SHOW VIEW, EVENT, TRIGGER, PROCESS ON *.* TO 'backup'@'%';
+```
+
+### 关键配置
+
+```ini
+# my.cnf 关键配置
+character-set-server=utf8mb4
+collation-server=utf8mb4_unicode_ci
+bind-address=0.0.0.0
+log-bin=mysql-bin
+binlog-format=ROW
+expire-logs-days=7
+max-connections=300
+innodb-buffer-pool-size=768M
+event_scheduler=ON  # 自动派单必需
+```
+
+## 🔄 备份策略
+
+### 自动备份
+
+备份调度器 (`backup-scheduler.sh`) 提供：
+
+1. **完整备份** (每日2:00)
+   - 包含结构、数据、存储过程、触发器、事件
+   - 自动压缩存储
+   - 保留5天
+
+2. **增量备份** (每小时)
+   - 二进制日志备份
+   - 保留2天
+
+3. **健康检查**
+   - 数据库连接状态
+   - 数据库大小监控
+   - 慢查询统计
+   - 连接数监控
 
 ### 手动备份
 
 ```bash
-# 进入备份容器
-docker exec -it 9color_mysql_backup bash
+# 完整备份
+docker exec 9color_mysql_standalone mysqldump \
+  -u root -proot123456 \
+  --single-transaction --routines --triggers --events \
+  6ui > backup_$(date +%Y%m%d).sql
 
-# 执行备份
-/scripts/backup-scheduler.sh
+# 恢复备份
+docker exec -i 9color_mysql_standalone mysql \
+  -u root -proot123456 6ui < backup_20241201.sql
 ```
 
-### 重新初始化数据库
+## 🛠️ 维护操作
 
-```bash
-# 停止服务
-docker-compose down
+### 检查自动派单状态
 
-# 删除数据卷（⚠️ 会丢失所有数据）
-docker volume rm database-server_mysql_data
+```sql
+-- 检查事件调度器状态
+SHOW VARIABLES LIKE 'event_scheduler';
 
-# 重新启动（会重新初始化）
-docker-compose up -d
+-- 查看自动派单事件
+SHOW EVENTS;
+
+-- 查看最近的处理日志
+SELECT * FROM xy_auto_dispatch_log ORDER BY create_time DESC LIMIT 10;
+
+-- 查看待处理订单
+SELECT COUNT(*) FROM xy_convey 
+WHERE auto_dispatch = 1 AND dispatch_status = 0 
+AND cooling_end_time > 0 AND cooling_end_time <= UNIX_TIMESTAMP() 
+AND status = 0;
 ```
 
-## 🔒 安全建议
+### 手动触发自动派单
 
-1. **修改默认密码**：部署后立即修改所有默认密码
-2. **网络安全**：配置防火墙，只允许必要的端口访问
-3. **定期备份**：确保备份服务正常运行
-4. **监控日志**：定期检查数据库和应用日志
-5. **版本更新**：定期更新 MySQL 和相关组件
+```sql
+-- 处理所有到期订单
+CALL ProcessAllExpiredOrders();
 
-## 📝 数据迁移
-
-### 从现有数据库迁移
-
-如果需要从其他数据库迁移数据，可以：
-
-1. 导出现有数据：
-
-```bash
-mysqldump -h source_host -u user -p source_db > migration.sql
+-- 处理特定订单
+CALL ProcessAutoDispatchOrder('UB2506232344012171');
 ```
 
-2. 导入到新数据库：
+### 启用/禁用自动派单
 
-```bash
-mysql -h localhost -P 3306 -u app -papp123456 6ui < migration.sql
+```sql
+-- 启用自动派单事件
+ALTER EVENT auto_dispatch_event ENABLE;
+
+-- 禁用自动派单事件
+ALTER EVENT auto_dispatch_event DISABLE;
+
+-- 查看事件状态
+SHOW EVENTS WHERE Name = 'auto_dispatch_event';
 ```
 
-## 🆘 故障排除
+## 🚨 故障排除
 
 ### 常见问题
 
-1. **容器启动失败**
+1. **自动派单不工作**
+   - 检查事件调度器: `SHOW VARIABLES LIKE 'event_scheduler';`
+   - 检查事件状态: `SHOW EVENTS;`
+   - 查看错误日志: `SELECT * FROM xy_auto_dispatch_log WHERE status LIKE '%error%';`
 
-   - 检查端口是否被占用
-   - 查看 Docker 日志：`docker-compose logs`
+2. **重复扣款问题**
+   - 已通过v2补丁修复
+   - 检查补丁应用状态: `SELECT * FROM xy_auto_dispatch_log WHERE order_id = 'PATCH_APPLIED_V2';`
 
-2. **数据库连接失败**
+3. **订单卡在冷却状态**
+   - 检查冷却时间设置
+   - 手动触发处理: `CALL ProcessAutoDispatchOrder('订单ID');`
 
-   - 确认容器状态：`docker-compose ps`
-   - 检查网络配置和防火墙设置
+### 日志查看
 
-3. **初始化脚本执行失败**
+```bash
+# MySQL错误日志
+docker logs 9color_mysql_standalone
 
-   - 查看 MySQL 日志中的错误信息
-   - 检查 SQL 脚本语法
+# 备份调度器日志
+docker logs 9color_mysql_backup
 
-4. **phpMyAdmin 无法访问**
-   - 确认端口 8090 未被占用
-   - 检查防火墙设置
+# 自动派单日志（数据库内）
+docker exec 9color_mysql_standalone mysql -u app -papp123456 \
+  -e "USE 6ui; SELECT * FROM xy_auto_dispatch_log ORDER BY create_time DESC LIMIT 20;"
+```
+
+## 🔐 安全配置
+
+### 网络安全
+
+- 数据库仅监听内部网络
+- 使用强密码策略
+- 定期更新密码
+
+### 备份安全
+
+- 备份文件自动压缩
+- 定期清理过期备份
+- 备份目录权限控制
+
+## 📊 性能优化
+
+### 索引优化
+
+关键表已创建必要索引：
+- `xy_convey`: 订单查询索引
+- `xy_balance_log`: 余额日志索引
+- `xy_auto_dispatch_log`: 派单日志索引
+
+### 内存配置
+
+- InnoDB缓冲池: 768MB
+- 最大连接数: 300
+- 二进制日志保留: 7天
+
+## 🌐 线上环境
+
+### 生产服务器配置
+
+**数据库服务器**: 38.180.150.127
+- 用途: MySQL数据库 + 备份服务
+- 配置: 与本地配置完全一致
+- 监控: 自动备份 + 健康检查
+
+**应用服务器**: 38.180.189.204
+- 用途: Nginx + PHP-FPM
+- 数据库连接: 指向数据库服务器
+
+### 部署同步
+
+本地配置与线上环境保持完全一致：
+- ✅ Docker Compose配置同步
+- ✅ MySQL配置文件同步
+- ✅ 自动派单系统同步
+- ✅ 备份策略同步
+- ✅ 修复补丁同步
+
+## 📝 更新日志
+
+### v2.1.0 (2025-06-23)
+- ✅ 修复自动派单重复扣款问题
+- ✅ 添加已扣款订单的智能识别
+- ✅ 优化存储过程性能
+- ✅ 完善错误日志记录
+- ✅ 与线上环境配置同步
+
+### v2.0.0 (2025-06-22)
+- ✅ 实现四状态智能切换系统
+- ✅ 重构自动派单存储过程
+- ✅ 添加MySQL事件调度器
+- ✅ 完善监控和日志系统
+
+### v1.0.0 (2025-06-20)
+- ✅ 初始数据库架构
+- ✅ 基础自动派单功能
+- ✅ 数据库备份系统
 
 ## 📞 技术支持
 
-如有问题，请提供以下信息：
-
-- 系统环境（操作系统、Docker 版本）
-- 错误日志（`docker-compose logs`）
-- 配置文件内容
-- 具体的错误现象描述
-
-## 🔄 更新记录
-
-### v1.1 - 2025-06-23
-
-- **修复自动派单返佣金额记录问题**
-  - 问题：自动派单中返佣记录（type=3）只记录佣金金额，而不是商品价格+佣金
-  - 修复：修改 `ProcessAutoDispatchOrder` 存储过程，将返佣记录从 `v_commission` 改为 `v_amount + v_commission`
-  - 影响：确保返佣信息的金额记录与手动结算保持一致
-- **修复数据库备份权限问题**
-  - 问题：app 用户执行 `mysqldump --routines` 时提示缺少 PROCESS 权限
-  - 修复：为 `app` 和 `backup` 用户添加 `PROCESS` 权限和 `mysql.proc` 表的 `SELECT` 权限
-  - 影响：现在可以正常备份存储过程和函数
-
-### v1.0 - 2025-06-22
-
-- 初始版本：统一数据库初始化脚本
-- 包含完整的表结构、初始数据和自动派单功能
+如遇问题，请检查：
+1. 容器运行状态: `docker-compose ps`
+2. 服务日志: `docker-compose logs`
+3. 数据库连接: 使用phpMyAdmin测试
+4. 自动派单状态: 查询监控表
 
 ---
 
-**最后更新**：2025-06-23  
-**版本**：v1.1 - 修复自动派单返佣金额记录
+**注意**: 生产环境操作前请务必备份数据！
