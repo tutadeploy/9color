@@ -930,8 +930,15 @@ class Convey extends Model
             
             // 根据订单状态和派单状态进行不同的余额处理
             if ($order['status'] == 0) {
-                // 待付款状态：无需退款，只需恢复用户状态
-                $refundMessage = '订单删除成功（待付款状态，无需退款）';
+                // 检查是否是手动派单且已扣费的订单
+                if ($order['manual_dispatch'] == 1 && $order['dispatch_status'] == 2 && $order['num'] > 0) {
+                    // 手动派单已扣费：需要退回订单金额
+                    $refundAmount = $order['num'];
+                    $refundMessage = "订单删除成功，退回手动派单金额 ¥{$order['num']}";
+                } else {
+                    // 真正的待付款状态：无需退款，只需恢复用户状态
+                    $refundMessage = '订单删除成功（待付款状态，无需退款）';
+                }
             } elseif ($order['status'] == 1) {
                 // 已完成状态：需要退回本金，扣除佣金（如果有）
                 $refundAmount = $order['num']; // 退回本金
@@ -1045,20 +1052,93 @@ class Convey extends Model
             return ['code' => 1, 'info' => '只能切换待付款状态的订单'];
         }
         
-        $coolingPeriod = get_dispatch_config('cooling_period_minutes', 1) * 60;
+        Db::startTrans();
+        try {
+            $coolingPeriod = get_dispatch_config('cooling_period_minutes', 1) * 60;
+            
+            // 判断当前是否有商品
+            $hasGoods = !empty($order['goods_id']) && $order['goods_id'] > 0;
+            
+            if ($hasGoods) {
+                // B状态：自动派单 + 有商品 = 开始计时，等待自动结付
+                $updateData = [
+                    'auto_dispatch' => 1,
+                    'manual_dispatch' => 0,
+                    'dispatch_status' => 0, // 冷却中
+                    'cooling_end_time' => time() + $coolingPeriod
+                ];
+                $message = '已切换为自动派单模式，开始冷却计时，等待自动结算';
+            } else {
+                // A状态：自动派单 + 无商品 = 自动分发商品，然后等待自动结付
+                $autoDispatchResult = $this->autoAssignGoods($orderId);
+                if ($autoDispatchResult['code'] != 0) {
+                    throw new \Exception($autoDispatchResult['info']);
+                }
+                
+                $updateData = [
+                    'auto_dispatch' => 1,
+                    'manual_dispatch' => 0,
+                    'dispatch_status' => 0, // 冷却中
+                    'cooling_end_time' => time() + $coolingPeriod
+                ];
+                $message = '已切换为自动派单模式，自动分发商品完成，开始冷却计时';
+            }
+            
+            $result = Db::name('xy_convey')->where('id', $orderId)->update($updateData);
+            
+            if ($result !== false) {
+                Db::commit();
+                return ['code' => 0, 'info' => $message];
+            } else {
+                throw new \Exception('更新订单状态失败');
+            }
+        } catch (\Exception $e) {
+            Db::rollback();
+            return ['code' => 1, 'info' => '切换失败: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * 自动分发商品到订单
+     * @param string $orderId 订单ID
+     * @return array
+     */
+    public function autoAssignGoods($orderId)
+    {
+        $order = Db::name('xy_convey')->where('id', $orderId)->find();
+        
+        if (!$order) {
+            return ['code' => 1, 'info' => '订单不存在'];
+        }
+        
+        if ($order['status'] != 0) {
+            return ['code' => 1, 'info' => '订单状态不正确'];
+        }
+        
+        // 查找可用商品（价格 <= 订单金额）
+        $availableGoods = Db::name('xy_goods_list')
+            ->where('status', 1)
+            ->where('goods_price', '<=', $order['num'])
+            ->order('goods_price desc') // 优先选择价格高的商品
+            ->find();
+        
+        if (!$availableGoods) {
+            return ['code' => 1, 'info' => '没有找到合适的商品'];
+        }
+        
+        // 更新订单商品信息
         $updateData = [
-            'auto_dispatch' => 1,
-            'manual_dispatch' => 0,
-            'dispatch_status' => 0, // 冷却中
-            'cooling_end_time' => time() + $coolingPeriod
+            'goods_id' => $availableGoods['id'],
+            'goods_count' => 1, // 固定数量为1
+            'num' => $availableGoods['goods_price'] // 订单金额=商品价格
         ];
         
         $result = Db::name('xy_convey')->where('id', $orderId)->update($updateData);
         
         if ($result !== false) {
-            return ['code' => 0, 'info' => '已切换为自动派单模式'];
+            return ['code' => 0, 'info' => '自动分发商品成功', 'goods' => $availableGoods];
         } else {
-            return ['code' => 1, 'info' => '切换失败'];
+            return ['code' => 1, 'info' => '分发商品失败'];
         }
     }
 
@@ -1079,17 +1159,33 @@ class Convey extends Model
             return ['code' => 1, 'info' => '只能切换待付款状态的订单'];
         }
         
-        $updateData = [
-            'auto_dispatch' => 0,
-            'manual_dispatch' => 1,
-            'dispatch_status' => 0, // 等待匹配
-            'cooling_end_time' => 0
-        ];
+        // 判断当前是否有商品
+        $hasGoods = !empty($order['goods_id']) && $order['goods_id'] > 0;
+        
+        if ($hasGoods) {
+            // 从B状态切换到D状态：手动派单 + 有商品 = 显示结算按钮
+            $updateData = [
+                'auto_dispatch' => 0,
+                'manual_dispatch' => 1,
+                'dispatch_status' => 2, // 手动派单中
+                'cooling_end_time' => 0 // 清除冷却时间
+            ];
+            $message = '已切换为手动派单模式，可以手动结算';
+        } else {
+            // 从A状态切换到C状态：手动派单 + 无商品 = 显示匹配订单按钮
+            $updateData = [
+                'auto_dispatch' => 0,
+                'manual_dispatch' => 1,
+                'dispatch_status' => 0, // 等待匹配
+                'cooling_end_time' => 0 // 清除冷却时间
+            ];
+            $message = '已切换为手动派单模式，请手动匹配商品';
+        }
         
         $result = Db::name('xy_convey')->where('id', $orderId)->update($updateData);
         
         if ($result !== false) {
-            return ['code' => 0, 'info' => '已切换为手动派单模式'];
+            return ['code' => 0, 'info' => $message];
         } else {
             return ['code' => 1, 'info' => '切换失败'];
         }
@@ -1210,14 +1306,25 @@ class Convey extends Model
      */
     private function calculateCommission($amount, $userLevel)
     {
+        // 确保用户等级为有效数字，默认为0（普通会员）
+        $userLevel = is_numeric($userLevel) ? intval($userLevel) : 0;
+        
         // 获取用户等级佣金比例
         $levelInfo = Db::name('xy_level')->where('level', $userLevel)->find();
-        if ($levelInfo && $levelInfo['bili']) {
+        
+        // 如果找到等级信息且佣金比例有效
+        if ($levelInfo && isset($levelInfo['bili']) && $levelInfo['bili'] > 0) {
             return $amount * floatval($levelInfo['bili']);
         }
         
-        // 如果没有找到等级信息，返回0佣金
-        return 0;
+        // 如果没有找到等级信息，使用默认等级0（普通会员）的佣金比例
+        $defaultLevel = Db::name('xy_level')->where('level', 0)->find();
+        if ($defaultLevel && isset($defaultLevel['bili']) && $defaultLevel['bili'] > 0) {
+            return $amount * floatval($defaultLevel['bili']);
+        }
+        
+        // 最后的保底：使用2.5%的默认佣金比例
+        return $amount * 0.025;
     }
 
     /**

@@ -55,6 +55,21 @@
         margin: 1px;
     }
     
+    /* 置灰按钮样式 */
+    .layui-btn-disabled {
+        background-color: #d2d2d2 !important;
+        border-color: #d2d2d2 !important;
+        color: #999 !important;
+        cursor: not-allowed !important;
+        opacity: 0.6;
+    }
+    
+    .layui-btn-disabled:hover {
+        background-color: #d2d2d2 !important;
+        border-color: #d2d2d2 !important;
+        color: #999 !important;
+    }
+    
     /* 响应式优化 */
     @media (max-width: 1200px) {
         .layui-table td {
@@ -188,6 +203,10 @@
                                 echo 'data-action="' . admin_url('admin/deal/manual_settlement') . '" ';
                                 echo 'data-value="id#' . $vo['id'] . '" ';
                                 echo 'class="layui-btn layui-btn-xs ' . $actionClass . '">' . $actionText . '</a>';
+                            } elseif ($actionType == 'manual_settle_disabled') {
+                                $title = isset($action['title']) ? $action['title'] : '用户余额为负数，无法手动结算';
+                                echo '<span title="' . htmlspecialchars($title) . '" ';
+                                echo 'class="layui-btn layui-btn-xs ' . $actionClass . '">' . $actionText . '</span>';
                             } elseif ($actionType == 'match_order') {
                                 echo '<a data-modal="' . admin_url('admin/deal/manual_dispatch') . '?order_id=' . $vo['id'] . '" ';
                                 echo 'data-title="手动派单 - 订单号: ' . $vo['id'] . '" ';

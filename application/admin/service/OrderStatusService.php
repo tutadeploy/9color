@@ -48,17 +48,42 @@ class OrderStatusService
     {
         $actions = [];
         
+        // 检查用户余额是否为负数
+        $userBalance = isset($order['ubalance']) ? floatval($order['ubalance']) : 0;
+        $isNegativeBalance = $userBalance < 0;
+        
         if ($order['status'] == 0) { // 待付款状态
             if (isset($order['auto_dispatch']) && $order['auto_dispatch'] == 1) {
                 if ($order['dispatch_status'] == 0) {
-                    $actions[] = ['type' => 'manual_settle', 'text' => '手动结算', 'class' => 'layui-btn-normal'];
+                    if ($isNegativeBalance) {
+                        // 用户余额为负数，手动结算按钮置灰
+                        $actions[] = [
+                            'type' => 'manual_settle_disabled', 
+                            'text' => '手动结算', 
+                            'class' => 'layui-btn-disabled',
+                            'title' => '用户余额为负数，无法手动结算'
+                        ];
+                    } else {
+                        $actions[] = ['type' => 'manual_settle', 'text' => '手动结算', 'class' => 'layui-btn-normal'];
+                    }
                 }
             } elseif (isset($order['manual_dispatch']) && $order['manual_dispatch'] == 1) {
                 if ($order['dispatch_status'] == 0) {
-                    // 手动派单等待匹配状态：不在操作列添加匹配订单按钮，因为派单模式列中已经有了
-                    // $actions[] = ['type' => 'match_order', 'text' => '匹配订单', 'class' => 'layui-btn'];
+                    // C状态：手动派单 + 无商品 = 显示匹配订单按钮（在派单模式列中）
+                    // 操作列不显示任何按钮
                 } elseif ($order['dispatch_status'] == 2) {
-                    $actions[] = ['type' => 'manual_settle', 'text' => '手动结算', 'class' => 'layui-btn-normal'];
+                    // D状态：手动派单 + 有商品 = 显示结算按钮
+                    if ($isNegativeBalance) {
+                        // 用户余额为负数，手动结算按钮置灰
+                        $actions[] = [
+                            'type' => 'manual_settle_disabled', 
+                            'text' => '手动结算', 
+                            'class' => 'layui-btn-disabled',
+                            'title' => '用户余额为负数，无法手动结算'
+                        ];
+                    } else {
+                        $actions[] = ['type' => 'manual_settle', 'text' => '手动结算', 'class' => 'layui-btn-normal'];
+                    }
                 }
             } else {
                 // 兼容原有逻辑
@@ -174,18 +199,43 @@ class OrderStatusService
     {
         $html = '';
         
+        // 已完成订单：显示灰色不可点击的标签
+        if ($order['status'] == 1) {
+            if (isset($order['auto_dispatch']) && $order['auto_dispatch'] == 1) {
+                $html .= '<span class="layui-btn layui-btn-xs layui-btn-disabled">自动派单</span>';
+            } elseif (isset($order['manual_dispatch']) && $order['manual_dispatch'] == 1) {
+                $html .= '<span class="layui-btn layui-btn-xs layui-btn-disabled">手动派单</span>';
+            } else {
+                $html .= '<span class="layui-btn layui-btn-xs layui-btn-disabled">传统模式</span>';
+            }
+            return $html;
+        }
+        
+        // 未完成订单：显示交互按钮
         if (isset($order['auto_dispatch']) && $order['auto_dispatch'] == 1) {
+            // A状态或B状态：自动派单
             $html .= '<span class="layui-btn layui-btn-xs layui-btn-normal">自动派单</span>';
             $html .= '<a class="layui-btn layui-btn-xs layui-btn-primary" ';
             $html .= 'data-action="' . admin_url('admin/deal/toggle_order_dispatch') . '" ';
             $html .= 'data-value="id#' . $order['id'] . ';mode#manual">切换手动</a>';
         } elseif (isset($order['manual_dispatch']) && $order['manual_dispatch'] == 1) {
+            // C状态或D状态：手动派单
             $html .= '<span class="layui-btn layui-btn-xs layui-btn-warm">手动派单</span>';
             $html .= '<a class="layui-btn layui-btn-xs layui-btn-primary" ';
             $html .= 'data-action="' . admin_url('admin/deal/toggle_order_dispatch') . '" ';
             $html .= 'data-value="id#' . $order['id'] . ';mode#auto">切换自动</a>';
+            
+            // C状态：手动派单 + 无商品 = 显示匹配订单按钮
+            if ($order['dispatch_status'] == 0) {
+                $html .= '<a class="layui-btn layui-btn-xs layui-btn" ';
+                $html .= 'data-open="' . admin_url('admin/deal/manual_dispatch') . '?order_id=' . $order['id'] . '">匹配订单</a>';
+            }
         } else {
+            // 传统模式
             $html .= '<span class="layui-btn layui-btn-xs">传统模式</span>';
+            $html .= '<a class="layui-btn layui-btn-xs layui-btn-primary" ';
+            $html .= 'data-action="' . admin_url('admin/deal/toggle_order_dispatch') . '" ';
+            $html .= 'data-value="id#' . $order['id'] . ';mode#auto">启用自动</a>';
         }
         
         return $html;
@@ -208,6 +258,12 @@ class OrderStatusService
                     $html .= 'data-action="' . admin_url('admin/deal/manual_settlement') . '" ';
                     $html .= 'data-value="id#' . $order['id'] . '" ';
                     $html .= 'class="layui-btn layui-btn-xs ' . $action['class'] . '">' . $action['text'] . '</a>';
+                    break;
+                    
+                case 'manual_settle_disabled':
+                    $title = isset($action['title']) ? $action['title'] : '无法手动结算';
+                    $html .= '<span title="' . htmlspecialchars($title) . '" ';
+                    $html .= 'class="layui-btn layui-btn-xs ' . $action['class'] . '">' . $action['text'] . '</span>';
                     break;
                     
                 case 'match_order':
