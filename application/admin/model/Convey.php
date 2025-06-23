@@ -719,6 +719,19 @@ class Convey extends Model
             // 手动派单已付款等待结算
             $canSettle = true;
             $settleType = 'manual_settle';
+        } elseif ($order['auto_dispatch'] == 1 && $order['dispatch_status'] == 0 && $order['status'] == 0) {
+            // 特殊情况：从手动派单已扣款状态切换回自动派单的订单
+            // 检查是否存在扣款记录（说明已经扣过款）
+            $paymentLog = Db::name('xy_balance_log')
+                ->where('oid', $orderId)
+                ->where('type', 2) // 支出类型
+                ->where('status', 2) // 支出状态
+                ->find();
+            
+            if ($paymentLog) {
+                $canSettle = true;
+                $settleType = 'already_paid_auto'; // 新的结算类型
+            }
         }
         
         if (!$canSettle) {
@@ -900,6 +913,68 @@ class Convey extends Model
                     'info' => '手动结算成功',
                     'settle_type' => $settleType
                 ];
+                
+            } elseif ($settleType == 'already_paid_auto') {
+                // 已扣款的自动派单订单结算（从D状态切换过来的特殊情况）
+                
+                // 直接执行结算：返还本金+佣金
+                $orderAmount = $order['num'];
+                $commission = $order['commission'];
+                $settleAmount = $orderAmount + $commission;
+                
+                $updateBalanceResult = Db::name('xy_users')
+                    ->where('id', $order['uid'])
+                    ->update([
+                        'balance' => Db::raw('balance + ' . $settleAmount),
+                        'deal_status' => 1 // 恢复正常状态
+                    ]);
+                
+                if (!$updateBalanceResult) {
+                    throw new \Exception('结算余额失败');
+                }
+                
+                // 记录结算日志
+                $logData = [
+                    'uid' => $order['uid'],
+                    'oid' => $orderId,
+                    'num' => $orderAmount + $commission, // 记录商品价格+佣金
+                    'type' => 3, // 结算
+                    'status' => 1,
+                    'addtime' => time()
+                ];
+                
+                $logResult = Db::name('xy_balance_log')->insert($logData);
+                if (!$logResult) {
+                    throw new \Exception('记录结算日志失败');
+                }
+                
+                // 更新订单状态
+                $updateOrderResult = Db::name('xy_convey')
+                    ->where('id', $orderId)
+                    ->update([
+                        'status' => 1, // 交易完成
+                        'dispatch_status' => 1, // 派单也完成
+                        'c_status' => 1 // 佣金已发放
+                    ]);
+                
+                if (!$updateOrderResult) {
+                    throw new \Exception('更新订单状态失败');
+                }
+                
+                Db::commit();
+                
+                // 异步发放上级奖励
+                try {
+                    $this->deal_reward_to_parent_only($order['uid'], $orderId, $orderAmount, $commission);
+                } catch (\Exception $e) {
+                    error_log("发放上级奖励失败: " . $e->getMessage());
+                }
+                
+                return [
+                    'code' => 0,
+                    'info' => '手动结算成功（已扣款订单）',
+                    'settle_type' => $settleType
+                ];
             }
             
         } catch (\Exception $e) {
@@ -963,12 +1038,21 @@ class Convey extends Model
                 $refundMessage = "订单删除成功，退回冻结金额 ¥{$order['num']}";
             }
             
+            // 获取用户当前信息
+            $user = Db::name('xy_users')->where('id', $order['uid'])->find();
+            if (!$user) {
+                throw new \Exception('用户不存在');
+            }
+            
             // 执行余额退款
             if ($refundAmount > 0) {
+                // 计算退款后的余额
+                $newBalance = $user['balance'] + $refundAmount;
+                
                 $updateBalanceResult = Db::name('xy_users')
                     ->where('id', $order['uid'])
                     ->update([
-                        'balance' => Db::raw('balance + ' . $refundAmount),
+                        'balance' => $newBalance,
                         'deal_status' => 1 // 恢复为可交易状态
                     ]);
                 
@@ -988,6 +1072,11 @@ class Convey extends Model
                 
                 if (!$logResult) {
                     throw new \Exception('记录退款日志失败');
+                }
+                
+                // 如果用户原本余额为负数，在退款信息中说明
+                if ($user['balance'] < 0) {
+                    $refundMessage .= "（用户原余额为负 ¥{$user['balance']}，退款后余额 ¥{$newBalance}）";
                 }
             } else {
                 // 无需退款，只恢复用户状态
@@ -1052,15 +1141,42 @@ class Convey extends Model
             return ['code' => 1, 'info' => '只能切换待付款状态的订单'];
         }
         
+        // 获取用户信息，检查余额
+        $user = Db::name('xy_users')->where('id', $order['uid'])->find();
+        if (!$user) {
+            return ['code' => 1, 'info' => '用户不存在'];
+        }
+        
+        // 检查用户余额是否为负数
+        if ($user['balance'] < 0) {
+            return ['code' => 1, 'info' => '用户余额为负数，无法切换到自动派单模式。请先处理用户余额问题或使用手动结算。'];
+        }
+        
         Db::startTrans();
         try {
             $coolingPeriod = get_dispatch_config('cooling_period_minutes', 1) * 60;
             
-            // 判断当前是否有商品
+            // 检查是否已经付款（通过余额日志判断）
+            $paymentLog = Db::name('xy_balance_log')
+                ->where('oid', $orderId)
+                ->where('type', 2) // 支出类型
+                ->where('status', 2) // 支出状态
+                ->find();
+            
+            $alreadyPaid = !empty($paymentLog);
             $hasGoods = !empty($order['goods_id']) && $order['goods_id'] > 0;
             
-            if ($hasGoods) {
-                // B状态：自动派单 + 有商品 = 开始计时，等待自动结付
+            if ($alreadyPaid) {
+                // 已付款的订单：设置正常的冷却时间，等待自动结算
+                $updateData = [
+                    'auto_dispatch' => 1,
+                    'manual_dispatch' => 0,
+                    'dispatch_status' => 0, // 冷却中
+                    'cooling_end_time' => time() + $coolingPeriod // 正常冷却期
+                ];
+                $message = '已切换为自动派单模式，订单已付款，等待冷却期结束后自动结算';
+            } elseif ($hasGoods) {
+                // 有商品但未付款：开始正常的自动派单流程（付款+冷却）
                 $updateData = [
                     'auto_dispatch' => 1,
                     'manual_dispatch' => 0,
@@ -1069,7 +1185,7 @@ class Convey extends Model
                 ];
                 $message = '已切换为自动派单模式，开始冷却计时，等待自动结算';
             } else {
-                // A状态：自动派单 + 无商品 = 自动分发商品，然后等待自动结付
+                // 无商品的订单：自动分发商品，然后开始冷却
                 $autoDispatchResult = $this->autoAssignGoods($orderId);
                 if ($autoDispatchResult['code'] != 0) {
                     throw new \Exception($autoDispatchResult['info']);
@@ -1159,27 +1275,35 @@ class Convey extends Model
             return ['code' => 1, 'info' => '只能切换待付款状态的订单'];
         }
         
-        // 判断当前是否有商品
-        $hasGoods = !empty($order['goods_id']) && $order['goods_id'] > 0;
+        // 检查是否已经付款（通过余额日志判断）
+        $paymentLog = Db::name('xy_balance_log')
+            ->where('oid', $orderId)
+            ->where('type', 2) // 支出类型
+            ->where('status', 2) // 支出状态
+            ->find();
         
-        if ($hasGoods) {
-            // 从B状态切换到D状态：手动派单 + 有商品 = 显示结算按钮
+        $alreadyPaid = !empty($paymentLog);
+        
+        if ($alreadyPaid) {
+            // 已付款的订单：切换到D状态（手动派单+有商品+已付款）
             $updateData = [
                 'auto_dispatch' => 0,
                 'manual_dispatch' => 1,
-                'dispatch_status' => 2, // 手动派单中
+                'dispatch_status' => 2, // 手动派单中，已付款
                 'cooling_end_time' => 0 // 清除冷却时间
             ];
-            $message = '已切换为手动派单模式，可以手动结算';
+            $message = '已切换为手动派单模式，订单已付款，可以手动结算';
         } else {
-            // 从A状态切换到C状态：手动派单 + 无商品 = 显示匹配订单按钮
+            // 未付款的订单：无论是否有商品，都重新进入匹配流程（C状态）
             $updateData = [
                 'auto_dispatch' => 0,
                 'manual_dispatch' => 1,
                 'dispatch_status' => 0, // 等待匹配
-                'cooling_end_time' => 0 // 清除冷却时间
+                'cooling_end_time' => 0, // 清除冷却时间
+                'goods_id' => null, // 清除商品，重新匹配
+                'goods_count' => 0
             ];
-            $message = '已切换为手动派单模式，请手动匹配商品';
+            $message = '已切换为手动派单模式，请重新匹配商品';
         }
         
         $result = Db::name('xy_convey')->where('id', $orderId)->update($updateData);

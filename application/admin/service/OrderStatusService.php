@@ -55,7 +55,20 @@ class OrderStatusService
         if ($order['status'] == 0) { // 待付款状态
             if (isset($order['auto_dispatch']) && $order['auto_dispatch'] == 1) {
                 if ($order['dispatch_status'] == 0) {
-                    if ($isNegativeBalance) {
+                    // 检查是否冷却完成待自动结算
+                    $isCoolingFinished = (isset($order['cooling_end_time']) && 
+                                         $order['cooling_end_time'] > 0 && 
+                                         $order['cooling_end_time'] <= time());
+                    
+                    if ($isCoolingFinished) {
+                        // 冷却完成，禁用手动结算
+                        $actions[] = [
+                            'type' => 'manual_settle_disabled', 
+                            'text' => '手动结算', 
+                            'class' => 'layui-btn-disabled',
+                            'title' => '冷却完成，等待自动结算，无法手动干预'
+                        ];
+                    } elseif ($isNegativeBalance) {
                         // 用户余额为负数，手动结算按钮置灰
                         $actions[] = [
                             'type' => 'manual_settle_disabled', 
@@ -97,36 +110,54 @@ class OrderStatusService
             // 这些状态的订单通常不需要额外操作，只保留删除功能
         }
         
-        // 所有状态的订单都可以删除（管理员权限）
-        $deleteText = '删除订单';
-        $deleteConfirm = '确定删除此订单吗？';
+        // 检查是否冷却完成待自动结算（禁用删除操作）
+        $isCoolingFinished = ($order['status'] == 0 && 
+                             isset($order['auto_dispatch']) && $order['auto_dispatch'] == 1 &&
+                             $order['dispatch_status'] == 0 && 
+                             isset($order['cooling_end_time']) && 
+                             $order['cooling_end_time'] > 0 && 
+                             $order['cooling_end_time'] <= time());
         
-        // 根据订单状态调整删除按钮的提示文字
-        switch ($order['status']) {
-            case 0:
-                $deleteConfirm = '确定删除此订单吗？（待付款状态，无需退款）';
-                break;
-            case 1:
-                $deleteConfirm = '确定删除此订单吗？将退回本金并扣除已发放的佣金！';
-                break;
-            case 2:
-            case 4:
-                $deleteConfirm = '确定删除此订单吗？（取消状态）';
-                break;
-            case 3:
-                $deleteConfirm = '确定删除此订单吗？将退回强制付款金额！';
-                break;
-            case 5:
-                $deleteConfirm = '确定删除此订单吗？将退回冻结金额！';
-                break;
+        if ($isCoolingFinished) {
+            // 冷却完成，禁用删除操作
+            $actions[] = [
+                'type' => 'delete_disabled', 
+                'text' => '删除订单', 
+                'class' => 'layui-btn-disabled',
+                'title' => '冷却完成，等待自动结算，无法删除'
+            ];
+        } else {
+            // 正常情况下可以删除
+            $deleteText = '删除订单';
+            $deleteConfirm = '确定删除此订单吗？';
+            
+            // 根据订单状态调整删除按钮的提示文字
+            switch ($order['status']) {
+                case 0:
+                    $deleteConfirm = '确定删除此订单吗？（待付款状态，无需退款）';
+                    break;
+                case 1:
+                    $deleteConfirm = '确定删除此订单吗？将退回本金并扣除已发放的佣金！';
+                    break;
+                case 2:
+                case 4:
+                    $deleteConfirm = '确定删除此订单吗？（取消状态）';
+                    break;
+                case 3:
+                    $deleteConfirm = '确定删除此订单吗？将退回强制付款金额！';
+                    break;
+                case 5:
+                    $deleteConfirm = '确定删除此订单吗？将退回冻结金额！';
+                    break;
+            }
+            
+            $actions[] = [
+                'type' => 'delete', 
+                'text' => $deleteText, 
+                'class' => 'layui-btn-danger',
+                'confirm' => $deleteConfirm
+            ];
         }
-        
-        $actions[] = [
-            'type' => 'delete', 
-            'text' => $deleteText, 
-            'class' => 'layui-btn-danger',
-            'confirm' => $deleteConfirm
-        ];
         
         return $actions;
     }
@@ -215,15 +246,39 @@ class OrderStatusService
         if (isset($order['auto_dispatch']) && $order['auto_dispatch'] == 1) {
             // A状态或B状态：自动派单
             $html .= '<span class="layui-btn layui-btn-xs layui-btn-normal">自动派单</span>';
-            $html .= '<a class="layui-btn layui-btn-xs layui-btn-primary" ';
-            $html .= 'data-action="' . admin_url('admin/deal/toggle_order_dispatch') . '" ';
-            $html .= 'data-value="id#' . $order['id'] . ';mode#manual">切换手动</a>';
+            
+            // 检查是否冷却完成待自动结算（禁用所有操作）
+            $isCoolingFinished = ($order['dispatch_status'] == 0 && 
+                                 isset($order['cooling_end_time']) && 
+                                 $order['cooling_end_time'] > 0 && 
+                                 $order['cooling_end_time'] <= time());
+            
+            if ($isCoolingFinished) {
+                // 冷却完成，禁用切换操作
+                $html .= '<span class="layui-btn layui-btn-xs layui-btn-disabled" ';
+                $html .= 'title="冷却完成，等待自动结算，无法进行其他操作">切换手动</span>';
+            } else {
+                // 正常状态，可以切换
+                $html .= '<a class="layui-btn layui-btn-xs layui-btn-primary" ';
+                $html .= 'data-action="' . admin_url('admin/deal/toggle_order_dispatch') . '" ';
+                $html .= 'data-value="id#' . $order['id'] . ';mode#manual">切换手动</a>';
+            }
         } elseif (isset($order['manual_dispatch']) && $order['manual_dispatch'] == 1) {
             // C状态或D状态：手动派单
             $html .= '<span class="layui-btn layui-btn-xs layui-btn-warm">手动派单</span>';
-            $html .= '<a class="layui-btn layui-btn-xs layui-btn-primary" ';
-            $html .= 'data-action="' . admin_url('admin/deal/toggle_order_dispatch') . '" ';
-            $html .= 'data-value="id#' . $order['id'] . ';mode#auto">切换自动</a>';
+            
+            // 检查用户余额是否为负数
+            $userBalance = isset($order['ubalance']) ? floatval($order['ubalance']) : 0;
+            if ($userBalance < 0) {
+                // 用户余额为负数，禁用切换自动按钮
+                $html .= '<span class="layui-btn layui-btn-xs layui-btn-disabled" ';
+                $html .= 'title="用户余额为负数，无法切换到自动派单模式">切换自动</span>';
+            } else {
+                // 用户余额正常，显示可点击的切换按钮
+                $html .= '<a class="layui-btn layui-btn-xs layui-btn-primary" ';
+                $html .= 'data-action="' . admin_url('admin/deal/toggle_order_dispatch') . '" ';
+                $html .= 'data-value="id#' . $order['id'] . ';mode#auto">切换自动</a>';
+            }
             
             // C状态和D状态都显示匹配订单按钮
             // C状态：手动派单 + 无商品 = 匹配订单（初次分配商品）
@@ -280,6 +335,12 @@ class OrderStatusService
                     $html .= 'data-action="' . admin_url('admin/deal/delete_order_with_refund') . '" ';
                     $html .= 'data-value="id#' . $order['id'] . '" ';
                     $html .= 'class="layui-btn layui-btn-xs ' . $action['class'] . '">' . $action['text'] . '</a>';
+                    break;
+                    
+                case 'delete_disabled':
+                    $title = isset($action['title']) ? $action['title'] : '无法删除';
+                    $html .= '<span title="' . htmlspecialchars($title) . '" ';
+                    $html .= 'class="layui-btn layui-btn-xs ' . $action['class'] . '">' . $action['text'] . '</span>';
                     break;
                     
                 case 'force_pay':

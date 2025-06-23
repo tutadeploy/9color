@@ -1553,6 +1553,23 @@ class Deal extends Controller
             return $this->error('参数错误');
         }
         
+        // 检查订单是否冷却完成待自动结算（禁止切换）
+        $order = Db::name('xy_convey')->where('id', $orderId)->find();
+        if (!$order) {
+            return $this->error('订单不存在');
+        }
+        
+        $isCoolingFinished = ($order['status'] == 0 && 
+                             $order['auto_dispatch'] == 1 &&
+                             $order['dispatch_status'] == 0 && 
+                             isset($order['cooling_end_time']) && 
+                             $order['cooling_end_time'] > 0 && 
+                             $order['cooling_end_time'] <= time());
+        
+        if ($isCoolingFinished) {
+            return $this->error('冷却完成，等待自动结算，无法进行模式切换');
+        }
+        
         $conveyModel = new \app\admin\model\Convey();
         if ($mode == 'auto') {
             // 切换为自动派单
@@ -1578,6 +1595,23 @@ class Deal extends Controller
         $this->applyCsrfToken();
         $orderId = input('post.id/s', '');
         
+        // 检查订单是否冷却完成待自动结算（禁止手动干预）
+        $order = Db::name('xy_convey')->where('id', $orderId)->find();
+        if (!$order) {
+            return $this->error('订单不存在');
+        }
+        
+        $isCoolingFinished = ($order['status'] == 0 && 
+                             $order['auto_dispatch'] == 1 &&
+                             $order['dispatch_status'] == 0 && 
+                             isset($order['cooling_end_time']) && 
+                             $order['cooling_end_time'] > 0 && 
+                             $order['cooling_end_time'] <= time());
+        
+        if ($isCoolingFinished) {
+            return $this->error('冷却完成，等待自动结算，无法手动干预');
+        }
+        
         $conveyModel = new \app\admin\model\Convey();
         $result = $conveyModel->manualSettleOrder($orderId, 0); // 管理员操作
         
@@ -1597,6 +1631,23 @@ class Deal extends Controller
         $this->applyCsrfToken();
         $orderId = input('post.id/s', '');
         $adminId = session('admin_user.id');
+        
+        // 检查订单是否冷却完成待自动结算（禁止删除）
+        $order = Db::name('xy_convey')->where('id', $orderId)->find();
+        if (!$order) {
+            return $this->error('订单不存在');
+        }
+        
+        $isCoolingFinished = ($order['status'] == 0 && 
+                             $order['auto_dispatch'] == 1 &&
+                             $order['dispatch_status'] == 0 && 
+                             isset($order['cooling_end_time']) && 
+                             $order['cooling_end_time'] > 0 && 
+                             $order['cooling_end_time'] <= time());
+        
+        if ($isCoolingFinished) {
+            return $this->error('冷却完成，等待自动结算，无法删除订单');
+        }
         
         $conveyModel = new \app\admin\model\Convey();
         $result = $conveyModel->deleteOrderWithRefund($orderId, $adminId);
