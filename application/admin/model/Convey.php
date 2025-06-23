@@ -1234,14 +1234,20 @@ class Convey extends Model
             $orderAmount = $goodsPrice * $goodsCount; // $goodsPrice * 1
             $commission = $this->calculateCommission($orderAmount, $user['level']);
             
-            // 5. 设置用户状态为交易中
-            $updateUserResult = Db::name('xy_users')
-                ->where('id', $order['uid'])
-                ->update(['deal_status' => 3]); // 3=交易中
+            // 5. 设置用户状态为交易中（仅在C状态初次派单时）
+            $isFirstTimePayment = ($order['dispatch_status'] == 0); // C状态是初次扣费
             
-            if (!$updateUserResult) {
-                throw new \Exception('更新用户状态失败');
+            if ($isFirstTimePayment) {
+                // C状态：初次派单，需要设置用户状态为交易中
+                $updateUserResult = Db::name('xy_users')
+                    ->where('id', $order['uid'])
+                    ->update(['deal_status' => 3]); // 3=交易中
+                
+                if (!$updateUserResult) {
+                    throw new \Exception('更新用户状态失败');
+                }
             }
+            // D状态：修改商品，用户已经处于交易中状态，无需重复设置
             
             // 6. 更新订单商品信息
             $updateOrderData = [
@@ -1259,7 +1265,7 @@ class Convey extends Model
             }
             
             // 7. 处理扣费逻辑
-            $isFirstTimePayment = ($order['dispatch_status'] == 0); // C状态是初次扣费
+            // $isFirstTimePayment 已在上面定义
             $isModifyGoods = ($order['dispatch_status'] == 2); // D状态是修改商品
             
             if ($isFirstTimePayment) {
