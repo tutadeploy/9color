@@ -42,18 +42,29 @@ class Order extends Base
                             ->where('xc.dispatch_status', 2)
                             ->where('xc.status', 0);
                     })->whereOr(function($subq) {
+                        // 自动派单：已扣款等待结算的订单（手动匹配后切到自动的情况）
+                        $subq->where('xc.auto_dispatch', 1)
+                            ->where('xc.dispatch_status', 0)
+                            ->where('xc.status', 0)
+                            ->whereExists(function($query) {
+                                $query->table('xy_balance_log')
+                                    ->where('oid', 'exp', '= xc.id')
+                                    ->where('type', 2)
+                                    ->where('status', 2);
+                            });
+                    })->whereOr(function($subq) {
                         // 传统模式：待付款订单
                         $subq->where('xc.auto_dispatch', 0)
                             ->where('xc.manual_dispatch', 0)
                             ->where('xc.status', 0);
                     });
-                    // 注意：自动派单冷却期内的订单不显示给用户
+                    // 注意：自动派单冷却期内未扣款的订单不显示给用户
                 });
             } else {
                 $query->where('xc.status', $status);
             }
         } else {
-            // 全部订单：排除自动派单冷却期的订单
+            // 全部订单：排除自动派单冷却期未扣款的订单和手动派单等待匹配的订单
             $query->where(function($q) {
                 $q->whereOr(function($subq) {
                     // 显示已完成的订单
@@ -64,12 +75,23 @@ class Order extends Base
                         ->where('xc.dispatch_status', 2)
                         ->where('xc.status', 0);
                 })->whereOr(function($subq) {
+                    // 显示自动派单已扣款等待结算的订单（手动匹配后切到自动的情况）
+                    $subq->where('xc.auto_dispatch', 1)
+                        ->where('xc.dispatch_status', 0)
+                        ->where('xc.status', 0)
+                        ->whereExists(function($query) {
+                            $query->table('xy_balance_log')
+                                ->where('oid', 'exp', '= xc.id')
+                                ->where('type', 2)
+                                ->where('status', 2);
+                        });
+                })->whereOr(function($subq) {
                     // 显示传统模式待付款的订单
                     $subq->where('xc.auto_dispatch', 0)
                         ->where('xc.manual_dispatch', 0)
                         ->where('xc.status', 0);
                 });
-                // 不显示：自动派单冷却期订单 (auto_dispatch=1 AND dispatch_status=0)
+                // 不显示：自动派单冷却期未扣款订单 (auto_dispatch=1 AND dispatch_status=0 AND 未扣款)
                 // 不显示：手动派单等待匹配订单 (manual_dispatch=1 AND dispatch_status=0)
             });
         }
@@ -134,12 +156,23 @@ class Order extends Base
                             ->where('xc.dispatch_status', 2)
                             ->where('xc.status', 0);
                     })->whereOr(function($subq) {
+                        // 自动派单：已扣款等待结算的订单（手动匹配后切到自动的情况）
+                        $subq->where('xc.auto_dispatch', 1)
+                            ->where('xc.dispatch_status', 0)
+                            ->where('xc.status', 0)
+                            ->whereExists(function($query) {
+                                $query->table('xy_balance_log')
+                                    ->where('oid', 'exp', '= xc.id')
+                                    ->where('type', 2)
+                                    ->where('status', 2);
+                            });
+                    })->whereOr(function($subq) {
                         // 传统模式：待付款订单
                         $subq->where('xc.auto_dispatch', 0)
                             ->where('xc.manual_dispatch', 0)
                             ->where('xc.status', 0);
                     });
-                    // 注意：自动派单冷却期内的订单不显示给用户
+                    // 注意：自动派单冷却期内未扣款的订单不显示给用户
                 });
                 break;
             case 2: //获取冻结中订单
