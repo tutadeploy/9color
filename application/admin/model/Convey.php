@@ -1236,7 +1236,7 @@ class Convey extends Model
         
         // 检查用户余额是否为负数
         if ($user['balance'] < 0) {
-            return ['code' => 1, 'info' => '用户余额为负数，无法切换到自动派单模式。请先处理用户余额问题或使用手动结算。'];
+            return ['code' => 1, 'info' => '用户余额为负数，无法切换到自动派单模式。请先处理用户余额问题。'];
         }
         
         Db::startTrans();
