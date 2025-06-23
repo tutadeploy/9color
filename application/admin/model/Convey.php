@@ -798,16 +798,8 @@ class Convey extends Model
         $settleType = '';
         
         if ($order['auto_dispatch'] == 1 && $order['dispatch_status'] == 0) {
-            // 自动派单冷却期内手动结算
-            $canSettle = true;
-            $settleType = 'auto_manual';
-        } elseif ($order['manual_dispatch'] == 1 && $order['dispatch_status'] == 2 && $order['status'] == 0) {
-            // 手动派单已付款等待结算
-            $canSettle = true;
-            $settleType = 'manual_settle';
-        } elseif ($order['auto_dispatch'] == 1 && $order['dispatch_status'] == 0 && $order['status'] == 0) {
-            // 特殊情况：从手动派单已扣款状态切换回自动派单的订单
-            // 检查是否存在扣款记录（说明已经扣过款）
+            // 自动派单冷却期内的订单：需要区分是否已扣款
+            // 检查是否存在扣款记录
             $paymentLog = Db::name('xy_balance_log')
                 ->where('oid', $orderId)
                 ->where('type', 2) // 支出类型
@@ -815,9 +807,18 @@ class Convey extends Model
                 ->find();
             
             if ($paymentLog) {
+                // 已扣款：手动匹配后切到自动的情况，只需结算
                 $canSettle = true;
-                $settleType = 'already_paid_auto'; // 新的结算类型
+                $settleType = 'already_paid_auto';
+            } else {
+                // 未扣款：纯自动派单冷却期，需要先扣款再结算
+                $canSettle = true;
+                $settleType = 'auto_manual';
             }
+        } elseif ($order['manual_dispatch'] == 1 && $order['dispatch_status'] == 2 && $order['status'] == 0) {
+            // 手动派单已付款等待结算
+            $canSettle = true;
+            $settleType = 'manual_settle';
         }
         
         if (!$canSettle) {
