@@ -194,7 +194,6 @@
                             <div data-v-35ad745e="" class="records_tabs_box">
                                 <div data-v-35ad745e="" class="records_tabs_box_top">
                                     {if $v['order_num']!=0}<span class="circle">{$v.order_num}</span>{/if}
-                                    <div>{:lang('抢单的时间')}：{$v.addtime|format_datetime='Y-m-d H:i:s'}</div>
                                     <div>{:lang('抢单编号')}：{$v.id}</div>
                                 </div>
                                 <img data-v-35ad745e="" src="{$img}" class="records_tabs_box_img">
@@ -512,7 +511,6 @@
                     '<div data-v-35ad745e="" class="records_tabs_box">' +
                     '<div data-v-35ad745e="" class="records_tabs_box_top">' +
                     (obj.order_num && obj.order_num != 0 ? '<span class="circle">' + obj.order_num + '</span>' : '') +
-                    '<div>{:lang("抢单的时间")}：' + obj.addtime + '</div>' +
                     '<div>{:lang("抢单编号")}：' + obj.id + '</div>' +
                     '</div>' +
                     '<img data-v-35ad745e="" src="' + img + '" class="records_tabs_box_img">' +
