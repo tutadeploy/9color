@@ -99,7 +99,8 @@
             <tr>
                 <th class='text-left nowrap'>订单号</th>
                 <th class='text-left nowrap'>用户信息<hr>等级/余额</th>
-                <th class='text-left nowrap'>订单金额<hr>佣金</th>
+                <th class='text-left nowrap'>订单金额</th>
+                <th class='text-left nowrap'>佣金</th>
                 <th class='text-left nowrap'>派单模式<hr>状态</th>
                 <th class='text-left nowrap'>时间信息</th>
                 <th class='text-left nowrap'>操作</th>
@@ -117,10 +118,15 @@
                     <br><small>{:model('Users')->getLevel($vo.level,'name');} | ¥{$vo.ubalance}</small>
                 </td>
                 
-                <!-- 订单金额合并列 -->
+                <!-- 订单金额列 -->
                 <td class='text-left nowrap compact-cell'>
-                    <font color="red">¥{$vo.num}</font><hr>佣金¥{$vo.commission}
+                    <font color="red">¥{$vo.num}</font>
                     <br><small class="J_today_num">第?单</small>
+                </td>
+                
+                <!-- 佣金列 -->
+                <td class='text-left nowrap compact-cell'>
+                    <font color="green">¥{$vo.commission}</font>
                 </td>
                 
                 <!-- 派单模式和状态合并列 -->
