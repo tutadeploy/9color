@@ -31,7 +31,7 @@ class Convey extends Model
 
         
          
-        $goods = $this->rand_order($min,$max,$cid);
+        $goods = $this->rand_order($min,$max,$cid,$uinfo['balance']);
 
 //return ['code'=>8,'info'=>'第'.$di_num_dan.'单;区间min:'.$min.'max:'.$max.'总价'.$goods['num'].'数量'.$goods['count'].'单价'.$goods['price'].'利润:'.$commission];
         $level = $uinfo['level'];
@@ -75,9 +75,105 @@ class Convey extends Model
     }
 
     /**
-     * 随机生成订单
+     * 智能商品匹配算法 - 根据用户余额选择最接近且不超过余额的商品
+     * 
+     * @param float $min 最小价格
+     * @param float $max 最大价格  
+     * @param int $cid 商品分类ID
+     * @param float $userBalance 用户余额（新增参数）
+     * @return array
      */
-    private function rand_order($min,$max,$cid=1)
+    private function rand_order($min, $max, $cid = 1, $userBalance = null)
+    {
+        // 如果传入了用户余额，使用智能匹配算法
+        if ($userBalance !== null) {
+            return $this->smart_goods_matching($userBalance, $cid, $min, $max);
+        }
+        
+        // 保持原有逻辑作为兜底方案
+        return $this->legacy_rand_order($min, $max, $cid);
+    }
+
+    /**
+     * 智能商品匹配 - 选择余额内最接近余额的商品
+     * 
+     * @param float $userBalance 用户余额
+     * @param int $cid 商品分类ID
+     * @param float $min 最小价格（可选约束）
+     * @param float $max 最大价格（可选约束）
+     * @return array
+     */
+    private function smart_goods_matching($userBalance, $cid = 1, $min = null, $max = null)
+    {
+        // 优先策略：忽略价格区间约束，选择最接近用户余额的商品
+        $goods = Db::name('xy_goods_list')
+            ->where('cid', $cid)
+            ->where('status', 1) // 只选择启用的商品
+            ->where('goods_price', '<=', $userBalance) // 确保不超过用户余额
+            ->order('goods_price DESC') // 按价格降序排列，选择最接近余额的
+            ->find();
+        
+        if ($goods) {
+            // 找到了最佳匹配商品，直接返回
+            $count = 1;
+            $totalAmount = $goods['goods_price'];
+            
+            return [
+                'code' => 0,
+                'count' => $count,           // 固定为1
+                'id' => $goods['id'],
+                'num' => $totalAmount,       // 订单总金额 = 商品价格
+                'cid' => $goods['cid'],
+                'price' => $goods['goods_price'],
+                'goods_name' => $goods['goods_name'] ?? '',
+                'match_info' => "智能匹配：用户余额{$userBalance}，选择最接近商品价格{$goods['goods_price']}（忽略价格区间约束）"
+            ];
+        }
+        
+        // 如果没有找到任何符合条件的商品，尝试使用价格区间约束作为兜底
+        if ($min !== null && $max !== null) {
+            $query = Db::name('xy_goods_list')
+                ->where('cid', $cid)
+                ->where('status', 1)
+                ->where('goods_price', '<=', $userBalance);
+            
+            // 添加价格区间约束
+            if ($min > 0) {
+                $query->where('goods_price', '>=', $min);
+            }
+            
+            if ($max > 0) {
+                $effectiveMax = min($max, $userBalance);
+                $query->where('goods_price', '<=', $effectiveMax);
+            }
+            
+            $goods = $query->order('goods_price DESC')->find();
+            
+            if ($goods) {
+                $count = 1;
+                $totalAmount = $goods['goods_price'];
+                
+                return [
+                    'code' => 0,
+                    'count' => $count,
+                    'id' => $goods['id'],
+                    'num' => $totalAmount,
+                    'cid' => $goods['cid'],
+                    'price' => $goods['goods_price'],
+                    'goods_name' => $goods['goods_name'] ?? '',
+                    'match_info' => "智能匹配：用户余额{$userBalance}，在价格区间[{$min}-{$max}]内选择商品价格{$goods['goods_price']}"
+                ];
+            }
+        }
+        
+        // 如果仍然没找到，返回错误
+        return ['code' => 1, 'info' => lang('该分类下没有符合余额条件的商品')];
+    }
+
+    /**
+     * 原有的随机选择算法（保持兼容性）
+     */
+    private function legacy_rand_order($min, $max, $cid = 1)
     {
         // 直接在价格区间内查找商品，确保商品数量为1
         $goods = Db::name('xy_goods_list')
@@ -194,7 +290,7 @@ class Convey extends Model
         // 验证商品价格是否在允许的区间内
         if($totalAmount < $min || $totalAmount > $max){
             // 如果商品价格不在区间内，递归重新查找
-            return self::rand_order($min,$max,$cid);
+            return $this->legacy_rand_order($min,$max,$cid);
         }
         
         return [
@@ -1307,7 +1403,7 @@ class Convey extends Model
     }
 
     /**
-     * 自动分发商品到订单
+     * 自动分发商品到订单（使用智能匹配算法）
      * @param string $orderId 订单ID
      * @return array
      */
@@ -1323,28 +1419,38 @@ class Convey extends Model
             return ['code' => 1, 'info' => '订单状态不正确'];
         }
         
-        // 查找可用商品（价格 <= 订单金额）
-        $availableGoods = Db::name('xy_goods_list')
-            ->where('status', 1)
-            ->where('goods_price', '<=', $order['num'])
-            ->order('goods_price desc') // 优先选择价格高的商品
-            ->find();
-        
-        if (!$availableGoods) {
-            return ['code' => 1, 'info' => '没有找到合适的商品'];
+        // 获取用户余额
+        $user = Db::name('xy_users')->where('id', $order['uid'])->find();
+        if (!$user) {
+            return ['code' => 1, 'info' => '用户不存在'];
         }
+        
+        // 使用智能匹配算法选择最接近用户余额的商品
+        $goodsResult = $this->smart_goods_matching($user['balance'], 1); // 默认分类ID为1
+        
+        if ($goodsResult['code'] != 0) {
+            return $goodsResult; // 返回错误信息
+        }
+        
+        // 计算佣金
+        $commission = $this->calculateCommission($goodsResult['num'], $user['level']);
         
         // 更新订单商品信息
         $updateData = [
-            'goods_id' => $availableGoods['id'],
-            'goods_count' => 1, // 固定数量为1
-            'num' => $availableGoods['goods_price'] // 订单金额=商品价格
+            'goods_id' => $goodsResult['id'],
+            'goods_count' => $goodsResult['count'], // 固定为1
+            'num' => $goodsResult['num'], // 订单金额=商品价格
+            'commission' => $commission // 更新佣金
         ];
         
         $result = Db::name('xy_convey')->where('id', $orderId)->update($updateData);
         
         if ($result !== false) {
-            return ['code' => 0, 'info' => '自动分发商品成功', 'goods' => $availableGoods];
+            return [
+                'code' => 0, 
+                'info' => '智能分发商品成功：' . $goodsResult['match_info'], 
+                'goods' => $goodsResult
+            ];
         } else {
             return ['code' => 1, 'info' => '分发商品失败'];
         }
