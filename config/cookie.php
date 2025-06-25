@@ -15,7 +15,7 @@
 
 return [
     // cookie 保存时间
-    'expire'    => 1800,
+    'expire'    => 14400,
     // cookie 启用安全传输
     'secure'    => false,
     // httponly 设置
