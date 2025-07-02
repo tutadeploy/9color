@@ -565,7 +565,7 @@ class Convey extends Model
     }
 
     /**
-     * 创建派单订单（统一入口）
+     * 创建派单订单（新方法）
      * @param int $uid 用户ID
      * @param int $cid 商品分类ID
      * @return array
@@ -582,21 +582,48 @@ class Convey extends Model
         // 获取用户派单模式
         $isAutoDispatch = $userModel->getUserDispatchMode($uid);
         
-        // 统一创建空订单（核心变更）
-        $orderResult = $this->create_empty_order($uid, $cid, $isAutoDispatch);
-        
-        if ($orderResult['code'] != 0) {
-            return $orderResult;
-        }
-
         if ($isAutoDispatch) {
+            // 自动派单：创建完整订单
+            $orderResult = $this->create_order($uid, $cid);
+            
+            if ($orderResult['code'] != 0) {
+                return $orderResult;
+            }
+
+            $orderId = $orderResult['oid'];
+            
+            // 设置自动派单相关字段
+            $coolingPeriod = get_dispatch_config('cooling_period_minutes', 1) * 60;
+            $updateData = [
+                'auto_dispatch' => 1,
+                'dispatch_status' => 0, // 0=冷却中
+                'manual_dispatch' => 0,
+                'cooling_end_time' => time() + $coolingPeriod,
+                'endtime' => time() + $coolingPeriod, // 自动派单订单的超时时间与冷却期匹配
+            ];
+
+            // 更新订单派单信息
+            $updateResult = Db::name('xy_convey')->where('id', $orderId)->update($updateData);
+            
+            if ($updateResult === false) {
+                return ['code' => 1, 'info' => '派单设置失败'];
+            }
+
             return [
                 'code' => 0,
-                'info' => '自动派单成功，系统将在冷却期后智能匹配商品并结算',
-                'oid' => $orderResult['oid'],
+                'info' => '自动派单成功，冷却期后自动结算',
+                'oid' => $orderId,
                 'dispatch_mode' => 'auto'
             ];
+            
         } else {
+            // 手动派单：创建不完整订单（等待管理员匹配商品）
+            $orderResult = $this->create_manual_dispatch_order($uid, $cid);
+            
+            if ($orderResult['code'] != 0) {
+                return $orderResult;
+            }
+
             return [
                 'code' => 0,
                 'info' => '手动派单成功，等待管理员匹配',
@@ -607,13 +634,12 @@ class Convey extends Model
     }
 
     /**
-     * 创建统一的空订单（自动和手动派单都使用）
+     * 创建手动派单订单（等待管理员匹配商品）
      * @param int $uid 用户ID
      * @param int $cid 商品分类ID
-     * @param bool $isAutoDispatch 是否自动派单
      * @return array
      */
-    private function create_empty_order($uid, $cid = 1, $isAutoDispatch = true)
+    private function create_manual_dispatch_order($uid, $cid = 1)
     {
         $add_id = Db::name('xy_member_address')->where('uid',$uid)->value('id');
         if(!$add_id) return ['code'=>1,'info'=>lang('还没有设置收货地址')];
@@ -637,74 +663,33 @@ class Convey extends Model
             'deal_count'=>Db::raw('deal_count+1')
         ]);
 
-        // 统一的空订单结构
-        $orderData = [
+        // 创建空订单记录（等待管理员匹配商品）
+        $res1 = Db::name($this->table)->insert([
             'id'            => $id,
             'uid'           => $uid,
             'ubalance'      => $uinfo['balance'],
-            'num'           => 0, // 等待系统/管理员设置
+            'num'           => 0, // 等待管理员设置
             'addtime'       => time(),
             'endtime'       => time()+config('deal_timeout'),
             'add_id'        => $add_id,
-            'goods_id'      => 0, // 等待系统/管理员选择（关键）
-            'goods_count'   => 0, // 等待设置
+            'goods_id'      => 0, // 等待管理员选择
+            'goods_count'   => 0, // 等待管理员设置
             'commission'    => 0, // 等待计算
-            'dispatch_status' => 0, // 0=等待派单
+            'auto_dispatch' => 0,
+            'dispatch_status' => 0, // 0=等待匹配商品
+            'manual_dispatch' => 1,
+            'cooling_end_time' => 0, // 手动派单无冷却期
             'order_num' => 0,
             'grouping_id' => 0,
-            'version' => 1,
-        ];
-        
-        if ($isAutoDispatch) {
-            // 自动派单：设置冷却期
-            $coolingPeriod = get_dispatch_config('cooling_period_minutes', 1) * 60;
-            $orderData['auto_dispatch'] = 1;
-            $orderData['manual_dispatch'] = 0;
-            $orderData['cooling_end_time'] = time() + $coolingPeriod;
-            $orderData['endtime'] = time() + $coolingPeriod; // 自动派单的超时时间与冷却期一致
-        } else {
-            // 手动派单：无冷却期
-            $orderData['auto_dispatch'] = 0;
-            $orderData['manual_dispatch'] = 1;
-            $orderData['cooling_end_time'] = 0;
-        }
-        
-        $res1 = Db::name($this->table)->insert($orderData);
+        ]);
         
         if($res && $res1){
             Db::commit();
-            return ['code'=>0,'info'=>'订单创建成功','oid'=>$id];
+            return ['code'=>0,'info'=>lang('手动派单订单创建成功，等待管理员匹配商品'),'oid'=>$id];
         }else{
             Db::rollback();
             return ['code'=>1,'info'=>lang('订单创建失败!请稍后再试')];
         }
-    }
-
-    /**
-     * 检查旧订单兼容性
-     * @return array
-     */
-    public function checkOrderCompatibility()
-    {
-        // 检查是否有旧的自动派单订单（有商品信息的）
-        $oldAutoOrders = Db::name('xy_convey')
-            ->where('auto_dispatch', 1)
-            ->where('goods_id', '>', 0)
-            ->where('status', 0)
-            ->count();
-        
-        // 检查是否有空的自动派单订单
-        $newAutoOrders = Db::name('xy_convey')
-            ->where('auto_dispatch', 1)
-            ->where('goods_id', 0)
-            ->where('status', 0)
-            ->count();
-            
-        return [
-            'old_auto_orders' => $oldAutoOrders,
-            'new_auto_orders' => $newAutoOrders,
-            'message' => "发现 {$oldAutoOrders} 个旧格式自动派单订单，{$newAutoOrders} 个新格式空订单"
-        ];
     }
 
     /**
@@ -1388,16 +1373,19 @@ class Convey extends Model
                 ];
                 $message = '已切换为自动派单模式，开始冷却计时，等待自动结算';
             } else {
-                // 无商品的订单：保持空订单状态，等待冷却期结束后分配商品
+                // 无商品的订单：自动分发商品，然后开始冷却
+                $autoDispatchResult = $this->autoAssignGoods($orderId);
+                if ($autoDispatchResult['code'] != 0) {
+                    throw new \Exception($autoDispatchResult['info']);
+                }
+                
                 $updateData = [
                     'auto_dispatch' => 1,
                     'manual_dispatch' => 0,
                     'dispatch_status' => 0, // 冷却中
                     'cooling_end_time' => time() + $coolingPeriod
-                    // 不修改 goods_id，保持原有的 0 值
-                    // 不调用 autoAssignGoods()
                 ];
-                $message = '已切换为自动派单模式，等待冷却期结束后智能分配商品';
+                $message = '已切换为自动派单模式，自动分发商品完成，开始冷却计时';
             }
             
             $result = Db::name('xy_convey')->where('id', $orderId)->update($updateData);

@@ -23,5 +23,6 @@ return [
     'prefix' => 'fw',
     'path'   => $_path_,
     'name'   => $_name_,
+    'cookie_lifetime' => 3600*24*7, // Session Cookie有效期7天
     // 'var_session_id' => $_name_,
 ];

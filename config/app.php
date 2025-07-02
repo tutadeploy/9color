@@ -88,15 +88,15 @@ return [
     'master_bk_address'=>'请联系客服',         //银行地址
     'deal_zhuji_time'=>'2',         //远程主机分配时间
     'deal_shop_time'=>'2',          //等待商家响应时间
-    'tixian_time_1'=>'9',           //提现开始时间
-    'tixian_time_2'=>'21',          //提现结束时间
+    'tixian_time_1'=>'0',           //提现开始时间
+    'tixian_time_2'=>'24',          //提现结束时间
 
-    'chongzhi_time_1'=>'9',           //充值开始时间
-    'chongzhi_time_2'=>'21',          //充值结束时间
+    'chongzhi_time_1'=>'0',           //充值开始时间
+    'chongzhi_time_2'=>'24',          //充值结束时间
 
 
-    'order_time_1'=>'9',           //抢单结束时间
-    'order_time_2'=>'21',          //抢单结束时间
+    'order_time_1'=>'0',           //抢单结束时间
+    'order_time_2'=>'24',          //抢单结束时间
 
     //利息宝
     'lxb_bili'=>'0.005',         //利息宝 日利率
