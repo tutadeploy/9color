@@ -133,6 +133,7 @@ class Users extends Model
         // 设置用户默认启用状态
         $data['status'] = 1;           // 用户状态：1=启用
         $data['deal_status'] = 1;      // 交易状态：1=可交易
+        $data['level'] = 0;            // 新用户默认等级为0
         if($pwd2){
             $salt2 = rand(0,99999);  //生成盐
             $data['pwd2'] = sha1($pwd2.$salt2.config('pwd_str'));
