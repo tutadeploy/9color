@@ -389,8 +389,8 @@
                 onerror="this.src='/static/public/img/head.png'">
 
 
-            <p class="vip_car_logo_name" style="width: auto;">会员等级：普通会员</p>
-            <p class="vip_car_logo_rw">每天可接单：<span id="num_task">20</span> (单)</p>
+        <p class="vip_car_logo_name" style="width: auto;">{:lang('会员等级')}：{$level_name}</p>
+        <p class="vip_car_logo_rw">{:lang('每天可接单')}：<span id="num_task">{$order_num}</span> ({:lang('单')})</p>
             <a class="vip_car_hyxq" href="/my">会员详情</a>
             <!--<div class="vip_car_hyjj">
             <p class="vip_car_hytq"><span>下级任务佣金</span> <span style="float: right;">下级会员佣金</span> </p>
@@ -421,75 +421,24 @@
 
     <!--</div>-->
     <div class="swiper-container vio_rwktlb swiper-container-horizontal" id="vip_sel" style="width: 100%;margin-left:0">
-        <div class="swiper-wrapper">
-
-            <li class="swiper-slide sub swiper-slide-active" data-id="1" data-price="500.00"
-                style="width: 131.333px; margin-right: 10px;">
-                <p class="vip_hylss">普通会员</p>
-                <p class="vip_hyjg">500.00<span>元</span></p>
-                <p class="vip_yuanjia2">提现次数: 100/天</p>
-                <p class="vip_yuanjia2">提现额度:100000.00</p>
-                <p class="vip_yuanjia2">接单数量:20/天</p>
-                <p class="vip_yuanjia2">佣金比例:0.0000</p>
-                <p data-name="1" class="vip_yuanjia isc">会员永久有效</p>
+          <div class="swiper-wrapper">
+        {foreach $member_level as $key=>$vo}
+            <?php $lv = $vo['id'] == $info['level'] ? 1 : ''  ?>
+            <li class="swiper-slide sub <?php echo $vo['level'] > $info['level'] ? 'lv' :'' ;?>  " data-id="{$vo.level}" data-price="{$vo.num}" data-neednum="{$vo.auto_vip_xu_num}" data-needblacne="{$vo.num}">
+            <p class="vip_hylss">{$vo.name}</p>
+            <p class="vip_hyjg">余额:{$vo.num}<span>{:lang('美元')}</span></p>
+            <p class="vip_hyjg">邀请:{$vo.auto_vip_xu_num}<span>人</span></p>
+            
+            <p  class="vip_yuanjia2">{:lang('提现次数')}:{$vo['tixian_ci']}/{:lang('天')}</p>
+            <p  class="vip_yuanjia2">{:lang('提现额度')}:{$vo['tixian_max']}</p>
+            <p  class="vip_yuanjia2">{:lang('接单数量')}:{$vo['order_num']}/{:lang('天')}</p>
+            <p  class="vip_yuanjia2">{:lang('佣金比例')}:{$vo['bili']}</p>
+            <p data-name="{$lv ? $lv: ''}" class="vip_yuanjia <?php echo $lv? 'isc': '' ?> ">{:lang('会员永久有效')}</p>
             </li>
+        {/foreach}
 
-            <li class="swiper-slide sub lv swiper-slide-next" data-id="2" data-price="2888.00"
-                style="width: 131.333px; margin-right: 10px;">
-                <p class="vip_hylss">白银会员</p>
-                <p class="vip_hyjg">2888.00<span>元</span></p>
-                <p class="vip_yuanjia2">提现次数: 100/天</p>
-                <p class="vip_yuanjia2">提现额度:50000.00</p>
-                <p class="vip_yuanjia2">接单数量:25/天</p>
-                <p class="vip_yuanjia2">佣金比例:0.0020</p>
-                <p class="vip_yuanjia">会员永久有效</p>
-            </li>
 
-            <li class="swiper-slide sub lv" data-id="3" data-price="5000.00"
-                style="width: 131.333px; margin-right: 10px;">
-                <p class="vip_hylss">黄金会员</p>
-                <p class="vip_hyjg">5000.00<span>元</span></p>
-                <p class="vip_yuanjia2">提现次数: 100/天</p>
-                <p class="vip_yuanjia2">提现额度:80000.00</p>
-                <p class="vip_yuanjia2">接单数量:30/天</p>
-                <p class="vip_yuanjia2">佣金比例:0.0040</p>
-                <p class="vip_yuanjia">会员永久有效</p>
-            </li>
-
-            <li class="swiper-slide sub lv" data-id="4" data-price="10000.00"
-                style="width: 131.333px; margin-right: 10px;">
-                <p class="vip_hylss">铂金会员</p>
-                <p class="vip_hyjg">10000.00<span>元</span></p>
-                <p class="vip_yuanjia2">提现次数: 100/天</p>
-                <p class="vip_yuanjia2">提现额度:100000.00</p>
-                <p class="vip_yuanjia2">接单数量:40/天</p>
-                <p class="vip_yuanjia2">佣金比例:0.0080</p>
-                <p class="vip_yuanjia">会员永久有效</p>
-            </li>
-
-            <li class="swiper-slide sub lv" data-id="5" data-price="30000.00"
-                style="width: 131.333px; margin-right: 10px;">
-                <p class="vip_hylss">钻石会员</p>
-                <p class="vip_hyjg">30000.00<span>元</span></p>
-                <p class="vip_yuanjia2">提现次数: 100/天</p>
-                <p class="vip_yuanjia2">提现额度:150000.00</p>
-                <p class="vip_yuanjia2">接单数量:60/天</p>
-                <p class="vip_yuanjia2">佣金比例:0.0120</p>
-                <p class="vip_yuanjia">会员永久有效</p>
-            </li>
-
-            <li class="swiper-slide sub lv" data-id="6" data-price="50000.00"
-                style="width: 131.333px; margin-right: 10px;">
-                <p class="vip_hylss">至尊会员</p>
-                <p class="vip_hyjg">50000.00<span>元</span></p>
-                <p class="vip_yuanjia2">提现次数: 100/天</p>
-                <p class="vip_yuanjia2">提现额度:1000000.00</p>
-                <p class="vip_yuanjia2">接单数量:80/天</p>
-                <p class="vip_yuanjia2">佣金比例:0.0320</p>
-                <p class="vip_yuanjia">会员永久有效</p>
-            </li>
-
-        </div>
+    </div>
         <!-- Add Pagination -->
         <div class="swiper-pagination"></div>
     </div>
